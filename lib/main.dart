@@ -34,7 +34,7 @@ class MainApp extends StatelessWidget {
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
-          if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta();
+          if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
           return const WidgetCargando();
         },
       )
@@ -593,7 +593,7 @@ class BotonesTileEtiqueta extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              //context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: etiqueta));
+              context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
             }, 
             icon: const Icon(Icons.edit, color: Colors.red)
           ),
@@ -604,17 +604,32 @@ class BotonesTileEtiqueta extends StatelessWidget {
 }
 
 class WidgetPlantillaEtiqueta extends StatelessWidget {
-  WidgetPlantillaEtiqueta({super.key});
+  final Etiqueta? etiqueta;
+  WidgetPlantillaEtiqueta({super.key, this.etiqueta});
 
   final _formKey = GlobalKey<FormState>();
   
   final TextEditingController controladorNombre = TextEditingController();
 
+  Etiqueta obtenerEtiqueta(){
+    return Etiqueta(
+      id: (etiqueta?.id)??0, 
+      nombre: controladorNombre.text, 
+    );
+  }
+  String obtenerTexto() => "${(etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
+  void inicializarValoresDeControladores(){
+    if (etiqueta == null) return;
+    controladorNombre.text = etiqueta?.nombre??'';
+  }
+
   @override
   Widget build(BuildContext context) {
+    inicializarValoresDeControladores();
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Etiqueta'),
+        title: Text(obtenerTexto()),
         actions: [
           IconButton(
             onPressed: () {
@@ -632,10 +647,13 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
+                  if (etiqueta == null) {
+                    context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
+                  }
+                  context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta()));
                 }
               },
-              child: const Text('Agregar Etiqueta'),
+              child: Text(obtenerTexto()),
             ),
           ],
         ),
