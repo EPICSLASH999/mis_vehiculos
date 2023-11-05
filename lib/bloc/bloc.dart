@@ -20,13 +20,14 @@ class Inicial extends VehiculoEstado{
 // VEHICULOS
 class MisVehiculos extends VehiculoEstado {
   final Future<List<Vehiculo>>? misVehiculos;
+  final List<int> idsVehiculosSeleccionados;
   
   List<Vehiculo> vehiculos = []; // Para los tests
   llenarvehiculosParaProps () async {
     vehiculos = await misVehiculos??[];
   }
 
-  MisVehiculos({required this.misVehiculos}){
+  MisVehiculos({required this.misVehiculos, required this.idsVehiculosSeleccionados}){
     llenarvehiculosParaProps();
   }
 
@@ -119,6 +120,11 @@ class EditadoVehiculo extends VehiculoEvento {
 
   EditadoVehiculo({required this.vehiculo});
 }
+class ClickeadoSeleccionarVehiculo extends VehiculoEvento {
+  final int idVehiculo;
+
+  ClickeadoSeleccionarVehiculo({required this.idVehiculo});
+}
 
 // ETIQUETAS
 class ClickeadoAdministrarEtiquetas extends VehiculoEvento {}
@@ -178,10 +184,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   final gastos = Gastos();
 
+  List<int> idsVehiculosSeleccionados = [];
+
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
       misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     
     // Vehiculos
@@ -195,13 +203,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.create(datos: datos);
       misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<EliminadoVehiculo>((event, emit) async {
       // TODO: Pasar registros de gastos a tabla gastos_archivados y en lugar de id de coche, que sea matricula.
       await vehiculos.delete(event.id);
       misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<EditadoVehiculo>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -213,7 +221,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.update(id: event.vehiculo.id, datos: datos);
       misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo());
@@ -224,7 +232,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
@@ -245,7 +253,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": event.gasto.fecha,
       };
       await gastos.create(datos: datos);
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
 
     // Etiquetas
