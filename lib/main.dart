@@ -30,7 +30,7 @@ class MainApp extends StatelessWidget {
     return  MaterialApp(
       home: BlocBuilder<VehiculoBloc, VehiculoEstado>(
         builder: (context, state) {
-          if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos,);
+          if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos, idsVehiculosSeleccionados: state.idsVehiculosSeleccionados,);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
@@ -114,8 +114,9 @@ class CuadroDeTexto extends StatelessWidget {
 // Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
   final Future <List<Vehiculo>>? misVehiculos;
+  final List<int> idsVehiculosSeleccionados;
 
-  const WidgetMisVehiculos({super.key, required this.misVehiculos});
+  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.idsVehiculosSeleccionados});
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +149,7 @@ class WidgetMisVehiculos extends StatelessWidget {
                 itemCount: vehiculos.length,
                 itemBuilder: (context, index) {
                   final vehiculo = vehiculos[index];
-                  return TileVehiculo(vehiculo: vehiculo);
+                  return TileVehiculo(vehiculo: vehiculo, estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id),);
                 }, 
               );
           }
@@ -167,10 +168,12 @@ class WidgetMisVehiculos extends StatelessWidget {
 class TileVehiculo extends StatelessWidget {
   const TileVehiculo({
     super.key,
-    required this.vehiculo,
+    required this.vehiculo, 
+    required this.estaSeleccionado,
   });
 
   final Vehiculo vehiculo;
+  final bool estaSeleccionado;
 
   @override
   Widget build(BuildContext context) {
@@ -182,8 +185,11 @@ class TileVehiculo extends StatelessWidget {
       subtitle: Text(vehiculo.matricula),
       trailing: BotonesTileVehiculo(vehiculo: vehiculo),
       onTap: () {
-        
+        context.read<VehiculoBloc>().add(ClickeadoSeleccionarVehiculo(idVehiculo: vehiculo.id));
       },
+      selected: estaSeleccionado,
+      selectedColor: Colors.black,
+      selectedTileColor: Colors.amber,
     );
   }
 }
