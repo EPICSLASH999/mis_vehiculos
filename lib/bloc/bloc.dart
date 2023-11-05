@@ -20,7 +20,8 @@ class Inicial extends VehiculoEstado{
 // VEHICULOS
 class MisVehiculos extends VehiculoEstado {
   final Future<List<Vehiculo>>? misVehiculos;
-  List<Vehiculo> vehiculos = [];
+  
+  List<Vehiculo> vehiculos = []; // Para los tests
   llenarvehiculosParaProps () async {
     vehiculos = await misVehiculos??[];
   }
@@ -78,8 +79,12 @@ class AdministradorEtiquetas extends VehiculoEstado {
   List<Object?> get props => [misEtiquetas];
 }
 class PlantillaEtiqueta extends VehiculoEstado {
+  final Etiqueta? etiqueta;
+
+  PlantillaEtiqueta({this.etiqueta});
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [etiqueta];
 }
 /*class EditarEtiqueta extends VehiculoEstado {
   @override
@@ -123,8 +128,16 @@ class EliminadaEtiqueta extends VehiculoEvento {
 
   EliminadaEtiqueta({required this.id});
 }
-class ClickeadoEditarEtiqueta extends VehiculoEvento {}
-class EditadoEtiqueta extends VehiculoEvento {}
+class ClickeadoEditarEtiqueta extends VehiculoEvento {
+  final Etiqueta etiqueta;
+
+  ClickeadoEditarEtiqueta({required this.etiqueta});
+}
+class EditadoEtiqueta extends VehiculoEvento {
+  final Etiqueta etiqueta;
+
+  EditadoEtiqueta({required this.etiqueta});
+}
 class AgregadoEtiqueta extends VehiculoEvento {
   final String nombreEtiqueta;
 
@@ -248,6 +261,14 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<EliminadaEtiqueta>((event, emit) async {
       await etiquetas.delete(event.id);
+      misEtiquetas = etiquetas.fetchAll();
+      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+    });
+    on<ClickeadoEditarEtiqueta>((event, emit) {
+      emit(PlantillaEtiqueta(etiqueta: event.etiqueta));
+    });
+    on<EditadoEtiqueta>((event, emit) async {
+      await etiquetas.update(id: event.etiqueta.id, nombre: event.etiqueta.nombre);
       misEtiquetas = etiquetas.fetchAll();
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });

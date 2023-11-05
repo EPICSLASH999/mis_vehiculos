@@ -5,6 +5,7 @@ import 'package:mis_vehiculos/bloc/bloc.dart';
 import 'package:mis_vehiculos/database/database_service.dart';
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
+import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -195,6 +196,25 @@ Future main() async {
         PlantillaEtiqueta(),
         AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+      ],
+    );
+    blocTest<VehiculoBloc, VehiculoEstado>(
+      'Click a editar etiqueta genera la PlantillaEtiqueta con el nombre correspondiente.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add(ClickeadoAdministrarEtiquetas());
+        bloc.add(ClickeadoAgregarEtiqueta());
+        bloc.add(AgregadoEtiqueta(nombreEtiqueta: 'gasolina'));
+        bloc.add(ClickeadoEditarEtiqueta(etiqueta: const Etiqueta(id: 1, nombre: 'gasolina')));
+        bloc.add(EditadoEtiqueta(etiqueta: const Etiqueta(id: 1, nombre: 'Gasolina2')));
+      },
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        PlantillaEtiqueta(),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        PlantillaEtiqueta(etiqueta: const Etiqueta(id: 1, nombre: 'Gasolina2')),
       ],
     );
   });
