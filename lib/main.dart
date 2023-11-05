@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/bloc/bloc.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
@@ -258,12 +259,16 @@ class CuadroDeTexto extends StatelessWidget {
     this.esInt = false, 
     required this.titulo, 
     this.esDouble = false,
+    this.soloLectura = false, 
+    this.funcionAlPresionar,
   });
 
   final TextEditingController controlador;
   final bool esInt;
   final bool esDouble;
   final String titulo;
+  final bool soloLectura;
+  final VoidCallback? funcionAlPresionar;
 
   bool esNumerico(String? s) {
     if(s == null) return false;    
@@ -284,6 +289,7 @@ class CuadroDeTexto extends StatelessWidget {
               if ((esInt || esDouble) && !esNumerico(value)) return 'Debe ser numerico';  
               return null;
             },
+            readOnly: soloLectura,
             controller: controlador,
             decoration: const InputDecoration(
               hintText: "", 
@@ -291,7 +297,7 @@ class CuadroDeTexto extends StatelessWidget {
               prefixIconColor: Colors.red,
               suffixIcon: Icon(Icons.password)
             ),
-    
+            onTap: funcionAlPresionar
           ),
         ],
       ),
@@ -315,32 +321,54 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController controladorVehiculo = TextEditingController();
+  final TextEditingController controladorEtiqueta = TextEditingController();
   final TextEditingController controladorMecanico = TextEditingController();
   final TextEditingController controladorLugar = TextEditingController();
   final TextEditingController controladorCosto = TextEditingController();
   final TextEditingController controladorFecha = TextEditingController();
+  
+  DateTime fechaSeleccionada = DateTime.now();
+  List<String> etiquetas = ['1','2''3'];
 
   Gasto obtenerGasto(){
     return Gasto(
       id: (widget.gasto?.id)??0, 
       vehiculo: int.parse(controladorVehiculo.text),
-      etiqueta: 0,
-      // TODO: obtenerIdEtiqueta
-      //etiqueta: obtenerIdEtiqueta(),
+      etiqueta: int.parse(controladorEtiqueta.text),
       mecanico: controladorMecanico.text,
       lugar: controladorLugar.text,
       costo: double.parse(controladorCosto.text),
       fecha: controladorFecha.text
-      //fecha: obtenerFecha(),
-      //TODO: obtenerFecha
     );
+  }
+  VoidCallback funcionAlPresionar(){
+    return () async {
+      DateTime? nuevaFecha = await showDatePicker(
+        context: context, 
+        initialDate: fechaSeleccionada,
+        firstDate: DateTime(1550), 
+        lastDate: DateTime(3000),
+      );
+      if (nuevaFecha != null) {
+        fechaSeleccionada = nuevaFecha;
+        controladorFecha
+          ..text = DateFormat.yMMMd().format(fechaSeleccionada)
+          ..selection = TextSelection.fromPosition(TextPosition(
+              offset: controladorFecha.text.length,
+              affinity: TextAffinity.upstream));
+        
+        //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
+        
+      }
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    controladorFecha.text = DateTime.now().toIso8601String();
+    controladorFecha.text =  DateFormat.yMMMd().format(fechaSeleccionada);
     controladorVehiculo.text = widget.idVehiculo.toString();
-
+    controladorEtiqueta.text = '1';
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Agregar Gasto'),
@@ -357,43 +385,56 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         key: _formKey,
         child: Column(
           children: <Widget>[
-            //vehiculo,etiqueta,mecanico,lugar,costo,fecha
-            CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo'),
+            CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
+            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta),
             CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico'),
             CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar'),
             CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
-            Text(controladorFecha.text), 
-            TextButton(
-              onPressed: () {
-                showDatePicker(
-                  context: context, 
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1550), 
-                  lastDate: DateTime(3000),
-                );
-              }, 
-              child: const Text('Seleccionar Fecha')),
-            InputDatePickerFormField(
-              onDateSubmitted: (value) {
-                controladorFecha.text = value.toIso8601String();
-              },
-              fieldLabelText: 'Fecha',
-              initialDate: DateTime.now(),
-              firstDate: DateTime(1550), 
-              lastDate: DateTime(3000),
-            ),
+            CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', soloLectura: true, funcionAlPresionar: funcionAlPresionar(),),
+           
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   //context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
                 }
-                print(controladorFecha.text);
               },
               child: const Text('Agregar Gasto'),
             ),
           ],
         ),
       )
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class SeleccionadorEtiqueta extends StatefulWidget {
+  SeleccionadorEtiqueta({
+    super.key,
+    required this.etiquetaSeleccionada,
+  });
+
+  TextEditingController etiquetaSeleccionada;
+
+  @override
+  State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
+}
+
+class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
+  
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField(
+      value: widget.etiquetaSeleccionada.text,
+      items: const [
+        DropdownMenuItem(value: '1', child: Text('1')),
+        DropdownMenuItem(value: '2', child: Text('2'),),
+      ], 
+      onChanged: (value) {
+        setState(() {
+          widget.etiquetaSeleccionada.text = value??'';
+        });
+      },
     );
   }
 }
