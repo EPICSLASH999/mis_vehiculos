@@ -29,8 +29,12 @@ class MisVehiculos extends VehiculoEstado {
   List<Object?> get props => [vehiculos];
 }
 class PlantillaVehiculo extends VehiculoEstado {
+   final Vehiculo? vehiculo;
+
+  PlantillaVehiculo({this.vehiculo});
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [vehiculo];
 }
 /*class Editarvehiculo extends VehiculoEstado {
   @override
@@ -81,7 +85,11 @@ class EliminadoVehiculo extends VehiculoEvento {
   EliminadoVehiculo({required this.id});
 }
 class FiltradoVehiculos extends VehiculoEvento {}
-class ClickeadoEditarVehiculo extends VehiculoEvento {}
+class ClickeadoEditarVehiculo extends VehiculoEvento {
+   final Vehiculo vehiculo;
+
+  ClickeadoEditarVehiculo({required this.vehiculo});
+}
 class CheckeadoSeleccionarTodosVehiculos extends VehiculoEvento {}
 class AgregadoVehiculo extends VehiculoEvento {
   final Vehiculo vehiculo;
@@ -160,7 +168,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(PlantillaVehiculo());
     });
     on<ClickeadoEditarVehiculo>((event, emit) async {
-      emit(PlantillaVehiculo());
+      emit(PlantillaVehiculo(vehiculo: event.vehiculo));
     });
   }
 }

@@ -28,6 +28,7 @@ class MainApp extends StatelessWidget {
       home: BlocBuilder<VehiculoBloc, VehiculoEstado>(
         builder: (context, state) {
           if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos,);
+          if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
           return const WidgetCargando();
         },
       )
@@ -91,7 +92,7 @@ class WidgetMisVehiculos extends StatelessWidget {
                             ),
                             IconButton(
                               onPressed: () {
-                                context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: vehiculo));
+                                context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
                               }, 
                               icon: const Icon(Icons.edit, color: Colors.red)
                             ),
@@ -111,20 +112,121 @@ class WidgetMisVehiculos extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          Vehiculo vehiculo = const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969);
-          context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: vehiculo));
+          context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
         },
       ),
     );
   }
 }
 
-class WidgetPlantillaVehiculo extends StatelessWidget {
-  const WidgetPlantillaVehiculo({super.key});
+class WidgetPlantillaVehiculo extends StatefulWidget {
+  final Vehiculo? vehiculo;
+  const WidgetPlantillaVehiculo({super.key, this.vehiculo});
+
+  @override
+  State<WidgetPlantillaVehiculo> createState() => _WidgetPlantillaVehiculoState();
+}
+
+class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
+  final TextEditingController controladorMatricula = TextEditingController();
+  final TextEditingController controladorMarca = TextEditingController();
+  final TextEditingController controladorModelo = TextEditingController();
+  final TextEditingController controladorColor = TextEditingController();
+  final TextEditingController controladorAno = TextEditingController();
+
+  String obtenerTexto() => (widget.vehiculo == null)? 'Agregar Vehiculo':'Editar Vehiculo';
+  VoidCallback? obtenerFuncion (BuildContext context){
+    if (widget.vehiculo == null) {
+      return () {
+        context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
+      };
+    }
+    return () {
+      context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
+    };
+  }
+  Vehiculo obtenerVehiculo(){
+    return Vehiculo(
+      id: (widget.vehiculo?.id)??0, 
+      matricula: controladorMatricula.text, 
+      marca: controladorMarca.text, 
+      modelo: controladorModelo.text, 
+      color: controladorColor.text, 
+      ano: int.parse(controladorAno.text)
+    );
+  }
+  void inicializarValoresDeControladores(){
+    if (widget.vehiculo == null) return;
+    controladorMatricula.text = widget.vehiculo?.matricula??'';
+    controladorMarca.text = widget.vehiculo?.marca??'';
+    controladorModelo.text = widget.vehiculo?.modelo??'';
+    controladorColor.text = widget.vehiculo?.color??'';
+    controladorAno.text = (widget.vehiculo?.ano??0).toString();
+  }
+  
+  void escuchador(){
+    //print(controladorMatricula.text);
+    setState(() {
+      //reglas = establecerReglas();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    //controladorMatricula.addListener(escuchador);
+    var funcionOnClick = obtenerFuncion(context);
+    inicializarValoresDeControladores();
+
+    return Scaffold(
+      appBar: AppBar(title: Text(obtenerTexto())),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CuadroDeTexto(controlador: controladorMatricula),          
+          CuadroDeTexto(controlador: controladorMarca),
+          CuadroDeTexto(controlador: controladorModelo),
+          CuadroDeTexto(controlador: controladorColor),
+          CuadroDeTexto(controlador: controladorAno),
+          TextButton(
+            onPressed: funcionOnClick, 
+            child: Text(obtenerTexto())
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    controladorMatricula.dispose();
+    controladorMarca.dispose();
+    controladorModelo.dispose();
+    controladorColor.dispose();
+    controladorAno.dispose();
+    super.dispose();
+  }
+}
+
+class CuadroDeTexto extends StatelessWidget {
+  const CuadroDeTexto({
+    super.key,
+    required this.controlador,
+  });
+
+  final TextEditingController controlador;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controlador,
+      decoration: const InputDecoration(
+        hintText: "", 
+        prefixIcon: Icon(Icons.access_alarm_outlined),
+        prefixIconColor: Colors.red,
+        suffixIcon: Icon(Icons.password)
+      ),
+
+    );
   }
 }
 
