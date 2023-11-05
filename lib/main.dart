@@ -118,42 +118,61 @@ class WidgetMisVehiculos extends StatelessWidget {
 
   const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.idsVehiculosSeleccionados});
 
+  VoidCallback? funcionConsultargastos(BuildContext context){
+    if (idsVehiculosSeleccionados.isEmpty) return null;
+    return (){
+      context.read<VehiculoBloc>().add(ConsultadoGastos());
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    var pressedConsultar = funcionConsultargastos(context);
     
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Vehículos'),
       ),
-      body: FutureBuilder<List<Vehiculo>>(
-        future: misVehiculos,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting){
-            return const WidgetCargando();
-          } else{
-            final vehiculos = snapshot.data?? [];
+      body: Column(
+        children: [
+          Expanded(
+            child: 
+            FutureBuilder<List<Vehiculo>>(
+              future: misVehiculos,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final vehiculos = snapshot.data?? [];
 
-            return vehiculos.isEmpty
-                ? const Center(
-                  child: Text(
-                    'Sin vehiculos...',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 28,
-                    ),
-                  ),
-                )
-              : ListView.separated(
-                separatorBuilder: (context, index) => 
-                    const SizedBox(height: 12,), 
-                itemCount: vehiculos.length,
-                itemBuilder: (context, index) {
-                  final vehiculo = vehiculos[index];
-                  return TileVehiculo(vehiculo: vehiculo, estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id),);
-                }, 
-              );
-          }
-        },
+                  return vehiculos.isEmpty
+                      ? const Center(
+                        child: Text(
+                          'Sin vehiculos...',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 28,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                      separatorBuilder: (context, index) => 
+                          const SizedBox(height: 12,), 
+                      itemCount: vehiculos.length,
+                      itemBuilder: (context, index) {
+                        final vehiculo = vehiculos[index];
+                        return TileVehiculo(vehiculo: vehiculo, estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id),);
+                      }, 
+                    );
+                }
+              },
+            ),
+          ),
+          TextButton(
+            onPressed: pressedConsultar,
+            child: const Text('Consultar gastos'),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
