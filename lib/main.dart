@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/bloc/bloc.dart';
+import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 
@@ -31,7 +32,7 @@ class MainApp extends StatelessWidget {
         builder: (context, state) {
           if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos,);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
-          if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo,);
+          if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas);
           return const WidgetCargando();
         },
       )
@@ -311,7 +312,9 @@ class CuadroDeTexto extends StatelessWidget {
 class WidgetPlantillaGasto extends StatefulWidget {
   final Gasto? gasto;
   final int idVehiculo;
-  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto});
+  final Future <List<Etiqueta>>? misEtiquetas;
+
+  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, this.misEtiquetas});
 
   @override
   State<WidgetPlantillaGasto> createState() => _WidgetPlantillaGastoState();
@@ -328,7 +331,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   final TextEditingController controladorFecha = TextEditingController();
   
   DateTime fechaSeleccionada = DateTime.now();
-  List<String> etiquetas = ['1','2''3'];
 
   Gasto obtenerGasto(){
     return Gasto(
@@ -367,7 +369,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Widget build(BuildContext context) {
     controladorFecha.text =  DateFormat.yMMMd().format(fechaSeleccionada);
     controladorVehiculo.text = widget.idVehiculo.toString();
-    controladorEtiqueta.text = '1';
+    controladorEtiqueta.text = '0';
     
     return Scaffold(
       appBar: AppBar(
@@ -386,7 +388,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         child: Column(
           children: <Widget>[
             CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
-            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta),
+            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta'),
             CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico'),
             CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar'),
             CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
@@ -397,6 +399,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                 if (_formKey.currentState!.validate()) {
                   //context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
                 }
+                print(controladorEtiqueta.text);
               },
               child: const Text('Agregar Gasto'),
             ),
@@ -412,29 +415,52 @@ class SeleccionadorEtiqueta extends StatefulWidget {
   SeleccionadorEtiqueta({
     super.key,
     required this.etiquetaSeleccionada,
+    required this.titulo, 
+    this.misEtiquetas
   });
 
   TextEditingController etiquetaSeleccionada;
+  final String titulo;
+  final Future <List<Etiqueta>>? misEtiquetas;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
 }
 
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
+  List<Etiqueta> misEtiquetas = [];
+
+  obtenerEtiquetas() async{
+    misEtiquetas = await widget.misEtiquetas??[];
+  }
   
   @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField(
-      value: widget.etiquetaSeleccionada.text,
-      items: const [
-        DropdownMenuItem(value: '1', child: Text('1')),
-        DropdownMenuItem(value: '2', child: Text('2'),),
-      ], 
-      onChanged: (value) {
-        setState(() {
-          widget.etiquetaSeleccionada.text = value??'';
-        });
-      },
+  Widget build(BuildContext context){
+   obtenerEtiquetas();
+
+    return Column(
+      children: [
+        Text(widget.titulo),
+        SizedBox(
+          width: 150,
+          child: DropdownButtonFormField(
+            value: misEtiquetas.isNotEmpty? misEtiquetas.first.id:0,
+            items: [
+              //const DropdownMenuItem(value: '1', child: Text('1')),
+              for(var etiqueta in misEtiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
+            ],
+            onChanged: (value) {
+              setState(() {
+                widget.etiquetaSeleccionada.text = value.toString();
+              });
+            },
+          ),
+        ),
+        const TextButton(
+          onPressed: null, 
+          child: Text('Administrar Etiquetas')
+        ),
+      ],
     );
   }
 }

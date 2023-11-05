@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mis_vehiculos/bloc/bloc.dart';
 import 'package:mis_vehiculos/database/database_service.dart';
+import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -144,7 +145,7 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
-        PlantillaGasto(idVehiculo: 1),
+        PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
   });

@@ -1,9 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
+import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 
@@ -46,10 +48,12 @@ class PlantillaVehiculo extends VehiculoEstado {
 // GASTOS
 class PlantillaGasto extends VehiculoEstado {
   final int idVehiculo;
+  final Future<List<Etiqueta>>? misEtiquetas;
 
-  PlantillaGasto({required this.idVehiculo});
+  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, });
+
   @override
-  List<Object?> get props => [idVehiculo];
+  List<Object?> get props => [idVehiculo, misEtiquetas];
 }
 /*class EditarGasto extends VehiculoEstado {
   @override
@@ -141,6 +145,10 @@ class ClickeadoRegresar extends VehiculoEvento {}
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   Future <List<Vehiculo>>? misVehiculos;
   final vehiculos = Vehiculos();
+
+  Future <List<Etiqueta>>? misEtiquetas;
+  final etiquetas = Etiquetas();
+
   final gastos = Gastos();
 
   VehiculoBloc() : super(Inicial()) {
@@ -193,8 +201,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
   
     // Gastos
-    on<ClickeadoAgregarGasto>((event, emit) {
-      emit(PlantillaGasto(idVehiculo: event.idVehiculo));
+    on<ClickeadoAgregarGasto>((event, emit) async {
+      misEtiquetas = etiquetas.fetchAll();
+      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: misEtiquetas));
     });
     on<AgregadoGasto>((event, emit) async {
        Map<String,dynamic> datos = {
