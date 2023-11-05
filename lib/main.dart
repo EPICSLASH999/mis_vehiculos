@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:mis_vehiculos/bloc/bloc.dart';
+import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';

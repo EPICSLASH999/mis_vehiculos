@@ -5,6 +5,7 @@ import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
+import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
@@ -184,7 +185,15 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   final gastos = Gastos();
 
-  final List<int> idsVehiculosSeleccionados = [];
+  List<int> idsVehiculosSeleccionados = [];
+
+  void gestionarVahiculoSeleccionado(int idVehiculo) {
+    if (idsVehiculosSeleccionados.contains(idVehiculo)){
+      idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..remove(idVehiculo);
+      return;
+    }
+    idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..add(idVehiculo);
+  }
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
@@ -230,7 +239,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));
     });
     on<ClickeadoSeleccionarVehiculo>((event, emit) {
-      idsVehiculosSeleccionados.add(event.idVehiculo);
+      gestionarVahiculoSeleccionado(event.idVehiculo);
       emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
 
@@ -286,6 +295,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
   }
+  
 }
 
 

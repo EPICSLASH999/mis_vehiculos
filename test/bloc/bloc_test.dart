@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:mis_vehiculos/bloc/bloc.dart';
+import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/database/database_service.dart';
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
@@ -148,6 +148,20 @@ Future main() async {
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: [1]),
+      ],
+    );
+    blocTest<VehiculoBloc, VehiculoEstado>(
+      'Deseleccionar un vehiculo lo remueve de la lista de seleccionados.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add((ClickeadoSeleccionarVehiculo(idVehiculo: 1)));
+        bloc.add((ClickeadoSeleccionarVehiculo(idVehiculo: 1)));
+      },
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: [1]),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
       ],
     );
   
