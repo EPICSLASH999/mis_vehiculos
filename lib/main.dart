@@ -33,6 +33,7 @@ class MainApp extends StatelessWidget {
           if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos,);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas);
+          if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas();
           return const WidgetCargando();
         },
       )
@@ -40,6 +41,18 @@ class MainApp extends StatelessWidget {
   }
 }
 
+class WidgetCargando extends StatelessWidget {
+  const WidgetCargando({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: CircularProgressIndicator());
+  }
+}
+
+
+
+/* --------------------------------- VEHICULOS --------------------------------- */
 // Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
   final Future <List<Vehiculo>>? misVehiculos;
@@ -92,8 +105,6 @@ class WidgetMisVehiculos extends StatelessWidget {
     );
   }
 }
-
-/* --------------------------------- VEHICULOS --------------------------------- */
 
 class TileVehiculo extends StatelessWidget {
   const TileVehiculo({
@@ -460,9 +471,11 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
             },
           ),
         ),
-        const TextButton(
-          onPressed: null, 
-          child: Text('Administrar Etiquetas')
+        TextButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
+          }, 
+          child: const Text('Administrar Etiquetas')
         ),
       ],
     );
@@ -470,11 +483,38 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
 }
 /* ----------------------------------------------------------------------------- */
 
-class WidgetCargando extends StatelessWidget {
-  const WidgetCargando({super.key});
+/* --------------------------------- ETIQUETAS --------------------------------- */
+class WidgetAdministradorEtiquetas extends StatelessWidget {
+  WidgetAdministradorEtiquetas({super.key});
+
+  final _formKey = GlobalKey<FormState>();
+  
+  final TextEditingController controladorNombre = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: CircularProgressIndicator());
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Administrador Etiquetas'),
+      ),
+      body: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            CuadroDeTexto(controlador: controladorNombre, titulo: 'Nombre'),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  //context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                }
+              },
+              child: const Text('Agregar Gasto'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
+/* ----------------------------------------------------------------------------- */
+
