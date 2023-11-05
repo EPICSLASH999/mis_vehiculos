@@ -439,17 +439,9 @@ class SeleccionadorEtiqueta extends StatefulWidget {
 }
 
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
-  List<Etiqueta> misEtiquetas = [];
-
-  obtenerEtiquetas() async{
-    misEtiquetas = await widget.misEtiquetas??[];
-  }
   
   @override
   Widget build(BuildContext context)  {
-    obtenerEtiquetas();
-    print('Esta vacia: ${misEtiquetas.isEmpty}');
-
     return Column(
       children: [
         Text(widget.titulo),
@@ -468,9 +460,8 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                     if (value != null && value == 0) return 'Valor requerido';
                     return null;
                   },
-                  value: etiquetas.isNotEmpty? misEtiquetas.first.id:0,
+                  value: etiquetas.isNotEmpty? etiquetas.first.id:0,
                   items: [
-                    //DropdownMenuItem(value: 0, child: Text('1')),
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {
@@ -494,50 +485,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 }
 
-class _SeleccionadorEtiquetaState2 extends State<SeleccionadorEtiqueta>{
-  List<Etiqueta> misEtiquetas = [];
-
-  obtenerEtiquetas() async{
-    misEtiquetas = await widget.misEtiquetas??[];
-  }
-  
-  @override
-  Widget build(BuildContext context)  {
-    obtenerEtiquetas();
-    print('Esta vacia: ${misEtiquetas.isEmpty}');
-
-    return Column(
-      children: [
-        Text(widget.titulo),
-        SizedBox(
-          width: 150,
-          child: DropdownButtonFormField(
-            validator: (value) {
-              if (value != null && value == 0) return 'Valor requerido';
-              return null;
-            },
-            value: misEtiquetas.isNotEmpty? misEtiquetas.first.id:0,
-            items: [
-              //DropdownMenuItem(value: 0, child: Text('1')),
-              for(var etiqueta in misEtiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
-            ],
-            onChanged: (value) {
-              setState(() {
-                widget.etiquetaSeleccionada.text = value.toString();
-              });
-            },
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
-          }, 
-          child: const Text('Administrar Etiquetas')
-        ),
-      ],
-    );
-  }
-}
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------- ETIQUETAS --------------------------------- */
@@ -640,7 +587,7 @@ class BotonesTileEtiqueta extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () {
-              //context.read<VehiculoBloc>().add(EliminadoVehiculo(id: etiqueta.id));
+              context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: etiqueta.id));
             }, 
             icon: const Icon(Icons.delete, color: Colors.red)
           ),

@@ -169,12 +169,32 @@ Future main() async {
       act: (bloc) {
         bloc.add(Inicializado());
         bloc.add(ClickeadoAdministrarEtiquetas());
+        bloc.add(ClickeadoAgregarEtiqueta());
         bloc.add(AgregadoEtiqueta(nombreEtiqueta: 'Gasolina'));
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        PlantillaEtiqueta(),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+      ],
+    );
+    blocTest<VehiculoBloc, VehiculoEstado>(
+      'Click a borrar etiqueta funciona correctamente.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add(ClickeadoAdministrarEtiquetas());
+        bloc.add(ClickeadoAgregarEtiqueta());
+        bloc.add(AgregadoEtiqueta(nombreEtiqueta: 'Gasolina'));
+        bloc.add(EliminadaEtiqueta(id: 1));
+      },
+      expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        PlantillaEtiqueta(),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
   });

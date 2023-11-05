@@ -75,7 +75,7 @@ class AdministradorEtiquetas extends VehiculoEstado {
   AdministradorEtiquetas({required this.misEtiquetas});
   
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [misEtiquetas];
 }
 class PlantillaEtiqueta extends VehiculoEstado {
   @override
@@ -118,7 +118,11 @@ class EditadoVehiculo extends VehiculoEvento {
 // ETIQUETAS
 class ClickeadoAdministrarEtiquetas extends VehiculoEvento {}
 class ClickeadoAgregarEtiqueta extends VehiculoEvento {}
-class EliminadaEtiqueta extends VehiculoEvento {}
+class EliminadaEtiqueta extends VehiculoEvento {
+  final int id;
+
+  EliminadaEtiqueta({required this.id});
+}
 class ClickeadoEditarEtiqueta extends VehiculoEvento {}
 class EditadoEtiqueta extends VehiculoEvento {}
 class AgregadoEtiqueta extends VehiculoEvento {
@@ -239,6 +243,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<AgregadoEtiqueta>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
+      misEtiquetas = etiquetas.fetchAll();
+      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+    });
+    on<EliminadaEtiqueta>((event, emit) async {
+      await etiquetas.delete(event.id);
       misEtiquetas = etiquetas.fetchAll();
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
