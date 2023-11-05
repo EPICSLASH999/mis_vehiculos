@@ -32,7 +32,7 @@ class MisVehiculos extends VehiculoEstado {
   }
 
   @override
-  List<Object?> get props => [vehiculos];
+  List<Object?> get props => [vehiculos, idsVehiculosSeleccionados];
 }
 class PlantillaVehiculo extends VehiculoEstado {
    final Vehiculo? vehiculo;
@@ -184,7 +184,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   final gastos = Gastos();
 
-  List<int> idsVehiculosSeleccionados = [];
+  final List<int> idsVehiculosSeleccionados = [];
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
@@ -229,7 +229,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoEditarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));
     });
-    
+    on<ClickeadoSeleccionarVehiculo>((event, emit) {
+      idsVehiculosSeleccionados.add(event.idVehiculo);
+      emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+    });
+
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));

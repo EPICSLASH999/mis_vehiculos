@@ -147,7 +147,7 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: [1]),
       ],
     );
   
