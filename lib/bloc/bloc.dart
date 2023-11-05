@@ -70,17 +70,21 @@ class ConsultargastosArchivados extends VehiculoEstado {
 
 // ETIQUETAS
 class AdministradorEtiquetas extends VehiculoEstado {
+  final Future<List<Etiqueta>>? misEtiquetas;
+
+  AdministradorEtiquetas({required this.misEtiquetas});
+  
   @override
   List<Object?> get props => [];
 }
-class AgregarEtiqueta extends VehiculoEstado {
+class PlantillaEtiqueta extends VehiculoEstado {
   @override
   List<Object?> get props => [];
 }
-class EditarEtiqueta extends VehiculoEstado {
+/*class EditarEtiqueta extends VehiculoEstado {
   @override
   List<Object?> get props => [];
-}
+}*/
 /* --------------------------------------------------- */
 
 /* --------------------- EVENTOS --------------------- */
@@ -117,7 +121,11 @@ class ClickeadoAgregarEtiqueta extends VehiculoEvento {}
 class EliminadaEtiqueta extends VehiculoEvento {}
 class ClickeadoEditarEtiqueta extends VehiculoEvento {}
 class EditadoEtiqueta extends VehiculoEvento {}
-class AgregadoEtiqueta extends VehiculoEvento {}
+class AgregadoEtiqueta extends VehiculoEvento {
+  final String nombreEtiqueta;
+
+  AgregadoEtiqueta({required this.nombreEtiqueta});
+}
 
 // GASTOS
 class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}
@@ -138,7 +146,8 @@ class EliminadoGasto extends VehiculoEvento {}
 
 // MISC
 class Inicializado extends VehiculoEvento {}
-class ClickeadoRegresar extends VehiculoEvento {}
+class ClickeadoRegresarAMisvehiculos extends VehiculoEvento {}
+class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
 /* --------------------------------------------------- */
 
 
@@ -196,10 +205,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     
     // MISC
-    on<ClickeadoRegresar>((event, emit) async {
+    on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
       emit(MisVehiculos(misVehiculos: misVehiculos));
     });
-  
+    on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
+      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+    });
+
     // Gastos
     on<ClickeadoAgregarGasto>((event, emit) async {
       misEtiquetas = etiquetas.fetchAll();
@@ -220,7 +232,15 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // Etiquetas
     on<ClickeadoAdministrarEtiquetas>((event, emit) {
-      emit(AdministradorEtiquetas());
+      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+    });
+    on<ClickeadoAgregarEtiqueta>((event, emit) {
+      emit(PlantillaEtiqueta());
+    });
+    on<AgregadoEtiqueta>((event, emit) async {
+      await etiquetas.create(nombre: event.nombreEtiqueta);
+      misEtiquetas = etiquetas.fetchAll();
+      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
   }
 }

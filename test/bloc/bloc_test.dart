@@ -125,7 +125,7 @@ Future main() async {
       act: (bloc) {
         bloc.add(Inicializado());
         bloc.add(ClickeadoAgregarVehiculo());
-        bloc.add(ClickeadoRegresar());
+        bloc.add(ClickeadoRegresarAMisvehiculos());
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
@@ -160,7 +160,21 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
-        AdministradorEtiquetas(),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+      ],
+    );
+    blocTest<VehiculoBloc, VehiculoEstado>(
+      'Click a agregar etiqueta funciona correctamente.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add(ClickeadoAdministrarEtiquetas());
+        bloc.add(AgregadoEtiqueta(nombreEtiqueta: 'Gasolina'));
+      },
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
       ],
     );
   });

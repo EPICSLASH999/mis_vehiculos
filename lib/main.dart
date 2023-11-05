@@ -33,7 +33,8 @@ class MainApp extends StatelessWidget {
           if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos,);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas);
-          if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas();
+          if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
+          if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta();
           return const WidgetCargando();
         },
       )
@@ -122,7 +123,7 @@ class TileVehiculo extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(vehiculo.matricula),
-      trailing: BotonesTile(vehiculo: vehiculo),
+      trailing: BotonesTileVehiculo(vehiculo: vehiculo),
       onTap: () {
         
       },
@@ -130,8 +131,8 @@ class TileVehiculo extends StatelessWidget {
   }
 }
 
-class BotonesTile extends StatelessWidget {
-  const BotonesTile({
+class BotonesTileVehiculo extends StatelessWidget {
+  const BotonesTileVehiculo({
     super.key,
     required this.vehiculo,
   });
@@ -220,7 +221,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
         actions: [
           IconButton(
             onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresar());
+              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
             }, 
             icon: const Icon(Icons.arrow_back_ios_new_outlined)
           ),
@@ -325,7 +326,7 @@ class WidgetPlantillaGasto extends StatefulWidget {
   final int idVehiculo;
   final Future <List<Etiqueta>>? misEtiquetas;
 
-  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, this.misEtiquetas});
+  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, required this.misEtiquetas});
 
   @override
   State<WidgetPlantillaGasto> createState() => _WidgetPlantillaGastoState();
@@ -388,7 +389,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         actions: [
           IconButton(
             onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresar());
+              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
             }, 
             icon: const Icon(Icons.arrow_back_ios_new_outlined)
           ),
@@ -399,7 +400,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         child: Column(
           children: <Widget>[
             CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
-            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta'),
+            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas),
             CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico'),
             CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar'),
             CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
@@ -410,7 +411,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                 if (_formKey.currentState!.validate()) {
                   //context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
                 }
-                print(controladorEtiqueta.text);
               },
               child: const Text('Agregar Gasto'),
             ),
@@ -427,7 +427,7 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     super.key,
     required this.etiquetaSeleccionada,
     required this.titulo, 
-    this.misEtiquetas
+    required this.misEtiquetas
   });
 
   TextEditingController etiquetaSeleccionada;
@@ -438,7 +438,7 @@ class SeleccionadorEtiqueta extends StatefulWidget {
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
 }
 
-class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
+class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   List<Etiqueta> misEtiquetas = [];
 
   obtenerEtiquetas() async{
@@ -446,8 +446,65 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
   }
   
   @override
-  Widget build(BuildContext context){
-   obtenerEtiquetas();
+  Widget build(BuildContext context)  {
+    obtenerEtiquetas();
+    print('Esta vacia: ${misEtiquetas.isEmpty}');
+
+    return Column(
+      children: [
+        Text(widget.titulo),
+        SizedBox(
+          width: 150,
+          child: FutureBuilder<List<Etiqueta>>(
+            future: widget.misEtiquetas,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return const WidgetCargando();
+              } else{
+                final etiquetas = snapshot.data?? [];
+
+                return DropdownButtonFormField(
+                  validator: (value) {
+                    if (value != null && value == 0) return 'Valor requerido';
+                    return null;
+                  },
+                  value: etiquetas.isNotEmpty? misEtiquetas.first.id:0,
+                  items: [
+                    //DropdownMenuItem(value: 0, child: Text('1')),
+                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      widget.etiquetaSeleccionada.text = value.toString();
+                    });
+                  },
+                );
+              }
+            },
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
+          }, 
+          child: const Text('Administrar Etiquetas')
+        ),
+      ],
+    );
+  }
+}
+
+class _SeleccionadorEtiquetaState2 extends State<SeleccionadorEtiqueta>{
+  List<Etiqueta> misEtiquetas = [];
+
+  obtenerEtiquetas() async{
+    misEtiquetas = await widget.misEtiquetas??[];
+  }
+  
+  @override
+  Widget build(BuildContext context)  {
+    obtenerEtiquetas();
+    print('Esta vacia: ${misEtiquetas.isEmpty}');
 
     return Column(
       children: [
@@ -461,7 +518,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
             },
             value: misEtiquetas.isNotEmpty? misEtiquetas.first.id:0,
             items: [
-              //const DropdownMenuItem(value: '1', child: Text('1')),
+              //DropdownMenuItem(value: 0, child: Text('1')),
               for(var etiqueta in misEtiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
             ],
             onChanged: (value) {
@@ -485,7 +542,122 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
 
 /* --------------------------------- ETIQUETAS --------------------------------- */
 class WidgetAdministradorEtiquetas extends StatelessWidget {
-  WidgetAdministradorEtiquetas({super.key});
+  const WidgetAdministradorEtiquetas({super.key, required this.misEtiquetas});
+
+  final Future <List<Etiqueta>>? misEtiquetas;
+
+  @override
+  Widget build(BuildContext context) {
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis Etiquetas'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+            }, 
+            icon: const Icon(Icons.arrow_back_ios_new_outlined)
+          ),
+        ],
+      ),
+      body: FutureBuilder<List<Etiqueta>>(
+        future: misEtiquetas,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting){
+            return const WidgetCargando();
+          } else{
+            final etiquetas = snapshot.data?? [];
+
+            return etiquetas.isEmpty
+                ? const Center(
+                  child: Text(
+                    'Sin etiquetas...',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                    ),
+                  ),
+                )
+              : ListView.separated(
+                separatorBuilder: (context, index) => 
+                    const SizedBox(height: 12,), 
+                itemCount: etiquetas.length,
+                itemBuilder: (context, index) {
+                  final etiqueta = etiquetas[index];
+                  return TileEtiqueta(etiqueta: etiqueta);
+                }, 
+              );
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () {
+          context.read<VehiculoBloc>().add(ClickeadoAgregarEtiqueta());
+        },
+      ),
+    );
+  }
+}
+
+class TileEtiqueta extends StatelessWidget {
+  const TileEtiqueta({
+    super.key,
+    required this.etiqueta,
+  });
+
+  final Etiqueta etiqueta;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(
+        etiqueta.nombre,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      trailing: BotonesTileEtiqueta(etiqueta: etiqueta),
+      onTap: () {
+        
+      },
+    );
+  }
+}
+
+class BotonesTileEtiqueta extends StatelessWidget {
+  const BotonesTileEtiqueta({
+    super.key,
+    required this.etiqueta,
+  });
+
+  final Etiqueta etiqueta;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              //context.read<VehiculoBloc>().add(EliminadoVehiculo(id: etiqueta.id));
+            }, 
+            icon: const Icon(Icons.delete, color: Colors.red)
+          ),
+          IconButton(
+            onPressed: () {
+              //context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: etiqueta));
+            }, 
+            icon: const Icon(Icons.edit, color: Colors.red)
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WidgetPlantillaEtiqueta extends StatelessWidget {
+  WidgetPlantillaEtiqueta({super.key});
 
   final _formKey = GlobalKey<FormState>();
   
@@ -495,7 +667,15 @@ class WidgetAdministradorEtiquetas extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Administrador Etiquetas'),
+        title: const Text('Agregar Etiqueta'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoRegresarAAdministradorEtiquetas());
+            }, 
+            icon: const Icon(Icons.arrow_back_ios_new_outlined)
+          ),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -505,10 +685,10 @@ class WidgetAdministradorEtiquetas extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  //context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                  context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
                 }
               },
-              child: const Text('Agregar Gasto'),
+              child: const Text('Agregar Etiqueta'),
             ),
           ],
         ),
