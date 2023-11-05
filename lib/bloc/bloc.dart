@@ -42,14 +42,17 @@ class PlantillaVehiculo extends VehiculoEstado {
 }*/
 
 // GASTOS
-class AgregarGasto extends VehiculoEstado {
+class PlantillaGasto extends VehiculoEstado {
+  final int idVehiculo;
+
+  PlantillaGasto({required this.idVehiculo});
+  @override
+  List<Object?> get props => [idVehiculo];
+}
+/*class EditarGasto extends VehiculoEstado {
   @override
   List<Object?> get props => [];
-}
-class EditarGasto extends VehiculoEstado {
-  @override
-  List<Object?> get props => [];
-}
+}*/
 class ConsultarGastos extends VehiculoEstado {
   @override
   List<Object?> get props => [];
@@ -84,13 +87,13 @@ class EliminadoVehiculo extends VehiculoEvento {
 
   EliminadoVehiculo({required this.id});
 }
-class FiltradoVehiculos extends VehiculoEvento {}
+/*class FiltradoVehiculos extends VehiculoEvento {}*/
 class ClickeadoEditarVehiculo extends VehiculoEvento {
    final Vehiculo vehiculo;
 
   ClickeadoEditarVehiculo({required this.vehiculo});
 }
-class CheckeadoSeleccionarTodosVehiculos extends VehiculoEvento {}
+/*class CheckeadoSeleccionarTodosVehiculos extends VehiculoEvento {}*/
 class AgregadoVehiculo extends VehiculoEvento {
   final Vehiculo vehiculo;
 
@@ -112,7 +115,11 @@ class AgregadoEtiqueta extends VehiculoEvento {}
 
 // GASTOS
 class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}
-class ClickeadoAgregarGasto extends VehiculoEvento {}
+class ClickeadoAgregarGasto extends VehiculoEvento {
+  final int idVehiculo;
+
+  ClickeadoAgregarGasto({required this.idVehiculo});
+}
 class ClickeadoConsultarGastos extends VehiculoEvento {}
 class AgregadoGasto extends VehiculoEvento {}
 class ConsultadoGastos extends VehiculoEvento {}
@@ -134,6 +141,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       misVehiculos = vehiculos.fetchAll();
       emit(MisVehiculos(misVehiculos: misVehiculos));
     });
+    
+    // Vehiculos
     on<AgregadoVehiculo>((event, emit) async {
       Map<String,dynamic> datos = {
         "matricula": event.vehiculo.matricula,
@@ -172,6 +181,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<ClickeadoRegresar>((event, emit) async {
       emit(MisVehiculos(misVehiculos: misVehiculos));
+    });
+  
+    // Gastos
+    on<ClickeadoAgregarGasto>((event, emit) {
+      emit(PlantillaGasto(idVehiculo: event.idVehiculo));
     });
   }
 }

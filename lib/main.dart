@@ -36,6 +36,7 @@ class MainApp extends StatelessWidget {
   }
 }
 
+// Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
   final Future <List<Vehiculo>>? misVehiculos;
 
@@ -72,38 +73,7 @@ class WidgetMisVehiculos extends StatelessWidget {
                 itemCount: vehiculos.length,
                 itemBuilder: (context, index) {
                   final vehiculo = vehiculos[index];
-                  final subtitle = vehiculo.matricula;
-
-                    return ListTile(
-                      title: Text(
-                        vehiculo.modelo,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(subtitle),
-                      trailing: SizedBox(
-                        width: 100,
-                        child: Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                context.read<VehiculoBloc>().add(EliminadoVehiculo(id: vehiculo.id));
-                              }, 
-                              icon: const Icon(Icons.delete, color: Colors.red)
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
-                              }, 
-                              icon: const Icon(Icons.edit, color: Colors.red)
-                            ),
-                          ],
-                        ),
-                      ),
-                      onTap: () {
-                        
-                      },
-                    );
-                  
+                  return TileVehiculo(vehiculo: vehiculo);
                 }, 
               );
           }
@@ -119,6 +89,69 @@ class WidgetMisVehiculos extends StatelessWidget {
   }
 }
 
+class TileVehiculo extends StatelessWidget {
+  const TileVehiculo({
+    super.key,
+    required this.vehiculo,
+  });
+
+  final Vehiculo vehiculo;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(
+        vehiculo.modelo,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(vehiculo.matricula),
+      trailing: BotonesTile(vehiculo: vehiculo),
+      onTap: () {
+        
+      },
+    );
+  }
+}
+
+class BotonesTile extends StatelessWidget {
+  const BotonesTile({
+    super.key,
+    required this.vehiculo,
+  });
+
+  final Vehiculo vehiculo;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 145,
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(EliminadoVehiculo(id: vehiculo.id));
+            }, 
+            icon: const Icon(Icons.delete, color: Colors.red)
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
+            }, 
+            icon: const Icon(Icons.edit, color: Colors.red)
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+            }, 
+            icon: const Icon(Icons.monetization_on, color: Colors.red)
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* --------------------------------- VEHICULOS --------------------------------- */
 class WidgetPlantillaVehiculo extends StatefulWidget {
   final Vehiculo? vehiculo;
   const WidgetPlantillaVehiculo({super.key, this.vehiculo});
@@ -135,16 +168,6 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   final TextEditingController controladorAno = TextEditingController();
 
   String obtenerTexto() => (widget.vehiculo == null)? 'Agregar Vehiculo':'Editar Vehiculo';
-  VoidCallback? obtenerFuncion (BuildContext context){
-    if (widget.vehiculo == null) {
-      return () {
-        context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
-      };
-    }
-    return () {
-      context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
-    };
-  }
   Vehiculo obtenerVehiculo(){
     return Vehiculo(
       id: (widget.vehiculo?.id)??0, 
@@ -164,17 +187,15 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
     controladorAno.text = (widget.vehiculo?.ano??0).toString();
   }
   
-  void escuchador(){
-    //print(controladorMatricula.text);
-    setState(() {
-      //reglas = establecerReglas();
-    });
-  }
+  // Create a global key that uniquely identifies the Form widget
+  // and allows validation of the form.
+  //
+  // Note: This is a `GlobalKey<FormState>`,
+  // not a GlobalKey<MyCustomFormState>.
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    //controladorMatricula.addListener(escuchador);
-    var funcionOnClick = obtenerFuncion(context);
     inicializarValoresDeControladores();
 
     return Scaffold(
@@ -189,20 +210,30 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
           ),
         ],
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          CuadroDeTexto(controlador: controladorMatricula),          
-          CuadroDeTexto(controlador: controladorMarca),
-          CuadroDeTexto(controlador: controladorModelo),
-          CuadroDeTexto(controlador: controladorColor),
-          CuadroDeTexto(controlador: controladorAno),
-          TextButton(
-            onPressed: funcionOnClick, 
-            child: Text(obtenerTexto())
-          ),
-        ],
-      ),
+      body: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            // Add TextFormFields and ElevatedButton here.
+            CuadroDeTexto(controlador: controladorMatricula),          
+            CuadroDeTexto(controlador: controladorMarca),
+            CuadroDeTexto(controlador: controladorModelo),
+            CuadroDeTexto(controlador: controladorColor),
+            CuadroDeTexto(controlador: controladorAno, esInt: true),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  if (widget.vehiculo == null) {
+                    context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
+                  }
+                  context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
+                }
+              },
+              child: Text(obtenerTexto()),
+            ),
+          ],
+        ),
+      )
     );
   }
 
@@ -221,13 +252,25 @@ class CuadroDeTexto extends StatelessWidget {
   const CuadroDeTexto({
     super.key,
     required this.controlador,
+    this.esInt = false,
   });
 
   final TextEditingController controlador;
+  final bool esInt;
+
+  bool esNumerico(String? s) {
+    if(s == null) return false;    
+    return int.tryParse(s) != null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      validator: (value) {
+        if (value != null && value.isEmpty) return 'Valor requerido';
+        if (esInt && !esNumerico(value)) return 'Debe ser numerico';        
+        return null;
+      },
       controller: controlador,
       decoration: const InputDecoration(
         hintText: "", 
@@ -240,6 +283,7 @@ class CuadroDeTexto extends StatelessWidget {
   }
 }
 
+/* ----------------------------------------------------------------------------- */
 
 class WidgetCargando extends StatelessWidget {
   const WidgetCargando({super.key});

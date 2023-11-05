@@ -101,7 +101,10 @@ Future main() async {
         bloc.add(Inicializado());
         bloc.add(ClickeadoAgregarVehiculo());
       },
-      expect: () => <VehiculoEstado>[MisVehiculos(misVehiculos: Vehiculos().fetchAll()),PlantillaVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969))],
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Future.value([])),
+        PlantillaVehiculo(),
+      ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
       'Click a editar vehiculo manda a Estado PlantillaVehiculo.',
@@ -110,7 +113,10 @@ Future main() async {
         bloc.add(Inicializado());
         bloc.add(ClickeadoEditarVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
       },
-      expect: () => <VehiculoEstado>[MisVehiculos(misVehiculos: Vehiculos().fetchAll()),PlantillaVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969))],
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Future.value([])),
+        PlantillaVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969))
+      ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
       'Volver desde Agregar vehiculo devuelve a MisVehiculos.',
@@ -126,7 +132,21 @@ Future main() async {
         MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
       ],
     );
-  
+  });
+
+  group('Gastos: ', () {
+    blocTest<VehiculoBloc, VehiculoEstado>(
+      'Click a agregar gasto manda a Estado PlantillaGasto.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
+      },
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
+        PlantillaGasto(idVehiculo: 1),
+      ],
+    );
   });
   
 }
