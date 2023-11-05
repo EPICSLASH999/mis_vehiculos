@@ -369,7 +369,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Widget build(BuildContext context) {
     controladorFecha.text =  DateFormat.yMMMd().format(fechaSeleccionada);
     controladorVehiculo.text = widget.idVehiculo.toString();
-    controladorEtiqueta.text = '0';
+    controladorEtiqueta.text = '';
     
     return Scaffold(
       appBar: AppBar(
@@ -444,6 +444,10 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta> {
         SizedBox(
           width: 150,
           child: DropdownButtonFormField(
+            validator: (value) {
+              if (value != null && value == 0) return 'Valor requerido';
+              return null;
+            },
             value: misEtiquetas.isNotEmpty? misEtiquetas.first.id:0,
             items: [
               //const DropdownMenuItem(value: '1', child: Text('1')),

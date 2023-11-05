@@ -69,7 +69,7 @@ class ConsultargastosArchivados extends VehiculoEstado {
 }
 
 // ETIQUETAS
-class AdministrarEtiquetas extends VehiculoEstado {
+class AdministradorEtiquetas extends VehiculoEstado {
   @override
   List<Object?> get props => [];
 }
@@ -216,6 +216,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await gastos.create(datos: datos);
       emit(MisVehiculos(misVehiculos: misVehiculos));
+    });
+
+    // Etiquetas
+    on<ClickeadoAdministrarEtiquetas>((event, emit) {
+      emit(AdministradorEtiquetas());
     });
   }
 }

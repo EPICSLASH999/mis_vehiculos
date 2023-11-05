@@ -150,6 +150,20 @@ Future main() async {
     );
   });
   
+  group('Etiquetas: ', () {
+    blocTest<VehiculoBloc, VehiculoEstado>(
+      'Click a administrar etiquetas manda a Estado AdministradorEtiquetas.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add(ClickeadoAdministrarEtiquetas());
+      },
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
+        AdministradorEtiquetas(),
+      ],
+    );
+  });
 }
 
 Future<void> testingMethod() async {
