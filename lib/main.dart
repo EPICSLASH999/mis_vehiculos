@@ -51,7 +51,64 @@ class WidgetCargando extends StatelessWidget {
   }
 }
 
+/* ----------------------------------- MISC ------------------------------------ */
 
+class CuadroDeTexto extends StatelessWidget {
+  const CuadroDeTexto({
+    super.key,
+    required this.controlador,
+    this.esInt = false, 
+    required this.titulo, 
+    this.esDouble = false,
+    this.soloLectura = false, 
+    this.funcionAlPresionar,
+    this.campoRequerido = true,
+  });
+
+  final TextEditingController controlador;
+  final bool esInt;
+  final bool esDouble;
+  final String titulo;
+  final bool soloLectura;
+  final VoidCallback? funcionAlPresionar;
+  final bool campoRequerido;
+
+  bool esNumerico(String? s) {
+    if(s == null) return false;    
+    if (esInt) return int.tryParse(s) != null;
+    return double.tryParse(s) != null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Text(titulo),
+          TextFormField(
+            validator: (value) {
+              if (value != null && value.isEmpty && campoRequerido) return 'Valor requerido';
+              if ((esInt || esDouble) && !esNumerico(value)) return 'Debe ser numerico';  
+              return null;
+            },
+            readOnly: soloLectura,
+            controller: controlador,
+            decoration: const InputDecoration(
+              hintText: "", 
+              prefixIcon: Icon(Icons.access_alarm_outlined),
+              prefixIconColor: Colors.red,
+              suffixIcon: Icon(Icons.password)
+            ),
+            onTap: funcionAlPresionar
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ----------------------------------------------------------------------------- */
 
 /* --------------------------------- VEHICULOS --------------------------------- */
 // Widget Principal (Menu Principal)
@@ -265,59 +322,6 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   }
 }
 
-class CuadroDeTexto extends StatelessWidget {
-  const CuadroDeTexto({
-    super.key,
-    required this.controlador,
-    this.esInt = false, 
-    required this.titulo, 
-    this.esDouble = false,
-    this.soloLectura = false, 
-    this.funcionAlPresionar,
-  });
-
-  final TextEditingController controlador;
-  final bool esInt;
-  final bool esDouble;
-  final String titulo;
-  final bool soloLectura;
-  final VoidCallback? funcionAlPresionar;
-
-  bool esNumerico(String? s) {
-    if(s == null) return false;    
-    if (esInt) return int.tryParse(s) != null;
-    return double.tryParse(s) != null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Text(titulo),
-          TextFormField(
-            validator: (value) {
-              if (value != null && value.isEmpty) return 'Valor requerido';
-              if ((esInt || esDouble) && !esNumerico(value)) return 'Debe ser numerico';  
-              return null;
-            },
-            readOnly: soloLectura,
-            controller: controlador,
-            decoration: const InputDecoration(
-              hintText: "", 
-              prefixIcon: Icon(Icons.access_alarm_outlined),
-              prefixIconColor: Colors.red,
-              suffixIcon: Icon(Icons.password)
-            ),
-            onTap: funcionAlPresionar
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /* ----------------------------------------------------------------------------- */
 
 /* ----------------------------------- GASTOS ----------------------------------- */
@@ -401,15 +405,15 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
           children: <Widget>[
             CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
             SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas),
-            CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico'),
-            CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar'),
+            CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
+            CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false,),
             CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
             CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', soloLectura: true, funcionAlPresionar: funcionAlPresionar(),),
            
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  //context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                  context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
                 }
               },
               child: const Text('Agregar Gasto'),
@@ -439,14 +443,15 @@ class SeleccionadorEtiqueta extends StatefulWidget {
 }
 
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
-  
+  var etiquetaSeleccionada = "";
+
   @override
   Widget build(BuildContext context)  {
     return Column(
       children: [
         Text(widget.titulo),
         SizedBox(
-          width: 150,
+          width: 160,
           child: FutureBuilder<List<Etiqueta>>(
             future: widget.misEtiquetas,
             builder: (context, snapshot) {
@@ -454,10 +459,16 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 return const WidgetCargando();
               } else{
                 final etiquetas = snapshot.data?? [];
-
+                
                 return DropdownButtonFormField(
                   validator: (value) {
                     if (value != null && value == 0) return 'Valor requerido';
+                    
+                    // En caso de que se encuentra seleccionada la etiqueta por omisión, se iguala el valor manualmente.
+                    if (etiquetaSeleccionada.isEmpty) {
+                      etiquetaSeleccionada = etiquetas.first.id.toString();
+                      widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
+                    }
                     return null;
                   },
                   value: etiquetas.isNotEmpty? etiquetas.first.id:0,
@@ -466,7 +477,8 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                   ],
                   onChanged: (value) {
                     setState(() {
-                      widget.etiquetaSeleccionada.text = value.toString();
+                      etiquetaSeleccionada = value.toString();
+                      widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
                     });
                   },
                 );
@@ -485,7 +497,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 }
 
-/* ----------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------ */
 
 /* --------------------------------- ETIQUETAS --------------------------------- */
 class WidgetAdministradorEtiquetas extends StatelessWidget {
@@ -626,7 +638,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTexto()),

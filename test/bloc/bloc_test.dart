@@ -215,8 +215,10 @@ Future main() async {
         PlantillaEtiqueta(),
         AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(etiqueta: const Etiqueta(id: 1, nombre: 'Gasolina2')),
+        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
+    
   });
 }
 

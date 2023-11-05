@@ -165,6 +165,7 @@ class EliminadoGasto extends VehiculoEvento {}
 class Inicializado extends VehiculoEvento {}
 class ClickeadoRegresarAMisvehiculos extends VehiculoEvento {}
 class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
+class ClickeadoRegresarDesdeAdministradorEtiquetas extends VehiculoEvento {}
 /* --------------------------------------------------- */
 
 
