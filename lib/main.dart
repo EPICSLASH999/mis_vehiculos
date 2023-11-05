@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/bloc/bloc.dart';
+import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 
 void main() {
@@ -29,6 +30,7 @@ class MainApp extends StatelessWidget {
         builder: (context, state) {
           if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos,);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
+          if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo,);
           return const WidgetCargando();
         },
       )
@@ -88,6 +90,8 @@ class WidgetMisVehiculos extends StatelessWidget {
     );
   }
 }
+
+/* --------------------------------- VEHICULOS --------------------------------- */
 
 class TileVehiculo extends StatelessWidget {
   const TileVehiculo({
@@ -151,7 +155,6 @@ class BotonesTile extends StatelessWidget {
   }
 }
 
-/* --------------------------------- VEHICULOS --------------------------------- */
 class WidgetPlantillaVehiculo extends StatefulWidget {
   final Vehiculo? vehiculo;
   const WidgetPlantillaVehiculo({super.key, this.vehiculo});
@@ -215,11 +218,11 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
         child: Column(
           children: <Widget>[
             // Add TextFormFields and ElevatedButton here.
-            CuadroDeTexto(controlador: controladorMatricula),          
-            CuadroDeTexto(controlador: controladorMarca),
-            CuadroDeTexto(controlador: controladorModelo),
-            CuadroDeTexto(controlador: controladorColor),
-            CuadroDeTexto(controlador: controladorAno, esInt: true),
+            CuadroDeTexto(controlador: controladorMatricula, titulo: 'Matricula'),          
+            CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
+            CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
+            CuadroDeTexto(controlador: controladorColor, titulo: 'Color'),
+            CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -252,37 +255,148 @@ class CuadroDeTexto extends StatelessWidget {
   const CuadroDeTexto({
     super.key,
     required this.controlador,
-    this.esInt = false,
+    this.esInt = false, 
+    required this.titulo, 
+    this.esDouble = false,
   });
 
   final TextEditingController controlador;
   final bool esInt;
+  final bool esDouble;
+  final String titulo;
 
   bool esNumerico(String? s) {
     if(s == null) return false;    
-    return int.tryParse(s) != null;
+    if (esInt) return int.tryParse(s) != null;
+    return double.tryParse(s) != null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      validator: (value) {
-        if (value != null && value.isEmpty) return 'Valor requerido';
-        if (esInt && !esNumerico(value)) return 'Debe ser numerico';        
-        return null;
-      },
-      controller: controlador,
-      decoration: const InputDecoration(
-        hintText: "", 
-        prefixIcon: Icon(Icons.access_alarm_outlined),
-        prefixIconColor: Colors.red,
-        suffixIcon: Icon(Icons.password)
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Text(titulo),
+          TextFormField(
+            validator: (value) {
+              if (value != null && value.isEmpty) return 'Valor requerido';
+              if ((esInt || esDouble) && !esNumerico(value)) return 'Debe ser numerico';  
+              return null;
+            },
+            controller: controlador,
+            decoration: const InputDecoration(
+              hintText: "", 
+              prefixIcon: Icon(Icons.access_alarm_outlined),
+              prefixIconColor: Colors.red,
+              suffixIcon: Icon(Icons.password)
+            ),
+    
+          ),
+        ],
       ),
-
     );
   }
 }
 
+/* ----------------------------------------------------------------------------- */
+
+/* ----------------------------------- GASTOS ----------------------------------- */
+class WidgetPlantillaGasto extends StatefulWidget {
+  final Gasto? gasto;
+  final int idVehiculo;
+  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto});
+
+  @override
+  State<WidgetPlantillaGasto> createState() => _WidgetPlantillaGastoState();
+}
+
+class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController controladorVehiculo = TextEditingController();
+  final TextEditingController controladorMecanico = TextEditingController();
+  final TextEditingController controladorLugar = TextEditingController();
+  final TextEditingController controladorCosto = TextEditingController();
+  final TextEditingController controladorFecha = TextEditingController();
+
+  Gasto obtenerGasto(){
+    return Gasto(
+      id: (widget.gasto?.id)??0, 
+      vehiculo: int.parse(controladorVehiculo.text),
+      etiqueta: 0,
+      // TODO: obtenerIdEtiqueta
+      //etiqueta: obtenerIdEtiqueta(),
+      mecanico: controladorMecanico.text,
+      lugar: controladorLugar.text,
+      costo: double.parse(controladorCosto.text),
+      fecha: controladorFecha.text
+      //fecha: obtenerFecha(),
+      //TODO: obtenerFecha
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    controladorFecha.text = DateTime.now().toIso8601String();
+    controladorVehiculo.text = widget.idVehiculo.toString();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Agregar Gasto'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoRegresar());
+            }, 
+            icon: const Icon(Icons.arrow_back_ios_new_outlined)
+          ),
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            //vehiculo,etiqueta,mecanico,lugar,costo,fecha
+            CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo'),
+            CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico'),
+            CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar'),
+            CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
+            Text(controladorFecha.text), 
+            TextButton(
+              onPressed: () {
+                showDatePicker(
+                  context: context, 
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1550), 
+                  lastDate: DateTime(3000),
+                );
+              }, 
+              child: const Text('Seleccionar Fecha')),
+            InputDatePickerFormField(
+              onDateSubmitted: (value) {
+                controladorFecha.text = value.toIso8601String();
+              },
+              fieldLabelText: 'Fecha',
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1550), 
+              lastDate: DateTime(3000),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  //context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                }
+                print(controladorFecha.text);
+              },
+              child: const Text('Agregar Gasto'),
+            ),
+          ],
+        ),
+      )
+    );
+  }
+}
 /* ----------------------------------------------------------------------------- */
 
 class WidgetCargando extends StatelessWidget {

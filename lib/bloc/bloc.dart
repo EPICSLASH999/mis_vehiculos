@@ -1,8 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:mis_vehiculos/database/tablas/gastos.dart';
 
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
+import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 
 /* --------------------- ESTADOS --------------------- */
@@ -121,7 +123,11 @@ class ClickeadoAgregarGasto extends VehiculoEvento {
   ClickeadoAgregarGasto({required this.idVehiculo});
 }
 class ClickeadoConsultarGastos extends VehiculoEvento {}
-class AgregadoGasto extends VehiculoEvento {}
+class AgregadoGasto extends VehiculoEvento {
+  final Gasto gasto;
+
+  AgregadoGasto({required this.gasto});
+}
 class ConsultadoGastos extends VehiculoEvento {}
 class CheckeadoEditarGasto extends VehiculoEvento {}
 class EliminadoGasto extends VehiculoEvento {}
@@ -135,6 +141,7 @@ class ClickeadoRegresar extends VehiculoEvento {}
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   Future <List<Vehiculo>>? misVehiculos;
   final vehiculos = Vehiculos();
+  final gastos = Gastos();
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
@@ -179,6 +186,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoEditarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));
     });
+    
+    // MISC
     on<ClickeadoRegresar>((event, emit) async {
       emit(MisVehiculos(misVehiculos: misVehiculos));
     });
@@ -186,6 +195,18 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // Gastos
     on<ClickeadoAgregarGasto>((event, emit) {
       emit(PlantillaGasto(idVehiculo: event.idVehiculo));
+    });
+    on<AgregadoGasto>((event, emit) async {
+       Map<String,dynamic> datos = {
+        "vehiculo": event.gasto.vehiculo,
+        "etiqueta": event.gasto.etiqueta,
+        "mecanico": event.gasto.mecanico,
+        "lugar": event.gasto.lugar,
+        "costo": event.gasto.costo,
+        "fecha": event.gasto.fecha,
+      };
+      await gastos.create(datos: datos);
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
   }
 }
