@@ -178,7 +178,17 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
     inicializarValoresDeControladores();
 
     return Scaffold(
-      appBar: AppBar(title: Text(obtenerTexto())),
+      appBar: AppBar(
+        title: Text(obtenerTexto()),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoRegresar());
+            }, 
+            icon: const Icon(Icons.arrow_back_ios_new_outlined)
+          ),
+        ],
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

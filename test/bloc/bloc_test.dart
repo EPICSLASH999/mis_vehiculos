@@ -112,6 +112,21 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[MisVehiculos(misVehiculos: Vehiculos().fetchAll()),PlantillaVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969))],
     );
+    blocTest<VehiculoBloc, VehiculoEstado>(
+      'Volver desde Agregar vehiculo devuelve a MisVehiculos.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add(ClickeadoAgregarVehiculo());
+        bloc.add(ClickeadoRegresar());
+      },
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
+        PlantillaVehiculo(),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
+      ],
+    );
+  
   });
   
 }

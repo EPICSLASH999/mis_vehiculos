@@ -121,7 +121,7 @@ class EliminadoGasto extends VehiculoEvento {}
 
 // MISC
 class Inicializado extends VehiculoEvento {}
-class RegresadoAEstado extends VehiculoEvento {}
+class ClickeadoRegresar extends VehiculoEvento {}
 /* --------------------------------------------------- */
 
 
@@ -169,6 +169,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<ClickeadoEditarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));
+    });
+    on<ClickeadoRegresar>((event, emit) async {
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
   }
 }
