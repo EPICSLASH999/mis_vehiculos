@@ -35,6 +35,7 @@ class MainApp extends StatelessWidget {
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
+          if (state is ConsultarGastos) return WidgetConsultarGastos(misGastos: state.misGastos);
           return const WidgetCargando();
         },
       )
@@ -121,14 +122,14 @@ class WidgetMisVehiculos extends StatelessWidget {
   VoidCallback? funcionConsultargastos(BuildContext context){
     if (idsVehiculosSeleccionados.isEmpty) return null;
     return (){
-      context.read<VehiculoBloc>().add(ConsultadoGastos());
+      context.read<VehiculoBloc>().add(ClickeadoConsultarGastos());
     };
   }
 
   @override
   Widget build(BuildContext context) {
     var pressedConsultar = funcionConsultargastos(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Vehículos'),
@@ -381,7 +382,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
       mecanico: controladorMecanico.text,
       lugar: controladorLugar.text,
       costo: double.parse(controladorCosto.text),
-      fecha: controladorFecha.text
+      //fecha: controladorFecha.text
+      fecha: fechaSeleccionada.millisecondsSinceEpoch.toString()
     );
   }
   VoidCallback funcionAlPresionar(){
@@ -401,7 +403,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
               affinity: TextAffinity.upstream));
         
         //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
-        
       }
     };
   }
@@ -521,6 +522,124 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
     );
   }
 }
+
+class WidgetConsultarGastos extends StatelessWidget {
+  final Future <List<Gasto>>? misGastos; 
+  const WidgetConsultarGastos({super.key, required this.misGastos});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis Gastos'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+            }, 
+            icon: const Icon(Icons.arrow_back_ios_new_outlined)
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: 
+            FutureBuilder<List<Gasto>>(
+              future: misGastos,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final gastos = snapshot.data?? [];
+                  
+                  return gastos.isEmpty
+                      ? const Center(
+                        child: Text(
+                          'Sin gastos...',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 28,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                      separatorBuilder: (context, index) => 
+                          const SizedBox(height: 12,), 
+                      itemCount: gastos.length,
+                      itemBuilder: (context, index) {
+                        final gasto = gastos[index];
+                        return TileGasto(gasto: gasto);
+                      }, 
+                    );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TileGasto extends StatelessWidget {
+  const TileGasto({
+    super.key,
+    required this.gasto, 
+  });
+
+  final Gasto gasto;
+
+  @override
+  Widget build(BuildContext context) {
+    
+    return ListTile(
+      title: Text(
+        gasto.etiqueta.toString(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(gasto.fecha),
+      trailing: BotonesTileGasto(gasto: gasto),
+      onTap: () {
+        context.read<VehiculoBloc>().add(ClickeadoSeleccionarVehiculo(idVehiculo: gasto.id));
+      },
+    );
+  }
+}
+
+class BotonesTileGasto extends StatelessWidget {
+  const BotonesTileGasto({
+    super.key,
+    required this.gasto,
+  });
+
+  final Gasto gasto;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              //context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: gasto.id));
+            }, 
+            icon: const Icon(Icons.delete, color: Colors.red)
+          ),
+          IconButton(
+            onPressed: () {
+              //context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: gasto));
+            }, 
+            icon: const Icon(Icons.edit, color: Colors.red)
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 
 /* ------------------------------------------------------------------------------ */
 

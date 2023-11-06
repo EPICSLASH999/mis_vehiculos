@@ -36,6 +36,20 @@ class Gastos {
     return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
   }
 
+  Future<List<Gasto>> fetchAllWhereVehiclesIds(List<int> idsVehiculosSeleccionados) async{
+    final database = await DatabaseService().database;
+    String values = "";
+    idsVehiculosSeleccionados = [1,2];
+    for(var id in idsVehiculosSeleccionados) {
+      values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';
+    }
+    String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY id_gasto''';
+    final registros = await database.rawQuery(
+      query
+    );
+    return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
+  }
+
   Future<Gasto> fetchById(int id) async {
     final database = await DatabaseService().database;
     final todo = await database
