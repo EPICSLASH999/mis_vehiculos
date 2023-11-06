@@ -52,8 +52,9 @@ class PlantillaVehiculo extends VehiculoEstado {
 class PlantillaGasto extends VehiculoEstado {
   final int idVehiculo;
   final Future<List<Etiqueta>>? misEtiquetas;
+  final Gasto? gasto;
 
-  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, });
+  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto});
 
   @override
   List<Object?> get props => [idVehiculo, misEtiquetas];
@@ -169,7 +170,16 @@ class AgregadoGasto extends VehiculoEvento {
   AgregadoGasto({required this.gasto});
 }
 /*class ConsultadoGastos extends VehiculoEvento {}*/
-class ClickeadoEditarGasto extends VehiculoEvento {}
+class ClickeadoEditarGasto extends VehiculoEvento {
+  final Gasto gasto;
+
+  ClickeadoEditarGasto({required this.gasto});
+}
+class EditadoGasto extends VehiculoEvento {
+  final Gasto gasto;
+
+  EditadoGasto({required this.gasto});
+}
 class EliminadoGasto extends VehiculoEvento {
   final int id;
 
@@ -285,6 +295,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await gastos.delete(event.id);
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
       emit(ConsultarGastos(misGastos: misGastos));
+    });
+    on<ClickeadoEditarGasto>((event, emit) {
+      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: misEtiquetas, gasto: event.gasto));
     });
 
     // Etiquetas
