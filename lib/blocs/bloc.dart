@@ -297,7 +297,21 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(ConsultarGastos(misGastos: misGastos));
     });
     on<ClickeadoEditarGasto>((event, emit) {
+      misEtiquetas = etiquetas.fetchAll();
       emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: misEtiquetas, gasto: event.gasto));
+    });
+    on<EditadoGasto>((event, emit) async {
+      Map<String,dynamic> datos = {
+        "vehiculo": event.gasto.vehiculo,
+        "etiqueta": event.gasto.etiqueta,
+        "mecanico": event.gasto.mecanico,
+        "lugar": event.gasto.lugar,
+        "costo": event.gasto.costo,
+        "fecha": event.gasto.fecha,
+      };
+      await gastos.update(id: event.gasto.id, datos: datos);
+      misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
+      emit(ConsultarGastos(misGastos: misGastos));
     });
 
     // Etiquetas

@@ -33,7 +33,7 @@ class MainApp extends StatelessWidget {
         builder: (context, state) {
           if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos, idsVehiculosSeleccionados: state.idsVehiculosSeleccionados,);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
-          if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas);
+          if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
           if (state is ConsultarGastos) return WidgetConsultarGastos(misGastos: state.misGastos);
@@ -326,6 +326,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
                 if (_formKey.currentState!.validate()) {
                   if (widget.vehiculo == null) {
                     context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
+                    return;
                   }
                   context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
                 }
@@ -375,6 +376,17 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   
   DateTime fechaSeleccionada = DateTime.now();
 
+  String obtenerTexto() => '${(widget.gasto == null)? 'Agregar':'Editar'} Gasto';
+  void inicializarValoresDeControladores(){
+    controladorVehiculo.text = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
+    controladorEtiqueta.text = (widget.gasto?.etiqueta??'').toString();
+    controladorMecanico.text = widget.gasto?.mecanico??'';
+    controladorLugar.text = widget.gasto?.lugar??'';
+    controladorCosto.text = (widget.gasto?.costo??'').toString();
+    DateTime fechaRecibida = DateTime.parse(widget.gasto?.fecha??fechaSeleccionada.toIso8601String());
+    controladorFecha.text = DateFormat.yMMMd().format(fechaRecibida);
+    //controladorFecha.text = (widget.gasto?.fecha??DateFormat.yMMMd().format(fechaSeleccionada));
+  }
   Gasto obtenerGasto(){
     return Gasto(
       id: (widget.gasto?.id)??0, 
@@ -410,13 +422,11 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
 
   @override
   Widget build(BuildContext context) {
-    controladorFecha.text =  DateFormat.yMMMd().format(fechaSeleccionada);
-    controladorVehiculo.text = widget.idVehiculo.toString();
-    controladorEtiqueta.text = '';
+    inicializarValoresDeControladores();
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Gasto'),
+        title: Text(obtenerTexto()),
         actions: [
           IconButton(
             onPressed: () {
@@ -440,10 +450,14 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                  if (widget.gasto == null) {
+                    context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                    return;
+                  }
+                  context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
                 }
               },
-              child: const Text('Agregar Gasto'),
+              child: Text(obtenerTexto()),
             ),
           ],
         ),
@@ -474,6 +488,8 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
 
   @override
   Widget build(BuildContext context)  {
+    int? idEtiquetaSeleccionada = int.tryParse(widget.etiquetaSeleccionada.text);
+    
     return Column(
       children: [
         Text(widget.titulo),
@@ -498,7 +514,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                     }
                     return null;
                   },
-                  value: etiquetas.isNotEmpty? etiquetas.first.id:0,
+                  value: (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:0),
                   items: [
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
@@ -647,7 +663,7 @@ class BotonesTileGasto extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              //context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: gasto));
+              context.read<VehiculoBloc>().add(ClickeadoEditarGasto(gasto: gasto));
             }, 
             icon: const Icon(Icons.edit, color: Colors.red)
           ),
