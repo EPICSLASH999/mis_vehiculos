@@ -489,7 +489,8 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   @override
   Widget build(BuildContext context)  {
     int? idEtiquetaSeleccionada = int.tryParse(widget.etiquetaSeleccionada.text);
-    
+    idEtiquetaSeleccionada = ((idEtiquetaSeleccionada != null) && (idEtiquetaSeleccionada == 0))?null:idEtiquetaSeleccionada;
+
     return Column(
       children: [
         Text(widget.titulo),
@@ -623,8 +624,8 @@ class TileGasto extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting){
           return const WidgetCargando();
         } else{
-          final etiqueta = snapshot.data?? 'default';
-
+          final etiqueta = snapshot.data?? 'Desconocida';
+          
           return ListTile(
             title: Text(
               etiqueta,

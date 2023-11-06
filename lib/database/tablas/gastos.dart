@@ -6,17 +6,23 @@ class Gastos {
   final tableName = 'gastos';
 
   Future<void> createTable(Database database) async {
+    await database.execute("""PRAGMA foreign_keys = ON;""");
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (
       "id_gasto" INTEGER NOT NULL,
       "vehiculo" INTEGER REFERENCES vehiculos(id_vehiculo) ON DELETE CASCADE, 
-      "etiqueta" INTEGER REFERENCES etiquetas(id_etiqueta) ON UPDATE CASCADE ON DELETE SET NULL,
+      "etiqueta" INTEGER,
       "mecanico" TEXT,
       "lugar" TEXT,
       "costo" INTEGER NOT NULL,
       "fecha" INTEGER NOT NULL DEFAULT (cast(strftime('%s','now') as int)),
-      PRIMARY KEY("id_gasto" AUTOINCREMENT)
+      PRIMARY KEY("id_gasto" AUTOINCREMENT),
+      CONSTRAINT fk_etiqueta
+        FOREIGN KEY (etiqueta)
+        REFERENCES etiquetas(id_etiqueta)
+        ON DELETE SET NULL
     );""");
   }
+  //"etiqueta" INTEGER REFERENCES etiquetas(id_etiqueta) ON DELETE SET NULL,
 
   Future<int> create({required Map<String,dynamic> datos}) async {
     final database = await DatabaseService().database;
