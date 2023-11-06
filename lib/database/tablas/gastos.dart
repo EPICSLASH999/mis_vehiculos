@@ -39,7 +39,6 @@ class Gastos {
   Future<List<Gasto>> fetchAllWhereVehiclesIds(List<int> idsVehiculosSeleccionados) async{
     final database = await DatabaseService().database;
     String values = "";
-    idsVehiculosSeleccionados = [1,2];
     for(var id in idsVehiculosSeleccionados) {
       values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
+import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
@@ -582,6 +583,7 @@ class WidgetConsultarGastos extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class TileGasto extends StatelessWidget {
   const TileGasto({
     super.key,
@@ -590,20 +592,40 @@ class TileGasto extends StatelessWidget {
 
   final Gasto gasto;
 
+  Future<String> obtenerNombreEtiquetaDeId(int id) async {
+    Etiqueta etiqueta = await Etiquetas().fetchById(id);
+    return etiqueta.nombre;
+  }
+
   @override
   Widget build(BuildContext context) {
+    DateTime nuevaFecha = DateTime.parse(gasto.fecha);
     
-    return ListTile(
-      title: Text(
-        gasto.etiqueta.toString(),
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text(gasto.fecha),
-      trailing: BotonesTileGasto(gasto: gasto),
-      onTap: () {
-        context.read<VehiculoBloc>().add(ClickeadoSeleccionarVehiculo(idVehiculo: gasto.id));
-      },
+    Future<String> nombreEtiqueta = obtenerNombreEtiquetaDeId(gasto.etiqueta);
+
+    return FutureBuilder<String>(
+              future: nombreEtiqueta,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final etiqueta = snapshot.data?? 'default';
+
+                  return ListTile(
+                    title: Text(
+                      etiqueta,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(DateFormat.yMMMd().format(nuevaFecha)),
+                    trailing: BotonesTileGasto(gasto: gasto),
+                    onTap: () {
+                    },
+                  );
+                }
+              }
     );
+    
+    
   }
 }
 
@@ -638,8 +660,6 @@ class BotonesTileGasto extends StatelessWidget {
     );
   }
 }
-
-
 
 /* ------------------------------------------------------------------------------ */
 

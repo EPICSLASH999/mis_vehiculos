@@ -273,9 +273,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await gastos.create(datos: datos);
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
-    on<ClickeadoConsultarGastos>((event, emit) async {
+    on<ClickeadoConsultarGastos>((event, emit) async {    
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
-      //misGastos = gastos.fetchAll();
       emit(ConsultarGastos(misGastos: misGastos));
     });
 

@@ -31,9 +31,9 @@ class Etiquetas {
 
   Future<Etiqueta> fetchById(int id) async {
     final database = await DatabaseService().database;
-    final todo = await database
+    final etiqueta = await database
         .rawQuery('''SELECT * from $tableName WHERE id_etiqueta = ?''', [id]);
-    return Etiqueta.fromSQfliteDatabase(todo.first);
+    return Etiqueta.fromSQfliteDatabase(etiqueta.first);
   }
 
   Future<int> update({required int id, required String? nombre}) async {
