@@ -641,7 +641,7 @@ class BotonesTileGasto extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () {
-              //context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: gasto.id));
+              context.read<VehiculoBloc>().add(EliminadoGasto(id: gasto.id));
             }, 
             icon: const Icon(Icons.delete, color: Colors.red)
           ),
