@@ -204,6 +204,30 @@ Future main() async {
         ConsultarGastos(misGastos: Gastos().fetchAllWhereVehiclesIds([1])),
       ],
     );
+     blocTest<VehiculoBloc, VehiculoEstado>(
+      'Eliminado gasto funciona correctamente.',
+      build: () => VehiculoBloc(),
+      act: (bloc) {
+        bloc.add(Inicializado());
+        bloc.add(ClickeadoAgregarVehiculo());
+        bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
+        bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
+        bloc.add(AgregadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
+        bloc.add(ClickeadoSeleccionarVehiculo(idVehiculo: 1));
+        bloc.add(ClickeadoConsultarGastos());
+        bloc.add(EliminadoGasto(id: 1));
+      },
+      expect: () => <VehiculoEstado>[
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        PlantillaVehiculo(),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
+        PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
+        ConsultarGastos(misGastos: Gastos().fetchAllWhereVehiclesIds([1])),
+        ConsultarGastos(misGastos: Gastos().fetchAllWhereVehiclesIds([1])),
+      ],
+    );
   });
   
   group('Etiquetas: ', () {

@@ -168,9 +168,13 @@ class AgregadoGasto extends VehiculoEvento {
 
   AgregadoGasto({required this.gasto});
 }
-class ConsultadoGastos extends VehiculoEvento {}
-class CheckeadoEditarGasto extends VehiculoEvento {}
-class EliminadoGasto extends VehiculoEvento {}
+/*class ConsultadoGastos extends VehiculoEvento {}*/
+class ClickeadoEditarGasto extends VehiculoEvento {}
+class EliminadoGasto extends VehiculoEvento {
+  final int id;
+
+  EliminadoGasto({required this.id});
+}
 
 // MISC
 class Inicializado extends VehiculoEvento {}
@@ -274,6 +278,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
+      misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
+      emit(ConsultarGastos(misGastos: misGastos));
+    });
+    on<EliminadoGasto>((event, emit) async {
+      await gastos.delete(event.id);
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
       emit(ConsultarGastos(misGastos: misGastos));
     });

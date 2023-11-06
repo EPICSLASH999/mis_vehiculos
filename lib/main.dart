@@ -583,7 +583,6 @@ class WidgetConsultarGastos extends StatelessWidget {
   }
 }
 
-// ignore: must_be_immutable
 class TileGasto extends StatelessWidget {
   const TileGasto({
     super.key,
@@ -600,32 +599,29 @@ class TileGasto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime nuevaFecha = DateTime.parse(gasto.fecha);
-    
     Future<String> nombreEtiqueta = obtenerNombreEtiquetaDeId(gasto.etiqueta);
 
     return FutureBuilder<String>(
-              future: nombreEtiqueta,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const WidgetCargando();
-                } else{
-                  final etiqueta = snapshot.data?? 'default';
+      future: nombreEtiqueta,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting){
+          return const WidgetCargando();
+        } else{
+          final etiqueta = snapshot.data?? 'default';
 
-                  return ListTile(
-                    title: Text(
-                      etiqueta,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(DateFormat.yMMMd().format(nuevaFecha)),
-                    trailing: BotonesTileGasto(gasto: gasto),
-                    onTap: () {
-                    },
-                  );
-                }
-              }
+          return ListTile(
+            title: Text(
+              etiqueta,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(DateFormat.yMMMd().format(nuevaFecha)),
+            trailing: BotonesTileGasto(gasto: gasto),
+            onTap: () {
+            },
+          );
+        }
+      }
     );
-    
-    
   }
 }
 
