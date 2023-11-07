@@ -21,7 +21,7 @@ class Gasto extends Equatable{
 
   factory Gasto.fromSQfliteDatabase(Map<String, dynamic> datos) => Gasto(
     id: datos['id_gasto']?.toInt() ?? 0,
-    vehiculo: datos['vehiculo'] ?? '',
+    vehiculo: datos['vehiculo'] ?? 0,
     etiqueta: datos['etiqueta'] ?? 0,
     mecanico: datos['mecanico'] ?? '',
     lugar: datos['lugar'] ?? '',

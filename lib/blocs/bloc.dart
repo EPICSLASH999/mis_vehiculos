@@ -264,6 +264,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
+      idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..clear();
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {

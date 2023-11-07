@@ -384,7 +384,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     controladorLugar.text = widget.gasto?.lugar??'';
     controladorCosto.text = (widget.gasto?.costo??'').toString();
     DateTime fechaRecibida = DateTime.parse(widget.gasto?.fecha??fechaSeleccionada.toIso8601String());
-    controladorFecha.text = DateFormat.yMMMd().format(fechaRecibida);
+    controladorFecha.text = DateFormat.yMMMd().format(fechaRecibida); // Esto es solo para mostrar la fecha en el textBox
+    fechaSeleccionada = fechaRecibida; // Esta es la fecha que se guardara en la BaseDeDatos
     //controladorFecha.text = (widget.gasto?.fecha??DateFormat.yMMMd().format(fechaSeleccionada));
   }
   Gasto obtenerGasto(){
@@ -399,7 +400,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
       fecha: fechaSeleccionada.millisecondsSinceEpoch.toString()
     );
   }
-  VoidCallback funcionAlPresionar(){
+  VoidCallback funcionAlPresionarFecha(){
     return () async {
       DateTime? nuevaFecha = await showDatePicker(
         context: context, 
@@ -441,11 +442,11 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         child: Column(
           children: <Widget>[
             CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
-            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas),
+            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
             CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
             CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false,),
             CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
-            CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', soloLectura: true, funcionAlPresionar: funcionAlPresionar(),),
+            CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', soloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
            
             ElevatedButton(
               onPressed: () {
@@ -466,18 +467,21 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   }
 }
 
+const String nombreEtiquetaNula = 'Desconocida';
 // ignore: must_be_immutable
 class SeleccionadorEtiqueta extends StatefulWidget {
   SeleccionadorEtiqueta({
     super.key,
     required this.etiquetaSeleccionada,
     required this.titulo, 
-    required this.misEtiquetas
+    required this.misEtiquetas,
+    this.esEditarGasto = false,
   });
 
   TextEditingController etiquetaSeleccionada;
   final String titulo;
   final Future <List<Etiqueta>>? misEtiquetas;
+  bool esEditarGasto;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
@@ -490,7 +494,14 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   Widget build(BuildContext context)  {
     int? idEtiquetaSeleccionada = int.tryParse(widget.etiquetaSeleccionada.text);
     idEtiquetaSeleccionada = ((idEtiquetaSeleccionada != null) && (idEtiquetaSeleccionada == 0))?null:idEtiquetaSeleccionada;
+    etiquetaSeleccionada = (idEtiquetaSeleccionada == null)?'':idEtiquetaSeleccionada.toString();
 
+    bool esNulaEtiqueta() => idEtiquetaSeleccionada == null && widget.esEditarGasto;
+    int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
+      if ((esNulaEtiqueta()) && etiquetas.isNotEmpty) return 0;
+      return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:0);
+    }
+    
     return Column(
       children: [
         Text(widget.titulo),
@@ -515,8 +526,9 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                     }
                     return null;
                   },
-                  value: (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:0),
+                  value: valorIdEtiquetaInicial(etiquetas),
                   items: [
+                    if(esNulaEtiqueta())const DropdownMenuItem(value: 0, child: Text(nombreEtiquetaNula),),
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {
@@ -624,14 +636,21 @@ class TileGasto extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting){
           return const WidgetCargando();
         } else{
-          final etiqueta = snapshot.data?? 'Desconocida';
+          final etiqueta = snapshot.data?? nombreEtiquetaNula;
           
           return ListTile(
             title: Text(
               etiqueta,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(DateFormat.yMMMd().format(nuevaFecha)),
+            subtitle: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(DateFormat.yMMMd().format(nuevaFecha)),
+                Text('\$${gasto.costo}')
+              ],
+            ),
             trailing: BotonesTileGasto(gasto: gasto),
             onTap: () {
             },

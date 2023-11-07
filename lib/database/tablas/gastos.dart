@@ -9,7 +9,7 @@ class Gastos {
     await database.execute("""PRAGMA foreign_keys = ON;""");
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (
       "id_gasto" INTEGER NOT NULL,
-      "vehiculo" INTEGER REFERENCES vehiculos(id_vehiculo) ON DELETE CASCADE, 
+      "vehiculo" INTEGER, 
       "etiqueta" INTEGER,
       "mecanico" TEXT,
       "lugar" TEXT,
@@ -19,7 +19,11 @@ class Gastos {
       CONSTRAINT fk_etiqueta
         FOREIGN KEY (etiqueta)
         REFERENCES etiquetas(id_etiqueta)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+      CONSTRAINT fk_vehiculo
+        FOREIGN KEY (vehiculo)
+        REFERENCES vehiculos(id_vehiculo)
+        ON DELETE CASCADE
     );""");
   }
   //"etiqueta" INTEGER REFERENCES etiquetas(id_etiqueta) ON DELETE SET NULL,
