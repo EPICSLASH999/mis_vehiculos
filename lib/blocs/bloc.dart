@@ -190,7 +190,8 @@ class EliminadoGasto extends VehiculoEvento {
 class Inicializado extends VehiculoEvento {}
 class ClickeadoRegresarAMisvehiculos extends VehiculoEvento {}
 class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
-class ClickeadoRegresarDesdeAdministradorEtiquetas extends VehiculoEvento {}
+/*class ClickeadoRegresarDesdeAdministradorEtiquetas extends VehiculoEvento {}*/
+class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
 /* --------------------------------------------------- */
 
 
@@ -269,6 +270,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+    });
+    on<ClickeadoregresarAConsultarGastos>((event, emit) {
+      emit(ConsultarGastos(misGastos: misGastos));
     });
 
     // Gastos

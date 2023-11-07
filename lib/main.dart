@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
+import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
@@ -353,6 +354,17 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 /* ----------------------------------------------------------------------------- */
 
 /* ----------------------------------- GASTOS ----------------------------------- */
+const String nombreEtiquetaNula = 'Desconocida';
+
+Future<String> obtenerNombreEtiquetaDeId(int id) async {
+  Etiqueta etiqueta = await Etiquetas().fetchById(id);
+  return etiqueta.nombre;
+}
+Future<String> obtenerNombreVehiculoDeId(int id) async {
+  Vehiculo vehiculo = await Vehiculos().fetchById(id);
+  return vehiculo.matricula;
+}
+
 class WidgetPlantillaGasto extends StatefulWidget {
   final Gasto? gasto;
   final int idVehiculo;
@@ -375,10 +387,12 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   final TextEditingController controladorFecha = TextEditingController();
   
   DateTime fechaSeleccionada = DateTime.now();
+  String idVehiculo = "";
 
   String obtenerTexto() => '${(widget.gasto == null)? 'Agregar':'Editar'} Gasto';
   void inicializarValoresDeControladores(){
-    controladorVehiculo.text = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
+    idVehiculo = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
+    controladorVehiculo.text = idVehiculo;
     controladorEtiqueta.text = (widget.gasto?.etiqueta??'').toString();
     controladorMecanico.text = widget.gasto?.mecanico??'';
     controladorLugar.text = widget.gasto?.lugar??'';
@@ -391,7 +405,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Gasto obtenerGasto(){
     return Gasto(
       id: (widget.gasto?.id)??0, 
-      vehiculo: int.parse(controladorVehiculo.text),
+      vehiculo: int.parse(idVehiculo),
       etiqueta: int.parse(controladorEtiqueta.text),
       mecanico: controladorMecanico.text,
       lugar: controladorLugar.text,
@@ -431,43 +445,59 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         actions: [
           IconButton(
             onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+              if (widget.gasto == null) {
+                context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+                return;
+              }
+              context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
             }, 
             icon: const Icon(Icons.arrow_back_ios_new_outlined)
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-            CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
-            SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
-            CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
-            CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false,),
-            CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
-            CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', soloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
-           
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  if (widget.gasto == null) {
-                    context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
-                    return;
-                  }
-                  context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
+      body: FutureBuilder<String>(
+            future: obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return const WidgetCargando();
+              } else{
+                final nombreVehiculo = snapshot.data?? '';
+                controladorVehiculo.text = nombreVehiculo;
+                
+                return Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
+                      SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
+                      CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
+                      CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false,),
+                      CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
+                      CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', soloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
+                    
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (widget.gasto == null) {
+                              context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                              return;
+                            }
+                            context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
+                          }
+                        },
+                        child: Text(obtenerTexto()),
+                      ),
+                    ],
+                  ),
+                );
                 }
-              },
-              child: Text(obtenerTexto()),
-            ),
-          ],
-        ),
-      )
+            },
+          ),
+      
     );
   }
 }
 
-const String nombreEtiquetaNula = 'Desconocida';
 // ignore: must_be_immutable
 class SeleccionadorEtiqueta extends StatefulWidget {
   SeleccionadorEtiqueta({
@@ -619,11 +649,6 @@ class TileGasto extends StatelessWidget {
   });
 
   final Gasto gasto;
-
-  Future<String> obtenerNombreEtiquetaDeId(int id) async {
-    Etiqueta etiqueta = await Etiquetas().fetchById(id);
-    return etiqueta.nombre;
-  }
 
   @override
   Widget build(BuildContext context) {
