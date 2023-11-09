@@ -64,7 +64,7 @@ class PlantillaGasto extends VehiculoEstado {
   List<Object?> get props => [];
 }*/
 class MisGastos extends VehiculoEstado {
-  Future <List<Gasto>>? misGastos;
+  final Future <List<Gasto>>? misGastos;
   final DateTime fechaInicial;
   final DateTime fechaFinal;
 
@@ -336,6 +336,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<FiltradoGastos>((event, emit) {
       fechaInicial = event.fechaInicial;
       fechaFinal = event.fechaFinal;
+      misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
       emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal));
     });
 

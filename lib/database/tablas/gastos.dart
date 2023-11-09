@@ -52,7 +52,7 @@ class Gastos {
     for(var id in idsVehiculosSeleccionados) {
       values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';
     }
-    String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY id_gasto''';
+    String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha''';
     final registros = await database.rawQuery(
       query
     );

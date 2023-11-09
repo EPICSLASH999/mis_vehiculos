@@ -636,10 +636,12 @@ class WidgetMisGastos extends StatelessWidget {
 
   const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial}); 
 
-  bool enIntervaloFecha(String fecha) {
-    return ((DateTime.parse(fecha)).isAfter(fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaSeleccionadaFinal) || (DateTime.parse(fecha)).isAtSameMomentAs(fechaSeleccionadaFinal)));
-  }
-
+  bool enIntervaloFecha(String fecha) => (
+    (DateTime.parse(fecha)).isAfter(fechaSeleccionadaInicial) 
+      && ((DateTime.parse(fecha)).isBefore(fechaSeleccionadaFinal) 
+          || (DateTime.parse(fecha)).isAtSameMomentAs(fechaSeleccionadaFinal))
+  );
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -666,8 +668,9 @@ class WidgetMisGastos extends StatelessWidget {
                   return const WidgetCargando();
                 } else{
                   final gastos = snapshot.data?? [];
+
                   gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha)));
-                  
+
                   return gastos.isEmpty
                       ? const Center(
                         child: Text(
