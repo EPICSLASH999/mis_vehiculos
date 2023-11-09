@@ -43,10 +43,6 @@ class PlantillaVehiculo extends VehiculoEstado {
   @override
   List<Object?> get props => [vehiculo];
 }
-/*class Editarvehiculo extends VehiculoEstado {
-  @override
-  List<Object?> get props => [];
-}*/
 
 // GASTOS
 class PlantillaGasto extends VehiculoEstado {
@@ -59,10 +55,6 @@ class PlantillaGasto extends VehiculoEstado {
   @override
   List<Object?> get props => [idVehiculo, misEtiquetas];
 }
-/*class EditarGasto extends VehiculoEstado {
-  @override
-  List<Object?> get props => [];
-}*/
 class MisGastos extends VehiculoEstado {
   final Future <List<Gasto>>? misGastos;
   final DateTime fechaInicial;
@@ -95,10 +87,6 @@ class PlantillaEtiqueta extends VehiculoEstado {
   @override
   List<Object?> get props => [etiqueta];
 }
-/*class EditarEtiqueta extends VehiculoEstado {
-  @override
-  List<Object?> get props => [];
-}*/
 /* --------------------------------------------------- */
 
 /* --------------------- EVENTOS --------------------- */
@@ -203,20 +191,22 @@ class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
 
 
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
+  // Vehiculos
   Future <List<Vehiculo>>? misVehiculos;
   final vehiculos = Vehiculos();
+  List<int> idsVehiculosSeleccionados = [];
 
+  // Etiquetas
   Future <List<Etiqueta>>? misEtiquetas;
   final etiquetas = Etiquetas();
 
+  // Gastos
   Future <List<Gasto>>? misGastos;
   final gastos = Gastos();
   DateTime fechaInicial = DateTime.now();
   DateTime fechaFinal = DateTime.now();
 
-  List<int> idsVehiculosSeleccionados = [];
-
-  void gestionarVahiculoSeleccionado(int idVehiculo) {
+  void gestionarIdVehiculoSeleccionado(int idVehiculo) {
     if (idsVehiculosSeleccionados.contains(idVehiculo)){
       idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..remove(idVehiculo);
       return;
@@ -273,7 +263,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));
     });
     on<ClickeadoSeleccionarVehiculo>((event, emit) {
-      gestionarVahiculoSeleccionado(event.idVehiculo);
+      gestionarIdVehiculoSeleccionado(event.idVehiculo);
       emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
 
