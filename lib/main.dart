@@ -127,7 +127,7 @@ class SeleccionadorDeFecha extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 160,
+      width: 150,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -721,11 +721,13 @@ class FiltroParaGastos extends StatelessWidget {
         context: context, 
         initialDate: fechaSeleccionadaInicial,
         firstDate: DateTime(1970), 
-        lastDate: DateTime(3000),
+        lastDate: DateTime.now(),
       );
-      if (nuevaFecha != null) fechaSeleccionadaInicial = nuevaFecha;
-      // ignore: use_build_context_synchronously
-      context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
+      if (nuevaFecha != null) {
+        fechaSeleccionadaInicial = nuevaFecha;
+        // ignore: use_build_context_synchronously
+        context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
+      }
     };
   }
   VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
@@ -736,9 +738,11 @@ class FiltroParaGastos extends StatelessWidget {
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
       );
-      if (nuevaFecha != null) fechaSeleccionadaFinal = nuevaFecha;
-      // ignore: use_build_context_synchronously
-      context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
+      if (nuevaFecha != null) {
+        fechaSeleccionadaFinal = nuevaFecha;
+        // ignore: use_build_context_synchronously
+        context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
+      }
     };
   }
 
