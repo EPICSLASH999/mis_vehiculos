@@ -37,7 +37,7 @@ class MainApp extends StatelessWidget {
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
-          if (state is ConsultarGastos) return WidgetConsultarGastos(misGastos: state.misGastos);
+          if (state is ConsultarGastos) return WidgetMisGastos(misGastos: state.misGastos);
           return const WidgetCargando();
         },
       )
@@ -106,6 +106,50 @@ class CuadroDeTexto extends StatelessWidget {
             onTap: funcionAlPresionar
           ),
         ],
+      ),
+    );
+  }
+}
+class SeleccionadorDeFecha extends StatelessWidget {
+  const SeleccionadorDeFecha({
+    super.key,
+    required this.controlador,
+    required this.titulo, 
+    required this.funcionAlPresionar,
+    this.campoRequerido = true,
+  });
+
+  final TextEditingController controlador;
+  final String titulo;
+  final VoidCallback funcionAlPresionar;
+  final bool campoRequerido;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 160,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(titulo),
+            TextFormField(
+              validator: (value) {
+                if (value != null && value.isEmpty && campoRequerido) return 'Valor requerido';
+                return null;
+              },
+              readOnly: true,
+              controller: controlador,
+              decoration: const InputDecoration(
+                hintText: "", 
+                //prefixIcon: Icon(Icons.access_alarm_outlined),
+                //prefixIconColor: Colors.red,
+                suffixIcon: Icon(Icons.date_range)
+              ),
+              onTap: funcionAlPresionar
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -419,7 +463,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
       DateTime? nuevaFecha = await showDatePicker(
         context: context, 
         initialDate: fechaSeleccionada,
-        firstDate: DateTime(1550), 
+        firstDate: DateTime(1970), 
         lastDate: DateTime(3000),
       );
       if (nuevaFecha != null) {
@@ -583,9 +627,9 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 }
 
-class WidgetConsultarGastos extends StatelessWidget {
+class WidgetMisGastos extends StatelessWidget {
   final Future <List<Gasto>>? misGastos; 
-  const WidgetConsultarGastos({super.key, required this.misGastos});
+  const WidgetMisGastos({super.key, required this.misGastos});
 
   @override
   Widget build(BuildContext context) {
@@ -603,6 +647,7 @@ class WidgetConsultarGastos extends StatelessWidget {
       ),
       body: Column(
         children: [
+          FiltroParaGastos(),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -642,6 +687,76 @@ class WidgetConsultarGastos extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
+class FiltroParaGastos extends StatelessWidget {
+  FiltroParaGastos({super.key});
+
+  final TextEditingController controladorFechaInicial = TextEditingController();
+  final TextEditingController controladorFechaFinal = TextEditingController();
+  DateTime fechaSeleccionadaInicial = DateTime.now();
+  DateTime fechaSeleccionadaFinal = DateTime.now();
+
+  VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
+    return () async {
+      DateTime? nuevaFecha = await showDatePicker(
+        context: context, 
+        initialDate: fechaSeleccionadaInicial,
+        firstDate: DateTime(1970), 
+        lastDate: DateTime(3000),
+      );
+      if (nuevaFecha != null) {
+        fechaSeleccionadaInicial = nuevaFecha;
+        controladorFechaInicial
+          ..text = DateFormat.yMMMd().format(fechaSeleccionadaInicial)
+          ..selection = TextSelection.fromPosition(TextPosition(
+              offset: controladorFechaInicial.text.length,
+              affinity: TextAffinity.upstream));
+        
+        //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
+      }
+    };
+  }
+  VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
+    return () async {
+      DateTime? nuevaFecha = await showDatePicker(
+        context: context, 
+        initialDate: fechaSeleccionadaFinal,
+        firstDate: DateTime(1970), 
+        lastDate: DateTime(3000),
+      );
+      if (nuevaFecha != null) {
+        fechaSeleccionadaFinal = nuevaFecha;
+        controladorFechaFinal
+          ..text = DateFormat.yMMMd().format(fechaSeleccionadaFinal)
+          ..selection = TextSelection.fromPosition(TextPosition(
+              offset: controladorFechaFinal.text.length,
+              affinity: TextAffinity.upstream));
+        
+        //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
+      }
+    };
+  }
+
+  void inicializarFechas() {
+    fechaSeleccionadaFinal = DateTime(fechaSeleccionadaInicial.year);
+    controladorFechaInicial.text = DateFormat.yMMMd().format(fechaSeleccionadaInicial);
+    controladorFechaFinal.text = DateFormat.yMMMd().format(fechaSeleccionadaFinal);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    inicializarFechas();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        SeleccionadorDeFecha(controlador: controladorFechaInicial, titulo: 'Fecha Inicial', funcionAlPresionar: funcionAlPresionarFechaInicial(context),),
+        SeleccionadorDeFecha(controlador: controladorFechaFinal, titulo: 'Fecha Final', funcionAlPresionar: funcionAlPresionarFechaFinal(context),),
+      ],
+    );
+  }
+}
+
 class TileGasto extends StatelessWidget {
   const TileGasto({
     super.key,
@@ -673,7 +788,7 @@ class TileGasto extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(DateFormat.yMMMd().format(nuevaFecha)),
-                Text('\$${gasto.costo}')
+                Text('\$${gasto.costo}'),
               ],
             ),
             trailing: BotonesTileGasto(gasto: gasto),
