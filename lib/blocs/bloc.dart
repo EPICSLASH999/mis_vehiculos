@@ -236,12 +236,14 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.create(datos: datos);
       misVehiculos = vehiculos.fetchAll();
+      idsVehiculosSeleccionados = [];
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<EliminadoVehiculo>((event, emit) async {
       // TODO: Pasar registros de gastos a tabla gastos_archivados y en lugar de id de coche, que sea matricula.
       await vehiculos.delete(event.id);
       misVehiculos = vehiculos.fetchAll();
+      idsVehiculosSeleccionados = [];
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<EditadoVehiculo>((event, emit) async {
@@ -254,6 +256,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.update(id: event.vehiculo.id, datos: datos);
       misVehiculos = vehiculos.fetchAll();
+      idsVehiculosSeleccionados = [];
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
