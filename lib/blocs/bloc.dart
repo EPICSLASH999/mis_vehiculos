@@ -223,10 +223,14 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     }
     idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..add(idVehiculo);
   }
+  void reinicialValoresFechas() {
+    fechaFinal  = DateTime.now();
+    fechaInicial = DateTime(fechaFinal.year);
+  }
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
-      fechaInicial = DateTime(fechaFinal.year);
+      reinicialValoresFechas();
       misVehiculos = vehiculos.fetchAll();
       emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
@@ -276,6 +280,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
       idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..clear();
+      reinicialValoresFechas();
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
@@ -360,7 +365,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
   }
-  
 }
 
 
