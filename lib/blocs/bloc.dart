@@ -171,7 +171,12 @@ class AgregadoGasto extends VehiculoEvento {
 
   AgregadoGasto({required this.gasto});
 }
-/*class ConsultadoGastos extends VehiculoEvento {}*/
+class FiltradoGastos extends VehiculoEvento {
+  final DateTime fechaInicial;
+  final DateTime fechaFinal;
+
+  FiltradoGastos({required this.fechaInicial, required this.fechaFinal});
+}
 class ClickeadoEditarGasto extends VehiculoEvento {
   final Gasto gasto;
 
@@ -321,6 +326,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await gastos.update(id: event.gasto.id, datos: datos);
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
+      emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal));
+    });
+    on<FiltradoGastos>((event, emit) {
+      fechaInicial = event.fechaInicial;
+      fechaFinal = event.fechaFinal;
       emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal));
     });
 
