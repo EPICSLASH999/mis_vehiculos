@@ -37,7 +37,7 @@ class MainApp extends StatelessWidget {
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
-          if (state is ConsultarGastos) return WidgetMisGastos(misGastos: state.misGastos);
+          if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal,);
           return const WidgetCargando();
         },
       )
@@ -627,9 +627,18 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 }
 
+
+// ignore: must_be_immutable
 class WidgetMisGastos extends StatelessWidget {
-  final Future <List<Gasto>>? misGastos; 
-  const WidgetMisGastos({super.key, required this.misGastos});
+  final Future <List<Gasto>>? misGastos;
+  final DateTime fechaSeleccionadaFinal;
+  final DateTime fechaSeleccionadaInicial;
+
+  const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial}); 
+
+  bool enIntervaloFecha(String fecha) {
+    return ((DateTime.parse(fecha)).isAfter(fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaSeleccionadaFinal) || (DateTime.parse(fecha)).isAtSameMomentAs(fechaSeleccionadaFinal)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -647,7 +656,7 @@ class WidgetMisGastos extends StatelessWidget {
       ),
       body: Column(
         children: [
-          FiltroParaGastos(),
+          FiltroParaGastos(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -657,6 +666,7 @@ class WidgetMisGastos extends StatelessWidget {
                   return const WidgetCargando();
                 } else{
                   final gastos = snapshot.data?? [];
+                  gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha)));
                   
                   return gastos.isEmpty
                       ? const Center(
@@ -689,12 +699,16 @@ class WidgetMisGastos extends StatelessWidget {
 
 // ignore: must_be_immutable
 class FiltroParaGastos extends StatelessWidget {
-  FiltroParaGastos({super.key});
-
-  final TextEditingController controladorFechaInicial = TextEditingController();
-  final TextEditingController controladorFechaFinal = TextEditingController();
-  DateTime fechaSeleccionadaInicial = DateTime.now();
-  DateTime fechaSeleccionadaFinal = DateTime.now();
+  FiltroParaGastos({
+    super.key, 
+    required this.fechaSeleccionadaInicial,
+    required this.fechaSeleccionadaFinal,
+  });
+  TextEditingController controladorFechaInicial = TextEditingController();
+  TextEditingController controladorFechaFinal = TextEditingController();
+  
+  DateTime fechaSeleccionadaInicial;
+  DateTime fechaSeleccionadaFinal;
 
   VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
     return () async {
@@ -737,15 +751,14 @@ class FiltroParaGastos extends StatelessWidget {
     };
   }
 
-  void inicializarFechas() {
-    fechaSeleccionadaFinal = DateTime(fechaSeleccionadaInicial.year);
+  void inicializarTextBoxesConFechas() {
     controladorFechaInicial.text = DateFormat.yMMMd().format(fechaSeleccionadaInicial);
     controladorFechaFinal.text = DateFormat.yMMMd().format(fechaSeleccionadaFinal);
   }
 
   @override
   Widget build(BuildContext context) {
-    inicializarFechas();
+    inicializarTextBoxesConFechas();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,

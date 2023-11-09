@@ -63,10 +63,12 @@ class PlantillaGasto extends VehiculoEstado {
   @override
   List<Object?> get props => [];
 }*/
-class ConsultarGastos extends VehiculoEstado {
+class MisGastos extends VehiculoEstado {
   Future <List<Gasto>>? misGastos;
+  final DateTime fechaInicial;
+  final DateTime fechaFinal;
 
-  ConsultarGastos({required this.misGastos});
+  MisGastos({required this.misGastos, required this.fechaInicial, required this.fechaFinal});
 
   @override
   List<Object?> get props => [misGastos];
@@ -204,6 +206,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   Future <List<Gasto>>? misGastos;
   final gastos = Gastos();
+  DateTime fechaInicial = DateTime.now();
+  DateTime fechaFinal = DateTime.now();
 
   List<int> idsVehiculosSeleccionados = [];
 
@@ -217,6 +221,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
+      fechaInicial = DateTime(fechaFinal.year);
       misVehiculos = vehiculos.fetchAll();
       emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
@@ -272,7 +277,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
     on<ClickeadoregresarAConsultarGastos>((event, emit) {
-      emit(ConsultarGastos(misGastos: misGastos));
+      emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal));
     });
 
     // Gastos
@@ -294,12 +299,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
-      emit(ConsultarGastos(misGastos: misGastos));
+      emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal));
     });
     on<EliminadoGasto>((event, emit) async {
       await gastos.delete(event.id);
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
-      emit(ConsultarGastos(misGastos: misGastos));
+      emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal));
     });
     on<ClickeadoEditarGasto>((event, emit) {
       misEtiquetas = etiquetas.fetchAll();
@@ -316,7 +321,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await gastos.update(id: event.gasto.id, datos: datos);
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
-      emit(ConsultarGastos(misGastos: misGastos));
+      emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal));
     });
 
     // Etiquetas
