@@ -71,7 +71,7 @@ class MisGastos extends VehiculoEstado {
   MisGastos({required this.misGastos, required this.fechaInicial, required this.fechaFinal});
 
   @override
-  List<Object?> get props => [misGastos];
+  List<Object?> get props => [misGastos, fechaInicial, fechaFinal];
 }
 class ConsultargastosArchivados extends VehiculoEstado {
   @override

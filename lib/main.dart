@@ -751,6 +751,10 @@ class FiltroParaGastos extends StatelessWidget {
         
         //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
       }
+
+      
+      // ignore: use_build_context_synchronously
+      context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
     };
   }
 
