@@ -627,8 +627,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 }
 
-
-// ignore: must_be_immutable
 class WidgetMisGastos extends StatelessWidget {
   final Future <List<Gasto>>? misGastos;
   final DateTime fechaSeleccionadaFinal;
@@ -636,11 +634,15 @@ class WidgetMisGastos extends StatelessWidget {
 
   const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial}); 
 
-  bool enIntervaloFecha(String fecha) => (
-    (DateTime.parse(fecha)).isAfter(fechaSeleccionadaInicial) 
-      && ((DateTime.parse(fecha)).isBefore(fechaSeleccionadaFinal) 
-          || (DateTime.parse(fecha)).isAtSameMomentAs(fechaSeleccionadaFinal))
-  );
+  String normalizarNumero(int numeroRecibido){
+    String numeroNormalizado = '';
+    if (numeroRecibido.toString().length == 1) numeroNormalizado += '0';
+    return numeroNormalizado += numeroRecibido.toString();
+  }
+  bool enIntervaloFecha(String fecha) {
+    DateTime fechaFinalNormalizada = DateTime.parse('${fechaSeleccionadaFinal.year}-${normalizarNumero(fechaSeleccionadaFinal.month)}-${normalizarNumero(fechaSeleccionadaFinal.day)} 23:59:59.999');
+    return ((DateTime.parse(fecha)).isAfter(fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaFinalNormalizada)));
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -721,17 +723,7 @@ class FiltroParaGastos extends StatelessWidget {
         firstDate: DateTime(1970), 
         lastDate: DateTime(3000),
       );
-      if (nuevaFecha != null) {
-        fechaSeleccionadaInicial = nuevaFecha;
-        controladorFechaInicial
-          ..text = DateFormat.yMMMd().format(fechaSeleccionadaInicial)
-          ..selection = TextSelection.fromPosition(TextPosition(
-              offset: controladorFechaInicial.text.length,
-              affinity: TextAffinity.upstream));
-        
-        //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
-      }
-
+      if (nuevaFecha != null) fechaSeleccionadaInicial = nuevaFecha;
       // ignore: use_build_context_synchronously
       context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
     };
@@ -742,20 +734,9 @@ class FiltroParaGastos extends StatelessWidget {
         context: context, 
         initialDate: fechaSeleccionadaFinal,
         firstDate: DateTime(1970), 
-        lastDate: DateTime(3000),
+        lastDate: DateTime.now(),
       );
-      if (nuevaFecha != null) {
-        fechaSeleccionadaFinal = nuevaFecha;
-        controladorFechaFinal
-          ..text = DateFormat.yMMMd().format(fechaSeleccionadaFinal)
-          ..selection = TextSelection.fromPosition(TextPosition(
-              offset: controladorFechaFinal.text.length,
-              affinity: TextAffinity.upstream));
-        
-        //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
-      }
-
-      
+      if (nuevaFecha != null) fechaSeleccionadaFinal = nuevaFecha;
       // ignore: use_build_context_synchronously
       context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
     };
