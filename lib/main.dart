@@ -399,7 +399,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 
 /* ----------------------------------- GASTOS ----------------------------------- */
 const String nombreEtiquetaNula = 'Desconocida';
-const int valorEtiquetaNula = 998;
+const int valorEtiquetaNula = 0;
 const int valorEtiquetaTodas = 999;
 const int valorSinEtiquetas = 0;
 
@@ -687,8 +687,7 @@ class WidgetMisGastos extends StatelessWidget {
                   
                   gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha))); // Filtrar por fecha
                   if (idEtiquetaSeleccionada != valorEtiquetaTodas) gastos.removeWhere((element) => (element.etiqueta != idEtiquetaSeleccionada)); // Filtrar por etiqueta
-                  print(idEtiquetaSeleccionada);
-
+                  
                   return gastos.isEmpty
                       ? const Center(
                         child: Text(
@@ -705,6 +704,7 @@ class WidgetMisGastos extends StatelessWidget {
                       itemCount: gastos.length,
                       itemBuilder: (context, index) {
                         final gasto = gastos[index];
+                        print(gasto.etiqueta);
                         return TileGasto(gasto: gasto);
                       }, 
                     );
