@@ -576,19 +576,23 @@ class SeleccionadorEtiqueta extends StatefulWidget {
 }
 
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
-  var etiquetaSeleccionada = "";
+  
+  int? obtenerIdEtiquetaSeleccionada() {
+    int? idEtiqueta = int.tryParse(widget.etiquetaSeleccionada.text);
+    idEtiqueta = ((idEtiqueta != null) && (idEtiqueta == valorEtiquetaNula))?null:idEtiqueta;
+    return idEtiqueta;
+  }
 
   @override
   Widget build(BuildContext context)  {
-    int? idEtiquetaSeleccionada = int.tryParse(widget.etiquetaSeleccionada.text); //1
-    idEtiquetaSeleccionada = ((idEtiquetaSeleccionada != null) && (idEtiquetaSeleccionada == valorEtiquetaNula))?null:idEtiquetaSeleccionada;//null:1
-    etiquetaSeleccionada = (idEtiquetaSeleccionada == null)?'':idEtiquetaSeleccionada.toString();//'':'1'
+    int? idEtiquetaSeleccionada = obtenerIdEtiquetaSeleccionada();
     
     bool esNulaEtiqueta() => idEtiquetaSeleccionada == null && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
       if ((esNulaEtiqueta()) && etiquetas.isNotEmpty) return valorEtiquetaNula;
-      return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:valorSinEtiquetas);
+      return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
     }
+    String obtenerEtiquetaSeleccionada() => (idEtiquetaSeleccionada == null)?'':idEtiquetaSeleccionada.toString();
     
     return Column(
       children: [
@@ -605,14 +609,10 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if (value != null && value == valorSinEtiquetas) return 'Valor requerido';
+                    if (value != null && value == valorNoHayEtiquetasCreadas) return 'Valor requerido';
                     
-                    // En caso de que se deja seleccionada la etiqueta por omisión, se iguala el valor manualmente.
-                    if (etiquetaSeleccionada.isEmpty) {
-                      //etiquetaSeleccionada = (value == valorEtiquetaNula)?valorEtiquetaNula.toString():etiquetas.first.id.toString();
-                      etiquetaSeleccionada = value.toString();
-                      widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
-                    }
+                    // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
+                    if (obtenerEtiquetaSeleccionada().isEmpty) widget.etiquetaSeleccionada.text = value.toString();
                     return null;
                   },
                   value: valorIdEtiquetaInicial(etiquetas),
@@ -622,8 +622,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                   ],
                   onChanged: (value) {
                     setState(() {
-                      etiquetaSeleccionada = value.toString();
-                      widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
+                      widget.etiquetaSeleccionada.text = value.toString();
                     });
                   },
                 );
@@ -900,7 +899,7 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if ((value != null && (value == valorEtiquetaNula || value == valorSinEtiquetas)) || value == valorEtiquetaTodas) return 'Valor requerido';
+                    if ((value != null && (value == valorEtiquetaNula || value == valorNoHayEtiquetasCreadas)) || value == valorEtiquetaTodas) return 'Valor requerido';
                     return null;
                   },
                   value: idEtiquetaSeleccionada,
