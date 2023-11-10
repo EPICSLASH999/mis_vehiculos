@@ -129,13 +129,11 @@ class SeleccionadorDeFecha extends StatelessWidget {
     required this.controlador,
     required this.titulo, 
     required this.funcionAlPresionar,
-    this.campoRequerido = true,
   });
 
   final TextEditingController controlador;
   final String titulo;
   final VoidCallback funcionAlPresionar;
-  final bool campoRequerido;
 
   @override
   Widget build(BuildContext context) {
@@ -148,15 +146,12 @@ class SeleccionadorDeFecha extends StatelessWidget {
             Text(titulo),
             TextFormField(
               validator: (value) {
-                if (value != null && value.isEmpty && campoRequerido) return 'Valor requerido';
+                if (value != null && value.isEmpty) return 'Valor requerido';
                 return null;
               },
               readOnly: true,
               controller: controlador,
               decoration: const InputDecoration(
-                hintText: "", 
-                //prefixIcon: Icon(Icons.access_alarm_outlined),
-                //prefixIconColor: Colors.red,
                 suffixIcon: Icon(Icons.date_range)
               ),
               onTap: funcionAlPresionar
