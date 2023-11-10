@@ -10,7 +10,7 @@ import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 
-/* --------------------- ESTADOS --------------------- */
+/* --------------------------------- ESTADOS --------------------------------- */
 sealed class VehiculoEstado with EquatableMixin{}
 
 class Inicial extends VehiculoEstado{
@@ -95,9 +95,9 @@ class PlantillaEtiqueta extends VehiculoEstado {
   @override
   List<Object?> get props => [etiqueta];
 }
-/* --------------------------------------------------- */
+/* --------------------------------------------------------------------------- */
 
-/* --------------------- EVENTOS --------------------- */
+/* --------------------------------- EVENTOS --------------------------------- */
 sealed class VehiculoEvento {}
 
 // VEHICULOS
@@ -200,8 +200,11 @@ class ClickeadoRegresarAMisvehiculos extends VehiculoEvento {}
 class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
 /*class ClickeadoRegresarDesdeAdministradorEtiquetas extends VehiculoEvento {}*/
 class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
-/* --------------------------------------------------- */
+/* --------------------------------------------------------------------------- */
 
+/* ---------------------------- VARIABLES GLOBALES --------------------------- */
+const int idEtiquetaTodas = 999;
+/* --------------------------------------------------------------------------- */
 
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Vehiculos
@@ -218,7 +221,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   final gastos = Gastos();
   DateTime fechaInicial = DateTime.now();
   DateTime fechaFinal = DateTime.now();
-  int filtroIdEtiqueta = 0;
+  int filtroIdEtiqueta = idEtiquetaTodas;
 
   void gestionarIdVehiculoSeleccionado(int idVehiculo) {
     if (idsVehiculosSeleccionados.contains(idVehiculo)){
@@ -318,6 +321,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoConsultarGastos>((event, emit) async {    
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
       misEtiquetas = etiquetas.fetchAll();
+      filtroIdEtiqueta = idEtiquetaTodas;
       emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta));
     });
     on<EliminadoGasto>((event, emit) async {

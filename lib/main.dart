@@ -683,8 +683,10 @@ class WidgetMisGastos extends StatelessWidget {
                   return const WidgetCargando();
                 } else{
                   final gastos = snapshot.data?? [];
-
-                  gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha)));
+                  
+                  gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha))); // Filtrar por fecha
+                  if (idEtiquetaSeleccionada != valorEtiquetaTodas) gastos.removeWhere((element) => (element.etiqueta != idEtiquetaSeleccionada)); // Filtrar por etiqueta
+                  print(idEtiquetaSeleccionada);
 
                   return gastos.isEmpty
                       ? const Center(
