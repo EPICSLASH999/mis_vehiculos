@@ -37,7 +37,7 @@ class MainApp extends StatelessWidget {
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
-          if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal,);
+          if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas,);
           return const WidgetCargando();
         },
       )
@@ -631,8 +631,9 @@ class WidgetMisGastos extends StatelessWidget {
   final Future <List<Gasto>>? misGastos;
   final DateTime fechaSeleccionadaFinal;
   final DateTime fechaSeleccionadaInicial;
+  final Future<List<Etiqueta>>? misEtiquetas;
 
-  const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial}); 
+  const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial, required this.misEtiquetas}); 
 
   String normalizarNumero(int numeroRecibido){
     String numeroNormalizado = '';
@@ -660,7 +661,7 @@ class WidgetMisGastos extends StatelessWidget {
       ),
       body: Column(
         children: [
-          FiltroParaGastos(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal),
+          FiltroParaGastos(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal, misEtiquetas: misEtiquetas,),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -707,10 +708,14 @@ class FiltroParaGastos extends StatelessWidget {
   FiltroParaGastos({
     super.key, 
     required this.fechaSeleccionadaInicial,
-    required this.fechaSeleccionadaFinal,
+    required this.fechaSeleccionadaFinal, 
+    required this.misEtiquetas,
   });
+  final Future<List<Etiqueta>>? misEtiquetas;
+
   TextEditingController controladorFechaInicial = TextEditingController();
   TextEditingController controladorFechaFinal = TextEditingController();
+  TextEditingController controladorEtiqueta= TextEditingController();
   
   DateTime fechaSeleccionadaInicial;
   DateTime fechaSeleccionadaFinal;
@@ -755,11 +760,16 @@ class FiltroParaGastos extends StatelessWidget {
   Widget build(BuildContext context) {
     inicializarTextBoxesConFechas();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Column(
       children: [
-        SeleccionadorDeFecha(controlador: controladorFechaInicial, titulo: 'Fecha Inicial', funcionAlPresionar: funcionAlPresionarFechaInicial(context),),
-        SeleccionadorDeFecha(controlador: controladorFechaFinal, titulo: 'Fecha Final', funcionAlPresionar: funcionAlPresionarFechaFinal(context),),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            SeleccionadorDeFecha(controlador: controladorFechaInicial, titulo: 'Fecha Inicial', funcionAlPresionar: funcionAlPresionarFechaInicial(context),),
+            SeleccionadorDeFecha(controlador: controladorFechaFinal, titulo: 'Fecha Final', funcionAlPresionar: funcionAlPresionarFechaFinal(context),),            
+          ],
+        ),
+        SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: misEtiquetas, esEditarGasto: true),
       ],
     );
   }
