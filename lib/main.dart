@@ -553,17 +553,12 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     required this.titulo, 
     required this.misEtiquetas,
     this.esEditarGasto = false,
-    this.mostrarEtiquetaTodas = false, 
-  }){
-    mostrarEtiquetaNula = (etiquetaSeleccionada.text.isEmpty && esEditarGasto);
-  }
+  });
 
   TextEditingController etiquetaSeleccionada;
   final String titulo;
   final Future <List<Etiqueta>>? misEtiquetas;
   bool esEditarGasto;
-  final bool mostrarEtiquetaTodas;
-  late final bool mostrarEtiquetaNula;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
@@ -580,7 +575,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
     
     bool esNulaEtiqueta() => idEtiquetaSeleccionada == null && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
-      if (widget.mostrarEtiquetaTodas && idEtiquetaSeleccionada == null) return valorEtiquetaTodas;
       if ((esNulaEtiqueta()) && etiquetas.isNotEmpty) return valorEtiquetaNula;
       return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:valorSinEtiquetas);
     }
@@ -611,8 +605,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                   },
                   value: valorIdEtiquetaInicial(etiquetas),
                   items: [
-                    if (widget.mostrarEtiquetaTodas) const DropdownMenuItem(value: valorEtiquetaTodas, child: Text('Todas')),
-                    if(widget.mostrarEtiquetaNula) const DropdownMenuItem(value: valorEtiquetaNula, child: Text(nombreEtiquetaNula),),
+                    if(esNulaEtiqueta()) const DropdownMenuItem(value: valorEtiquetaNula, child: Text(nombreEtiquetaNula),),
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {
@@ -620,8 +613,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                       etiquetaSeleccionada = value.toString();
                       widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
                     });
-                    if (value == null) return;
-                    if (widget.mostrarEtiquetaTodas) context.read<VehiculoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value));
                   },
                 );
               }
@@ -704,7 +695,6 @@ class WidgetMisGastos extends StatelessWidget {
                       itemCount: gastos.length,
                       itemBuilder: (context, index) {
                         final gasto = gastos[index];
-                        print(gasto.etiqueta);
                         return TileGasto(gasto: gasto);
                       }, 
                     );
