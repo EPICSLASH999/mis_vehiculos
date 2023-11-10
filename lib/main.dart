@@ -7,6 +7,7 @@ import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 
 void main() {
   runApp(const AplicacionInyectada());
@@ -414,11 +415,6 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 /* ----------------------------------------------------------------------------- */
 
 /* ----------------------------------- GASTOS ----------------------------------- */
-const String nombreEtiquetaNula = 'Desconocida';
-const int valorEtiquetaNula = 0;
-const int valorEtiquetaTodas = 999;
-const int valorSinEtiquetas = 998;
-
 Future<String> obtenerNombreEtiquetaDeId(int id) async {
   Etiqueta etiqueta = await Etiquetas().fetchById(id);
   return etiqueta.nombre;

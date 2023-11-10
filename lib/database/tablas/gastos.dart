@@ -1,6 +1,7 @@
 import 'package:mis_vehiculos/database/database_service.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Gastos {
