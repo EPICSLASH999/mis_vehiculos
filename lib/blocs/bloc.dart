@@ -53,7 +53,7 @@ class PlantillaGasto extends VehiculoEstado {
   PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto});
 
   @override
-  List<Object?> get props => [idVehiculo, misEtiquetas];
+  List<Object?> get props => [idVehiculo, misEtiquetas, gasto];
 }
 class MisGastos extends VehiculoEstado {
   final Future <List<Gasto>>? misGastos;
@@ -298,6 +298,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
     on<ClickeadoregresarAConsultarGastos>((event, emit) {
+      misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
       emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta));
     });
 

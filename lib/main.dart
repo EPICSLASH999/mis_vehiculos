@@ -401,6 +401,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 const String nombreEtiquetaNula = 'Desconocida';
 const int valorEtiquetaNula = 998;
 const int valorEtiquetaTodas = 999;
+const int valorSinEtiquetas = 0;
 
 Future<String> obtenerNombreEtiquetaDeId(int id) async {
   Etiqueta etiqueta = await Etiquetas().fetchById(id);
@@ -579,9 +580,9 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
     
     bool esNulaEtiqueta() => idEtiquetaSeleccionada == null && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
-      if (widget.mostrarEtiquetaTodas) return valorEtiquetaTodas;
+      if (widget.mostrarEtiquetaTodas && idEtiquetaSeleccionada == null) return valorEtiquetaTodas;
       if ((esNulaEtiqueta()) && etiquetas.isNotEmpty) return valorEtiquetaNula;
-      return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:0);
+      return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:valorSinEtiquetas);
     }
     
     return Column(
@@ -599,7 +600,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if ((value != null && (value == valorEtiquetaNula || value == 0)) || value == valorEtiquetaTodas) return 'Valor requerido';
+                    if ((value != null && (value == valorEtiquetaNula || value == valorSinEtiquetas)) || value == valorEtiquetaTodas) return 'Valor requerido';
                     
                     // En caso de que se deja seleccionada la etiqueta por omisión, se iguala el valor manualmente.
                     if (etiquetaSeleccionada.isEmpty) {
@@ -786,7 +787,7 @@ class FiltroParaGastos extends StatelessWidget {
             SeleccionadorDeFecha(controlador: controladorFechaFinal, titulo: 'Fecha Final', funcionAlPresionar: funcionAlPresionarFechaFinal(context),),            
           ],
         ),
-        SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: misEtiquetas, esEditarGasto: true, mostrarEtiquetaTodas: true,),
+        FiltroSeleccionadorEtiqueta(idEtiquetaSeleccionada: idEtiquetaSeleccionada, titulo: 'Etiqueta', misEtiquetas: misEtiquetas),
       ],
     );
   }
@@ -864,6 +865,63 @@ class BotonesTileGasto extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class FiltroSeleccionadorEtiqueta extends StatelessWidget{
+  const FiltroSeleccionadorEtiqueta({
+    super.key,
+    required this.idEtiquetaSeleccionada,
+    required this.titulo, 
+    required this.misEtiquetas
+  });
+
+  final int idEtiquetaSeleccionada;
+  final String titulo;
+  final Future <List<Etiqueta>>? misEtiquetas;
+
+  @override
+  Widget build(BuildContext context)  {
+    return Column(
+      children: [
+        Text(titulo),
+        SizedBox(
+          width: 160,
+          child: FutureBuilder<List<Etiqueta>>(
+            future: misEtiquetas,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return const WidgetCargando();
+              } else{
+                final etiquetas = snapshot.data?? [];
+                
+                return DropdownButtonFormField(
+                  validator: (value) {
+                    if ((value != null && (value == valorEtiquetaNula || value == valorSinEtiquetas)) || value == valorEtiquetaTodas) return 'Valor requerido';
+                    return null;
+                  },
+                  value: idEtiquetaSeleccionada,
+                  items: [
+                    const DropdownMenuItem(value: valorEtiquetaTodas, child: Text('Todas')),
+                    const DropdownMenuItem(value: valorEtiquetaNula, child: Text(nombreEtiquetaNula),),
+                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
+                  ],
+                  onChanged: (value) {
+                    context.read<VehiculoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value!));
+                  },
+                );
+              }
+            },
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
+          }, 
+          child: const Text('Administrar Etiquetas')
+        ),
+      ],
     );
   }
 }
