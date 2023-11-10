@@ -145,7 +145,7 @@ Future main() async {
       build: () => VehiculoBloc(),
       act: (bloc) {
         bloc.add(Inicializado());
-        bloc.add((ClickeadoSeleccionarVehiculo(idVehiculo: 1)));
+        bloc.add((SeleccionadoVehiculo(idVehiculo: 1)));
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
@@ -157,8 +157,8 @@ Future main() async {
       build: () => VehiculoBloc(),
       act: (bloc) {
         bloc.add(Inicializado());
-        bloc.add((ClickeadoSeleccionarVehiculo(idVehiculo: 1)));
-        bloc.add((ClickeadoSeleccionarVehiculo(idVehiculo: 1)));
+        bloc.add((SeleccionadoVehiculo(idVehiculo: 1)));
+        bloc.add((SeleccionadoVehiculo(idVehiculo: 1)));
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
@@ -191,7 +191,7 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
         bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
         bloc.add(AgregadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
-        bloc.add(ClickeadoSeleccionarVehiculo(idVehiculo: 1));
+        bloc.add(SeleccionadoVehiculo(idVehiculo: 1));
         bloc.add(ClickeadoConsultarGastos());
       },
       expect: () => <VehiculoEstado>[
@@ -213,7 +213,7 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
         bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
         bloc.add(AgregadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
-        bloc.add(ClickeadoSeleccionarVehiculo(idVehiculo: 1));
+        bloc.add(SeleccionadoVehiculo(idVehiculo: 1));
         bloc.add(ClickeadoConsultarGastos());
         bloc.add(EliminadoGasto(id: 1));
       },
@@ -237,7 +237,7 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
         bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
         bloc.add(AgregadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
-        bloc.add(ClickeadoSeleccionarVehiculo(idVehiculo: 1));
+        bloc.add(SeleccionadoVehiculo(idVehiculo: 1));
         bloc.add(ClickeadoConsultarGastos());
         bloc.add(ClickeadoEditarGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
         bloc.add(EditadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));

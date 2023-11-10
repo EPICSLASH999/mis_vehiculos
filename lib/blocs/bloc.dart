@@ -124,10 +124,10 @@ class EditadoVehiculo extends VehiculoEvento {
 
   EditadoVehiculo({required this.vehiculo});
 }
-class ClickeadoSeleccionarVehiculo extends VehiculoEvento {
+class SeleccionadoVehiculo extends VehiculoEvento {
   final int idVehiculo;
 
-  ClickeadoSeleccionarVehiculo({required this.idVehiculo});
+  SeleccionadoVehiculo({required this.idVehiculo});
 }
 
 // ETIQUETAS
@@ -283,7 +283,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoEditarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));
     });
-    on<ClickeadoSeleccionarVehiculo>((event, emit) {
+    on<SeleccionadoVehiculo>((event, emit) {
       gestionarIdVehiculoSeleccionado(event.idVehiculo);
       emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });

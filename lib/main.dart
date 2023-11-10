@@ -173,7 +173,7 @@ class WidgetMisVehiculos extends StatelessWidget {
 
   const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.idsVehiculosSeleccionados});
 
-  VoidCallback? funcionConsultargastos(BuildContext context){
+  VoidCallback? funcionConsultarGastos(BuildContext context){
     if (idsVehiculosSeleccionados.isEmpty) return null;
     return (){
       context.read<VehiculoBloc>().add(ClickeadoConsultarGastos());
@@ -182,7 +182,7 @@ class WidgetMisVehiculos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var pressedConsultar = funcionConsultargastos(context);
+    var pressedConsultarGastos = funcionConsultarGastos(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -224,7 +224,7 @@ class WidgetMisVehiculos extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: pressedConsultar,
+            onPressed: pressedConsultarGastos,
             child: const Text('Consultar gastos'),
           ),
         ],
@@ -259,7 +259,7 @@ class TileVehiculo extends StatelessWidget {
       subtitle: Text(vehiculo.matricula),
       trailing: BotonesTileVehiculo(vehiculo: vehiculo),
       onTap: () {
-        context.read<VehiculoBloc>().add(ClickeadoSeleccionarVehiculo(idVehiculo: vehiculo.id));
+        context.read<VehiculoBloc>().add(SeleccionadoVehiculo(idVehiculo: vehiculo.id));
       },
       selected: estaSeleccionado,
       selectedColor: Colors.black,
@@ -338,7 +338,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
     controladorMarca.text = widget.vehiculo?.marca??'';
     controladorModelo.text = widget.vehiculo?.modelo??'';
     controladorColor.text = widget.vehiculo?.color??'';
-    controladorAno.text = (widget.vehiculo?.ano??0).toString();
+    controladorAno.text = (widget.vehiculo?.ano??0000).toString();
   }
   
   // Create a global key that uniquely identifies the Form widget
