@@ -536,7 +536,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                       CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
                       CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false,),
                       CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
-                      CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', esSoloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
+                      SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: funcionAlPresionarFecha()),
+                      //CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', esSoloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
                     
                       ElevatedButton(
                         onPressed: () {
