@@ -37,7 +37,7 @@ class MainApp extends StatelessWidget {
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
-          if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas,);
+          if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta,);
           return const WidgetCargando();
         },
       )
@@ -643,8 +643,9 @@ class WidgetMisGastos extends StatelessWidget {
   final DateTime fechaSeleccionadaFinal;
   final DateTime fechaSeleccionadaInicial;
   final Future<List<Etiqueta>>? misEtiquetas;
+  final int idEtiquetaSeleccionada;
 
-  const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial, required this.misEtiquetas}); 
+  const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial, required this.misEtiquetas, required this.idEtiquetaSeleccionada}); 
 
   String normalizarNumero(int numeroRecibido){
     String numeroNormalizado = '';
@@ -672,7 +673,7 @@ class WidgetMisGastos extends StatelessWidget {
       ),
       body: Column(
         children: [
-          FiltroParaGastos(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal, misEtiquetas: misEtiquetas,),
+          FiltroParaGastos(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal, misEtiquetas: misEtiquetas, idEtiquetaSeleccionada: idEtiquetaSeleccionada,),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -720,9 +721,11 @@ class FiltroParaGastos extends StatelessWidget {
     super.key, 
     required this.fechaSeleccionadaInicial,
     required this.fechaSeleccionadaFinal, 
-    required this.misEtiquetas,
+    required this.misEtiquetas, 
+    required this.idEtiquetaSeleccionada,
   });
   final Future<List<Etiqueta>>? misEtiquetas;
+  final int idEtiquetaSeleccionada;
 
   TextEditingController controladorFechaInicial = TextEditingController();
   TextEditingController controladorFechaFinal = TextEditingController();
@@ -770,6 +773,7 @@ class FiltroParaGastos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     inicializarTextBoxesConFechas();
+    controladorEtiqueta.text = idEtiquetaSeleccionada.toString();
 
     return Column(
       children: [
