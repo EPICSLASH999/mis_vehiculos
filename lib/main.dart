@@ -60,19 +60,19 @@ class CuadroDeTexto extends StatelessWidget {
   const CuadroDeTexto({
     super.key,
     required this.controlador,
-    this.esInt = false, 
     required this.titulo, 
+    this.esInt = false, 
     this.esDouble = false,
-    this.soloLectura = false, 
+    this.esSoloLectura = false, 
     this.funcionAlPresionar,
     this.campoRequerido = true,
   });
 
   final TextEditingController controlador;
+  final String titulo;
   final bool esInt;
   final bool esDouble;
-  final String titulo;
-  final bool soloLectura;
+  final bool esSoloLectura;
   final VoidCallback? funcionAlPresionar;
   final bool campoRequerido;
 
@@ -80,6 +80,22 @@ class CuadroDeTexto extends StatelessWidget {
     if(s == null) return false;    
     if (esInt) return int.tryParse(s) != null;
     return double.tryParse(s) != null;
+  }
+  InputDecoration obtenerDecoracion(){
+
+    if (campoRequerido && !esSoloLectura){
+      return const InputDecoration(
+        hintText: "", 
+        prefixIcon: Icon(Icons.label_important),
+        prefixIconColor: Colors.red,
+        suffixIcon: Icon(Icons.car_rental)
+      );
+    }
+
+    return const InputDecoration(
+      hintText: "", 
+      suffixIcon: Icon(Icons.car_rental)
+    );
   }
 
   @override
@@ -91,18 +107,15 @@ class CuadroDeTexto extends StatelessWidget {
           Text(titulo),
           TextFormField(
             validator: (value) {
-              if (value != null && value.isEmpty && campoRequerido) return 'Valor requerido';
-              if ((esInt || esDouble) && !esNumerico(value)) return 'Debe ser numerico';  
+              if (value != null && value.isEmpty && campoRequerido) return 'Campo requerido';
+              if (esInt && !esNumerico(value)) return 'Debe ser número entero';  
+              if (esDouble && !esNumerico(value)) return 'Debe ser numerico';  
+              if((!esInt && !esDouble) && esNumerico(value)) return 'Campo inválido';
               return null;
             },
-            readOnly: soloLectura,
+            readOnly: esSoloLectura,
             controller: controlador,
-            decoration: const InputDecoration(
-              hintText: "", 
-              prefixIcon: Icon(Icons.access_alarm_outlined),
-              prefixIconColor: Colors.red,
-              suffixIcon: Icon(Icons.password)
-            ),
+            decoration: obtenerDecoracion(),
             onTap: funcionAlPresionar
           ),
         ],
@@ -515,12 +528,12 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   key: _formKey,
                   child: Column(
                     children: <Widget>[
-                      CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', soloLectura: true,),
+                      CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
                       SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
                       CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
                       CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false,),
                       CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
-                      CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', soloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
+                      CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', esSoloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
                     
                       ElevatedButton(
                         onPressed: () {

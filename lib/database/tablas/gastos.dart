@@ -68,7 +68,9 @@ class Gastos {
   }
 
   Future<int> update({required int id, required Map<String,dynamic> datos}) async {
-    if(datos["etiqueta"] == valorEtiquetaNula) datos["etiqueta"] = null; // Normalizar el valor de la etiqueta a NULL para que no trate de actualizarlo y ocasione algun error
+    // En caso de que la etiqueta se haya eliminado del registro de gasto, y se desea actualizar dejando la etiqueta con valor nulo...
+    // Normalizar el valor de la etiqueta a NULL para que no trate de actualizarlo y ocasione algun error
+    if(datos["etiqueta"] == valorEtiquetaNula) datos["etiqueta"] = null; 
 
     final database = await DatabaseService().database;
     return await database.update(
