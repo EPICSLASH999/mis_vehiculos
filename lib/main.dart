@@ -580,9 +580,9 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
 
   @override
   Widget build(BuildContext context)  {
-    int? idEtiquetaSeleccionada = int.tryParse(widget.etiquetaSeleccionada.text);
-    idEtiquetaSeleccionada = ((idEtiquetaSeleccionada != null) && (idEtiquetaSeleccionada == valorEtiquetaNula))?null:idEtiquetaSeleccionada;
-    etiquetaSeleccionada = (idEtiquetaSeleccionada == null)?'':idEtiquetaSeleccionada.toString();
+    int? idEtiquetaSeleccionada = int.tryParse(widget.etiquetaSeleccionada.text); //1
+    idEtiquetaSeleccionada = ((idEtiquetaSeleccionada != null) && (idEtiquetaSeleccionada == valorEtiquetaNula))?null:idEtiquetaSeleccionada;//null:1
+    etiquetaSeleccionada = (idEtiquetaSeleccionada == null)?'':idEtiquetaSeleccionada.toString();//'':'1'
     
     bool esNulaEtiqueta() => idEtiquetaSeleccionada == null && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
