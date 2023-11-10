@@ -201,7 +201,7 @@ Future main() async {
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
-        MisGastos(misGastos: Gastos().fetchAllWhereVehiclesIds([1]), fechaFinal: DateTime.now(), fechaInicial: DateTime.now(),misEtiquetas: Etiquetas().fetchAll()),
+        MisGastos(misGastos: Gastos().fetchAllWhereVehiclesIds([1]), fechaFinal: DateTime.now(), fechaInicial: DateTime.now(), misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0),
       ],
     );
      blocTest<VehiculoBloc, VehiculoEstado>(
@@ -224,8 +224,8 @@ Future main() async {
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
-        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll()),
-        MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll()),
+        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0),
+        MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0),
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -249,8 +249,8 @@ Future main() async {
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
-        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll()),
-        MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll()),
+        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0),
+        MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0),
       ],
     );
   });

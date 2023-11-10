@@ -399,6 +399,8 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 
 /* ----------------------------------- GASTOS ----------------------------------- */
 const String nombreEtiquetaNula = 'Desconocida';
+const int valorEtiquetaNula = 998;
+const int valorEtiquetaTodas = 999;
 
 Future<String> obtenerNombreEtiquetaDeId(int id) async {
   Etiqueta etiqueta = await Etiquetas().fetchById(id);
@@ -550,12 +552,17 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     required this.titulo, 
     required this.misEtiquetas,
     this.esEditarGasto = false,
-  });
+    this.mostrarEtiquetaTodas = false, 
+  }){
+    mostrarEtiquetaNula = (etiquetaSeleccionada.text.isEmpty && esEditarGasto);
+  }
 
   TextEditingController etiquetaSeleccionada;
   final String titulo;
   final Future <List<Etiqueta>>? misEtiquetas;
   bool esEditarGasto;
+  final bool mostrarEtiquetaTodas;
+  late final bool mostrarEtiquetaNula;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
@@ -567,12 +574,13 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   @override
   Widget build(BuildContext context)  {
     int? idEtiquetaSeleccionada = int.tryParse(widget.etiquetaSeleccionada.text);
-    idEtiquetaSeleccionada = ((idEtiquetaSeleccionada != null) && (idEtiquetaSeleccionada == 0))?null:idEtiquetaSeleccionada;
+    idEtiquetaSeleccionada = ((idEtiquetaSeleccionada != null) && (idEtiquetaSeleccionada == valorEtiquetaNula))?null:idEtiquetaSeleccionada;
     etiquetaSeleccionada = (idEtiquetaSeleccionada == null)?'':idEtiquetaSeleccionada.toString();
-
+    
     bool esNulaEtiqueta() => idEtiquetaSeleccionada == null && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
-      if ((esNulaEtiqueta()) && etiquetas.isNotEmpty) return 0;
+      if (widget.mostrarEtiquetaTodas) return valorEtiquetaTodas;
+      if ((esNulaEtiqueta()) && etiquetas.isNotEmpty) return valorEtiquetaNula;
       return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:0);
     }
     
@@ -591,9 +599,9 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if (value != null && value == 0) return 'Valor requerido';
+                    if ((value != null && (value == valorEtiquetaNula || value == 0)) || value == valorEtiquetaTodas) return 'Valor requerido';
                     
-                    // En caso de que se encuentra seleccionada la etiqueta por omisión, se iguala el valor manualmente.
+                    // En caso de que se deja seleccionada la etiqueta por omisión, se iguala el valor manualmente.
                     if (etiquetaSeleccionada.isEmpty) {
                       etiquetaSeleccionada = etiquetas.first.id.toString();
                       widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
@@ -602,7 +610,8 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                   },
                   value: valorIdEtiquetaInicial(etiquetas),
                   items: [
-                    if(esNulaEtiqueta())const DropdownMenuItem(value: 0, child: Text(nombreEtiquetaNula),),
+                    if (widget.mostrarEtiquetaTodas) const DropdownMenuItem(value: valorEtiquetaTodas, child: Text('Todas')),
+                    if(widget.mostrarEtiquetaNula) const DropdownMenuItem(value: valorEtiquetaNula, child: Text(nombreEtiquetaNula),),
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {
@@ -610,6 +619,8 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                       etiquetaSeleccionada = value.toString();
                       widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
                     });
+                    if (value == null) return;
+                    if (widget.mostrarEtiquetaTodas) context.read<VehiculoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value));
                   },
                 );
               }
@@ -731,7 +742,7 @@ class FiltroParaGastos extends StatelessWidget {
       if (nuevaFecha != null) {
         fechaSeleccionadaInicial = nuevaFecha;
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
+        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
       }
     };
   }
@@ -746,7 +757,7 @@ class FiltroParaGastos extends StatelessWidget {
       if (nuevaFecha != null) {
         fechaSeleccionadaFinal = nuevaFecha;
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastos(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
+        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
       }
     };
   }
@@ -769,7 +780,7 @@ class FiltroParaGastos extends StatelessWidget {
             SeleccionadorDeFecha(controlador: controladorFechaFinal, titulo: 'Fecha Final', funcionAlPresionar: funcionAlPresionarFechaFinal(context),),            
           ],
         ),
-        SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: misEtiquetas, esEditarGasto: true),
+        SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: misEtiquetas, esEditarGasto: true, mostrarEtiquetaTodas: true,),
       ],
     );
   }
