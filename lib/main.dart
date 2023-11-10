@@ -401,7 +401,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 const String nombreEtiquetaNula = 'Desconocida';
 const int valorEtiquetaNula = 0;
 const int valorEtiquetaTodas = 999;
-const int valorSinEtiquetas = 0;
+const int valorSinEtiquetas = 998;
 
 Future<String> obtenerNombreEtiquetaDeId(int id) async {
   Etiqueta etiqueta = await Etiquetas().fetchById(id);
@@ -594,11 +594,12 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if ((value != null && (value == valorEtiquetaNula || value == valorSinEtiquetas)) || value == valorEtiquetaTodas) return 'Valor requerido';
+                    if (value != null && value == valorSinEtiquetas) return 'Valor requerido';
                     
                     // En caso de que se deja seleccionada la etiqueta por omisión, se iguala el valor manualmente.
                     if (etiquetaSeleccionada.isEmpty) {
-                      etiquetaSeleccionada = etiquetas.first.id.toString();
+                      //etiquetaSeleccionada = (value == valorEtiquetaNula)?valorEtiquetaNula.toString():etiquetas.first.id.toString();
+                      etiquetaSeleccionada = value.toString();
                       widget.etiquetaSeleccionada.text = etiquetaSeleccionada;
                     }
                     return null;

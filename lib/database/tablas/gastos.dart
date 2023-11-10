@@ -1,4 +1,5 @@
 import 'package:mis_vehiculos/database/database_service.dart';
+import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -67,6 +68,8 @@ class Gastos {
   }
 
   Future<int> update({required int id, required Map<String,dynamic> datos}) async {
+    if(datos["etiqueta"] == valorEtiquetaNula) datos["etiqueta"] = null; // Normalizar el valor de la etiqueta a NULL para que no trate de actualizarlo y ocasione algun error
+
     final database = await DatabaseService().database;
     return await database.update(
       tableName, 
