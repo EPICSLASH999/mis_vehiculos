@@ -461,9 +461,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     controladorLugar.text = widget.gasto?.lugar??'';
     controladorCosto.text = (widget.gasto?.costo??'').toString();
     DateTime fechaRecibida = DateTime.parse(widget.gasto?.fecha??fechaSeleccionada.toIso8601String());
-    controladorFecha.text = DateFormat.yMMMd().format(fechaRecibida); // Esto es solo para mostrar la fecha en el textBox
-    fechaSeleccionada = fechaRecibida; // Esta es la fecha que se guardara en la BaseDeDatos
-    //controladorFecha.text = (widget.gasto?.fecha??DateFormat.yMMMd().format(fechaSeleccionada));
+    controladorFecha.text = DateFormat.yMMMd().format(fechaRecibida); // Esto es solo para mostrar la fecha en el TextBox
+    fechaSeleccionada = fechaRecibida; // Esta es la fecha que se guardará en la BaseDeDatos
   }
   Gasto obtenerGasto(){
     return Gasto(
@@ -473,7 +472,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
       mecanico: controladorMecanico.text,
       lugar: controladorLugar.text,
       costo: double.parse(controladorCosto.text),
-      //fecha: controladorFecha.text
       fecha: fechaSeleccionada.millisecondsSinceEpoch.toString()
     );
   }
@@ -483,7 +481,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         context: context, 
         initialDate: fechaSeleccionada,
         firstDate: DateTime(1970), 
-        lastDate: DateTime(3000),
+        lastDate: DateTime.now(),
       );
       if (nuevaFecha != null) {
         fechaSeleccionada = nuevaFecha;
@@ -501,6 +499,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   @override
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
+    var pressedFecha = funcionAlPresionarFecha();
     
     return Scaffold(
       appBar: AppBar(
@@ -534,10 +533,9 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                       CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
                       SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
                       CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
-                      CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false,),
-                      CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true,),
-                      SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: funcionAlPresionarFecha()),
-                      //CuadroDeTexto(controlador: controladorFecha, titulo: 'Fecha', esSoloLectura: true, funcionAlPresionar: funcionAlPresionarFecha(),),
+                      CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 30,),
+                      CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
+                      SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
                     
                       ElevatedButton(
                         onPressed: () {
