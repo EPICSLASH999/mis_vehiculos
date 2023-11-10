@@ -66,6 +66,7 @@ class CuadroDeTexto extends StatelessWidget {
     this.esSoloLectura = false, 
     this.funcionAlPresionar,
     this.campoRequerido = true,
+    this.maxCaracteres = 20,
   });
 
   final TextEditingController controlador;
@@ -75,6 +76,7 @@ class CuadroDeTexto extends StatelessWidget {
   final bool esSoloLectura;
   final VoidCallback? funcionAlPresionar;
   final bool campoRequerido;
+  final int maxCaracteres;
 
   bool esNumerico(String? s) {
     if(s == null) return false;    
@@ -97,6 +99,10 @@ class CuadroDeTexto extends StatelessWidget {
       suffixIcon: Icon(Icons.car_rental)
     );
   }
+  TextInputType obtenerTipoTeclado(){
+    if(esInt || esDouble) return TextInputType.number;
+    return TextInputType.text;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,10 +119,12 @@ class CuadroDeTexto extends StatelessWidget {
               if((!esInt && !esDouble) && esNumerico(value)) return 'Campo inválido';
               return null;
             },
+            maxLength: maxCaracteres,
             readOnly: esSoloLectura,
             controller: controlador,
             decoration: obtenerDecoracion(),
-            onTap: funcionAlPresionar
+            onTap: funcionAlPresionar,
+            keyboardType: obtenerTipoTeclado(),
           ),
         ],
       ),
@@ -369,11 +377,11 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
         child: Column(
           children: <Widget>[
             // Add TextFormFields and ElevatedButton here.
-            CuadroDeTexto(controlador: controladorMatricula, titulo: 'Matricula'),          
+            CuadroDeTexto(controlador: controladorMatricula, titulo: 'Matricula', maxCaracteres: 7,),          
             CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
             CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
-            CuadroDeTexto(controlador: controladorColor, titulo: 'Color'),
-            CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true),
+            CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15,),
+            CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4,),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
