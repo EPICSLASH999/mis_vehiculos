@@ -54,13 +54,12 @@ class Gastos {
     for(var id in idsVehiculosSeleccionados) {
       values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';
     }
-    String query = ''' SELECT * from $tableName 
-      WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
-    String query2 = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula from $tableName 
+    //String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
+    String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula from $tableName 
       INNER JOIN vehiculos ON vehiculos.id_vehiculo = $tableName.vehiculo 
       WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
     final registros = await database.rawQuery(
-      query2
+      query
     );
     return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
   }

@@ -39,7 +39,7 @@ class MainApp extends StatelessWidget {
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
-          if (state is MisGastos) return WidgetMisGastos2(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta,);
+          if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta,);
           return const WidgetCargando();
         },
       )
@@ -641,7 +641,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 }
 
-// ignore: must_be_immutable
 class WidgetMisGastos extends StatefulWidget {
   final Future <List<Gasto>>? misGastos;
   final DateTime fechaSeleccionadaFinal;
@@ -663,108 +662,6 @@ class WidgetMisGastos extends StatefulWidget {
 }
 
 class _WidgetMisGastosState extends State<WidgetMisGastos> {
-  TextEditingController controladorMecanico = TextEditingController();
-
-  String normalizarNumeroA2DigitosFecha(int numeroRecibido){
-    String numeroNormalizado = '';
-    if (numeroRecibido.toString().length == 1) numeroNormalizado += '0';
-    return numeroNormalizado += numeroRecibido.toString();
-  }
-
-  bool enIntervaloFecha(String fecha) {
-    DateTime fechaFinalNormalizada = DateTime.parse('${widget.fechaSeleccionadaFinal.year}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.month)}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.day)} 23:59:59.999');
-    return ((DateTime.parse(fecha)).isAfter(widget.fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaFinalNormalizada)));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Gastos'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
-            }, 
-            icon: const Icon(Icons.arrow_back_ios_new_outlined)
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
-          FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada),
-          CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
-          Expanded(
-            child: 
-            FutureBuilder<List<Gasto>>(
-              future: widget.misGastos,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const WidgetCargando();
-                } else{
-                  final gastos = snapshot.data?? [];
-
-                  gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha))); // Filtrar por fecha
-                  if (widget.idEtiquetaSeleccionada != valorEtiquetaTodas) gastos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta
-                  // Filtrar por mecánico
-
-                  return gastos.isEmpty
-                      ? const Center(
-                        child: Text(
-                          'Sin gastos...',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 28,
-                          ),
-                        ),
-                      )
-                    : ListView.separated(
-                      separatorBuilder: (context, index) => 
-                          const SizedBox(height: 12,), 
-                      itemCount: gastos.length,
-                      itemBuilder: (context, index) {
-                        final gasto = gastos[index];
-                        return TileGasto(gasto: gasto);
-                      }, 
-                    );
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  @override
-  void dispose() {
-    controladorMecanico.dispose();
-    super.dispose();
-  }
-}
-
-
-class WidgetMisGastos2 extends StatefulWidget {
-  final Future <List<Gasto>>? misGastos;
-  final DateTime fechaSeleccionadaFinal;
-  final DateTime fechaSeleccionadaInicial;
-  final Future<List<Etiqueta>>? misEtiquetas;
-  final int idEtiquetaSeleccionada;
-
-   const WidgetMisGastos2({
-    super.key, 
-    this.misGastos, 
-    required this.fechaSeleccionadaFinal, 
-    required this.fechaSeleccionadaInicial, 
-    required this.misEtiquetas, 
-    required this.idEtiquetaSeleccionada
-  }); 
-
-  @override
-  State<WidgetMisGastos2> createState() => _WidgetMisGastosState2();
-}
-
-class _WidgetMisGastosState2 extends State<WidgetMisGastos2> {
   TextEditingController controladorMecanico = TextEditingController();
 
   String normalizarNumeroA2DigitosFecha(int numeroRecibido){
