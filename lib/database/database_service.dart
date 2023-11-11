@@ -11,12 +11,9 @@ class DatabaseService {
 
   Future<Database> get database async {
     if (_database != null){
-      //print('ALREADY INITIALIZED !');
       return _database!;
     }
     _baseDeDatosEnEjecucion = await _initialize();
-    //print('INITIALIZED !');
-    turnOnForeignKeys(_database!); // Sql-lite necesita hacer esto manualmente para poder usar llaver foraneas
     return _database!;
   }
 
@@ -27,7 +24,6 @@ class DatabaseService {
   }
 
   Future<Database> _initialize() async {
-    //print('INITIALIZING...');
     final path = await fullPath;
     var database = await openDatabase(
       path,
@@ -35,6 +31,7 @@ class DatabaseService {
       onCreate: create,
       singleInstance: true,
     );
+    turnOnForeignKeys(database); // Sql-lite necesita hacer esto manualmente para poder usar llaver foraneas
     //recrearTablas(database);
     return database;
   }

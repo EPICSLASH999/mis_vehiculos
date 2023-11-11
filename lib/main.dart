@@ -568,7 +568,7 @@ class SeleccionadorEtiqueta extends StatefulWidget {
   TextEditingController etiquetaSeleccionada;
   final String titulo;
   final Future <List<Etiqueta>>? misEtiquetas;
-  bool esEditarGasto;
+  final bool esEditarGasto;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
@@ -647,15 +647,22 @@ class WidgetMisGastos extends StatelessWidget {
   final Future<List<Etiqueta>>? misEtiquetas;
   final int idEtiquetaSeleccionada;
 
-  const WidgetMisGastos({super.key, this.misGastos, required this.fechaSeleccionadaFinal, required this.fechaSeleccionadaInicial, required this.misEtiquetas, required this.idEtiquetaSeleccionada}); 
+  const WidgetMisGastos({
+    super.key, 
+    this.misGastos, 
+    required this.fechaSeleccionadaFinal, 
+    required this.fechaSeleccionadaInicial, 
+    required this.misEtiquetas, 
+    required this.idEtiquetaSeleccionada
+  }); 
 
-  String normalizarNumero(int numeroRecibido){
+  String normalizarNumeroA2DigitosFecha(int numeroRecibido){
     String numeroNormalizado = '';
     if (numeroRecibido.toString().length == 1) numeroNormalizado += '0';
     return numeroNormalizado += numeroRecibido.toString();
   }
   bool enIntervaloFecha(String fecha) {
-    DateTime fechaFinalNormalizada = DateTime.parse('${fechaSeleccionadaFinal.year}-${normalizarNumero(fechaSeleccionadaFinal.month)}-${normalizarNumero(fechaSeleccionadaFinal.day)} 23:59:59.999');
+    DateTime fechaFinalNormalizada = DateTime.parse('${fechaSeleccionadaFinal.year}-${normalizarNumeroA2DigitosFecha(fechaSeleccionadaFinal.month)}-${normalizarNumeroA2DigitosFecha(fechaSeleccionadaFinal.day)} 23:59:59.999');
     return ((DateTime.parse(fecha)).isAfter(fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaFinalNormalizada)));
   }
   
@@ -727,8 +734,8 @@ class FiltroParaFecha extends StatelessWidget {
     required this.fechaSeleccionadaFinal, 
   });
 
-  TextEditingController controladorFechaInicial = TextEditingController();
-  TextEditingController controladorFechaFinal = TextEditingController();
+  final TextEditingController controladorFechaInicial = TextEditingController();
+  final TextEditingController controladorFechaFinal = TextEditingController();
   
   DateTime fechaSeleccionadaInicial;
   DateTime fechaSeleccionadaFinal;
@@ -931,12 +938,6 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
             },
           ),
         ),
-        TextButton(
-          onPressed: () {
-            context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
-          }, 
-          child: const Text('Administrar Etiquetas')
-        ),
       ],
     );
   }
@@ -952,7 +953,6 @@ class WidgetAdministradorEtiquetas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Etiquetas'),
@@ -1106,6 +1106,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
                 if (_formKey.currentState!.validate()) {
                   if (etiqueta == null) {
                     context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
+                    return;
                   }
                   context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta()));
                 }
