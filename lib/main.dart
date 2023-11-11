@@ -621,7 +621,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {
-                    setState(() {
+                     setState(() {
                       widget.etiquetaSeleccionada.text = value.toString();
                     });
                   },
@@ -676,7 +676,8 @@ class WidgetMisGastos extends StatelessWidget {
       ),
       body: Column(
         children: [
-          FiltroParaGastos(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal, misEtiquetas: misEtiquetas, idEtiquetaSeleccionada: idEtiquetaSeleccionada,),
+          FiltroParaFecha(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal),
+          FiltroParaEtiqueta(misEtiquetas: misEtiquetas, idEtiquetaSeleccionada: idEtiquetaSeleccionada),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -720,20 +721,15 @@ class WidgetMisGastos extends StatelessWidget {
 }
 
 // ignore: must_be_immutable
-class FiltroParaGastos extends StatelessWidget {
-  FiltroParaGastos({
+class FiltroParaFecha extends StatelessWidget {
+  FiltroParaFecha({
     super.key, 
     required this.fechaSeleccionadaInicial,
     required this.fechaSeleccionadaFinal, 
-    required this.misEtiquetas, 
-    required this.idEtiquetaSeleccionada,
   });
-  final Future<List<Etiqueta>>? misEtiquetas;
-  final int idEtiquetaSeleccionada;
 
   TextEditingController controladorFechaInicial = TextEditingController();
   TextEditingController controladorFechaFinal = TextEditingController();
-  TextEditingController controladorEtiqueta= TextEditingController();
   
   DateTime fechaSeleccionadaInicial;
   DateTime fechaSeleccionadaFinal;
@@ -777,7 +773,6 @@ class FiltroParaGastos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     inicializarTextBoxesConFechas();
-    controladorEtiqueta.text = idEtiquetaSeleccionada.toString();
 
     return Column(
       children: [
@@ -788,6 +783,27 @@ class FiltroParaGastos extends StatelessWidget {
             SeleccionadorDeFecha(controlador: controladorFechaFinal, titulo: 'Fecha Final', funcionAlPresionar: funcionAlPresionarFechaFinal(context),),            
           ],
         ),
+        
+      ],
+    );
+  }
+}
+
+class FiltroParaEtiqueta extends StatelessWidget {
+  const FiltroParaEtiqueta({
+    super.key, 
+    required this.misEtiquetas, 
+    required this.idEtiquetaSeleccionada
+  });
+  
+  final Future<List<Etiqueta>>? misEtiquetas;
+  final int idEtiquetaSeleccionada;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
         FiltroSeleccionadorEtiqueta(idEtiquetaSeleccionada: idEtiquetaSeleccionada, titulo: 'Etiqueta', misEtiquetas: misEtiquetas),
       ],
     );
