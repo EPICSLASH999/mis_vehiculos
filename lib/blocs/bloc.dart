@@ -24,17 +24,10 @@ class MisVehiculos extends VehiculoEstado {
   final Future<List<Vehiculo>>? misVehiculos;
   final List<int> idsVehiculosSeleccionados;
   
-  List<Vehiculo> vehiculos = []; // Para los tests
-  llenarvehiculosParaProps () async {
-    vehiculos = await misVehiculos??[];
-  }
-
-  MisVehiculos({required this.misVehiculos, required this.idsVehiculosSeleccionados}){
-    llenarvehiculosParaProps();
-  }
+  MisVehiculos({required this.misVehiculos, required this.idsVehiculosSeleccionados});
 
   @override
-  List<Object?> get props => [vehiculos, idsVehiculosSeleccionados];
+  List<Object?> get props => [misVehiculos, idsVehiculosSeleccionados];
 }
 class PlantillaVehiculo extends VehiculoEstado {
    final Vehiculo? vehiculo;
@@ -108,13 +101,11 @@ class EliminadoVehiculo extends VehiculoEvento {
 
   EliminadoVehiculo({required this.id});
 }
-/*class FiltradoVehiculos extends VehiculoEvento {}*/
 class ClickeadoEditarVehiculo extends VehiculoEvento {
    final Vehiculo vehiculo;
 
   ClickeadoEditarVehiculo({required this.vehiculo});
 }
-/*class CheckeadoSeleccionarTodosVehiculos extends VehiculoEvento {}*/
 class AgregadoVehiculo extends VehiculoEvento {
   final Vehiculo vehiculo;
 
@@ -203,6 +194,7 @@ class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
 class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
 /* --------------------------------------------------------------------------- */
 
+
 /* ---------------------------- VARIABLES GLOBALES --------------------------- */
 
 /* --------------------------------------------------------------------------- */
@@ -231,14 +223,15 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     }
     idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..add(idVehiculo);
   }
-  void reinicialValoresFechas() {
+  void reiniciarFiltros() {
     filtroFechaFinal  = DateTime.now();
     filtroFechaInicial = DateTime(filtroFechaFinal.year);
+    filtroIdEtiqueta = valorEtiquetaTodas;
   }
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
-      reinicialValoresFechas();
+      reiniciarFiltros();
       misVehiculos = vehiculos.fetchAll();
       misEtiquetas = etiquetas.fetchAll();
       emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
@@ -292,7 +285,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
       idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..clear();
-      reinicialValoresFechas();
+      reiniciarFiltros();
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
@@ -323,7 +316,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoConsultarGastos>((event, emit) async {    
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados, filtroFechaInicial, filtroFechaFinal);
       misEtiquetas = etiquetas.fetchAll();
-      filtroIdEtiqueta = valorEtiquetaTodas;
       emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta));
     });
     on<EliminadoGasto>((event, emit) async {

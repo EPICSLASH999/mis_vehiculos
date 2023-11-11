@@ -12,3 +12,4 @@ const nombreBD = 'mis_vehiculos.db';
 const tablaGastos = 'gastos';
 const tablaVehiculos = 'vehiculos';
 const tablaEtiquetas = 'etiquetas';
+const tablaGastosArchivados = 'gastos_archivados';

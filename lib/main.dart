@@ -672,7 +672,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     if (filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
     return gastosRecibidos;
   }
-  Future<List<Gasto>>? obtenerListaGastosFutura() async {
+  Future<List<Gasto>>? obtenerListaGastos() async {
     List<Gasto> lista = await widget.misGastos??[];
     lista = filtrarListaGastos(lista);
     return Future(() => lista);
@@ -709,7 +709,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
-              future: obtenerListaGastosFutura(),
+              future: obtenerListaGastos(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting){
                   return const WidgetCargando();
