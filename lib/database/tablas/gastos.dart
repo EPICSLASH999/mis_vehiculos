@@ -7,7 +7,6 @@ class Gastos {
   final tableName = 'gastos';
 
   Future<void> createTable(Database database) async {
-    await database.execute("""PRAGMA foreign_keys = ON;""");
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (
       "id_gasto" INTEGER NOT NULL,
       "vehiculo" INTEGER, 

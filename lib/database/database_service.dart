@@ -16,6 +16,7 @@ class DatabaseService {
     }
     _baseDeDatosEnEjecucion = await _initialize();
     //print('INITIALIZED !');
+    turnOnForeignKeys(_database!); // Sql-lite necesita hacer esto manualmente para poder usar llaver foraneas
     return _database!;
   }
 
@@ -42,7 +43,10 @@ class DatabaseService {
     await Vehiculos().createTable(database);
     await Etiquetas().createTable(database);
     await Gastos().createTable(database);
-    //print('CREATED !');
+  }
+
+  Future<void> turnOnForeignKeys(Database database) async {
+    await database.execute("""PRAGMA foreign_keys = ON;""");
   }
 
   Future<void> recrearTablas(Database database) async {

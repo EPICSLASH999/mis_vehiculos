@@ -514,44 +514,43 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         ],
       ),
       body: FutureBuilder<String>(
-            future: obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting){
-                return const WidgetCargando();
-              } else{
-                final nombreVehiculo = snapshot.data?? '';
-                controladorVehiculo.text = nombreVehiculo;
+        future: obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting){
+            return const WidgetCargando();
+          } else{
+            final nombreVehiculo = snapshot.data?? '';
+            controladorVehiculo.text = nombreVehiculo;
+            
+            return Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
+                  SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
+                  CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
+                  CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 30,),
+                  CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
+                  SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
                 
-                return Form(
-                  key: _formKey,
-                  child: Column(
-                    children: <Widget>[
-                      CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
-                      SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
-                      CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
-                      CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 30,),
-                      CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
-                      SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
-                    
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            if (widget.gasto == null) {
-                              context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
-                              return;
-                            }
-                            context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
-                          }
-                        },
-                        child: Text(obtenerTexto()),
-                      ),
-                    ],
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        if (widget.gasto == null) {
+                          context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                          return;
+                        }
+                        context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
+                      }
+                    },
+                    child: Text(obtenerTexto()),
                   ),
-                );
-                }
-            },
-          ),
-      
+                ],
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }
