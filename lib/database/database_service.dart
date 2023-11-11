@@ -1,5 +1,6 @@
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
+import 'package:mis_vehiculos/database/tablas/gastos_archivados.dart';
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:path/path.dart';
@@ -28,7 +29,7 @@ class DatabaseService {
     final path = await fullPath;
     var database = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onOpen: turnOnForeignKeys,
       onCreate: create,
       singleInstance: true,
@@ -41,6 +42,8 @@ class DatabaseService {
     await Vehiculos().createTable(database);
     await Etiquetas().createTable(database);
     await Gastos().createTable(database);
+    await GastosArchivados().createTable(database);
+    print('CREATED');
   }
 
   Future<void> turnOnForeignKeys(Database database) async {

@@ -1,5 +1,6 @@
 import 'package:mis_vehiculos/database/database_service.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
+import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -27,12 +28,12 @@ class GastosArchivados {
     );
   }
 
-  Future<List<Gasto>> fetchAll() async{
+  Future<List<GastoArchivado>> fetchAll() async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
       ''' SELECT * from $tableName ORDER BY fecha DESC'''
     );
-    return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
+    return registros.map((gastoArchivado) => GastoArchivado.fromSQfliteDatabase(gastoArchivado)).toList();
   }
 
   Future<void> delete(int id) async {
