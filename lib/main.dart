@@ -761,10 +761,10 @@ class WidgetMisGastos2 extends StatefulWidget {
   }); 
 
   @override
-  State<WidgetMisGastos> createState() => _WidgetMisGastosState2();
+  State<WidgetMisGastos2> createState() => _WidgetMisGastosState2();
 }
 
-class _WidgetMisGastosState2 extends State<WidgetMisGastos> {
+class _WidgetMisGastosState2 extends State<WidgetMisGastos2> {
   TextEditingController controladorMecanico = TextEditingController();
 
   String normalizarNumeroA2DigitosFecha(int numeroRecibido){
@@ -778,19 +778,29 @@ class _WidgetMisGastosState2 extends State<WidgetMisGastos> {
     return ((DateTime.parse(fecha)).isAfter(widget.fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaFinalNormalizada)));
   }
 
-  List<Gasto> obtenerListaGastos(List<Gasto> gastos) {
+  List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
     String filtroMecanico = controladorMecanico.text.trim();
     if(filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
     return gastosRecibidos;
   }
-   obtenerListaGastosFutura() async {
-    List<Gasto>? lista = await widget.misGastos;
-    return lista;
+  Future<List<Gasto>>? obtenerListaGastosFutura() async {
+    List<Gasto> lista = await widget.misGastos??[];
+    lista = filtrarListaGastos(lista);
+    return Future(() => lista);
+  }
+
+   void escuchador(){
+    //print(controlador.text);
+    setState(() {
+      //reglas = establecerReglas();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    controladorMecanico.addListener(escuchador);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Gastos'),
@@ -811,14 +821,12 @@ class _WidgetMisGastosState2 extends State<WidgetMisGastos> {
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
-              future: widget.misGastos,
+              future: obtenerListaGastosFutura(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting){
                   return const WidgetCargando();
                 } else{
-                  final gastos2 = snapshot.data?? [];
-                  
-                  final gastos = obtenerListaGastos(gastos2);
+                  final gastos = snapshot.data?? [];
 
                   gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha))); // Filtrar por fecha
                   if (widget.idEtiquetaSeleccionada != valorEtiquetaTodas) gastos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta
