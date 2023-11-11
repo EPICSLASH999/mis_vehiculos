@@ -41,20 +41,26 @@ class Gastos {
   Future<List<Gasto>> fetchAll() async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
-      ''' SELECT * from $tableName ORDER BY id_gasto'''
+      ''' SELECT * from $tableName 
+      ORDER BY id_gasto'''
     );
     return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
   }
 
   Future<List<Gasto>> fetchAllWhereVehiclesIds(List<int> idsVehiculosSeleccionados) async{
+    //vehiculo,etiqueta,mecanico,lugar,costo,fecha
     final database = await DatabaseService().database;
     String values = "";
     for(var id in idsVehiculosSeleccionados) {
       values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';
     }
-    String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
+    String query = ''' SELECT * from $tableName 
+      WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
+    String query2 = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula from $tableName 
+      INNER JOIN vehiculos ON vehiculos.id_vehiculo = $tableName.vehiculo 
+      WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
     final registros = await database.rawQuery(
-      query
+      query2
     );
     return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
   }
@@ -62,7 +68,8 @@ class Gastos {
   Future<Gasto> fetchById(int id) async {
     final database = await DatabaseService().database;
     final todo = await database
-        .rawQuery('''SELECT * from $tableName WHERE id_gasto = ?''', [id]);
+        .rawQuery('''SELECT * from $tableName 
+          WHERE id_gasto = ?''', [id]);
     return Gasto.fromSQfliteDatabase(todo.first);
   }
 

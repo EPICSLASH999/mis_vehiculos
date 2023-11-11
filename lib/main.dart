@@ -847,6 +847,7 @@ class TileGasto extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(DateFormat.yMMMd().format(nuevaFecha)),
+                Text(gasto.nombreVehiculo??''),
                 Text('\$${gasto.costo}'),
               ],
             ),
