@@ -4,7 +4,7 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Gastos {
-  final tableName = 'gastos';
+  final tableName = tablaGastos;
 
   Future<void> createTable(Database database) async {
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (
@@ -18,11 +18,11 @@ class Gastos {
       PRIMARY KEY("id_gasto" AUTOINCREMENT),
       CONSTRAINT fk_etiqueta
         FOREIGN KEY (etiqueta)
-        REFERENCES etiquetas(id_etiqueta)
+        REFERENCES $tablaEtiquetas(id_etiqueta)
         ON DELETE SET NULL,
       CONSTRAINT fk_vehiculo
         FOREIGN KEY (vehiculo)
-        REFERENCES vehiculos(id_vehiculo)
+        REFERENCES $tablaVehiculos(id_vehiculo)
         ON DELETE CASCADE
     );""");
   }
@@ -34,7 +34,6 @@ class Gastos {
       '''INSERT INTO $tableName (vehiculo,etiqueta,mecanico,lugar,costo,fecha) VALUES (?,?,?,?,?,?)''',
       datos.values.toList()
       //[datos["vehiculo"],datos["etiqueta"],datos["mecanico"],datos["lugar"],datos["costo"],datos["fecha"],],
-      //[datos.values],
     );
   }
 
@@ -48,7 +47,6 @@ class Gastos {
   }
 
   Future<List<Gasto>> fetchAllWhereVehiclesIds(List<int> idsVehiculosSeleccionados) async{
-    //vehiculo,etiqueta,mecanico,lugar,costo,fecha
     final database = await DatabaseService().database;
     String values = "";
     for(var id in idsVehiculosSeleccionados) {
@@ -56,7 +54,7 @@ class Gastos {
     }
     //String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
     String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula from $tableName 
-      INNER JOIN vehiculos ON vehiculos.id_vehiculo = $tableName.vehiculo 
+      INNER JOIN vehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 
       WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
     final registros = await database.rawQuery(
       query

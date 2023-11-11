@@ -1,9 +1,10 @@
 import 'package:mis_vehiculos/database/database_service.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Vehiculos {
-  final tableName = 'vehiculos';
+  final tableName = tablaVehiculos;
 
   Future<void> createTable(Database database) async {
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (
@@ -22,7 +23,6 @@ class Vehiculos {
     return await database.rawInsert(
       '''INSERT INTO $tableName (matricula,marca,modelo,color,ano) VALUES (?,?,?,?,?)''',
       //[datos["matricula"],datos["marca"],datos["modelo"],datos["color"],datos["ano"],],
-      //[datos.values],
       datos.values.toList(),
     );
   }

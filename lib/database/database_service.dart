@@ -1,6 +1,7 @@
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -18,7 +19,7 @@ class DatabaseService {
   }
 
   Future<String> get fullPath async {
-    const name = 'mis_vehiculos.db';
+    const name = nombreBD;
     final path = await getDatabasesPath();
     return join(path,name);
   }
@@ -28,10 +29,10 @@ class DatabaseService {
     var database = await openDatabase(
       path,
       version: 1,
+      onOpen: turnOnForeignKeys,
       onCreate: create,
       singleInstance: true,
     );
-    turnOnForeignKeys(database); // Sql-lite necesita hacer esto manualmente para poder usar llaver foraneas
     //recrearTablas(database);
     return database;
   }
@@ -43,7 +44,9 @@ class DatabaseService {
   }
 
   Future<void> turnOnForeignKeys(Database database) async {
+     // Sql-lite necesita hacer esto manualmente para poder usar llaver foraneas
     await database.execute("""PRAGMA foreign_keys = ON;""");
+    //print('---> ACTIVATED FK !');
   }
 
   Future<void> recrearTablas(Database database) async {

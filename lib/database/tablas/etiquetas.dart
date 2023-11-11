@@ -1,9 +1,10 @@
 import 'package:mis_vehiculos/database/database_service.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Etiquetas {
-  final tableName = 'etiquetas';
+  final tableName = tablaEtiquetas;
 
   Future<void> createTable(Database database) async {
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (

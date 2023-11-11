@@ -5,6 +5,9 @@ const int valorEtiquetaNula = 0; // NO CAMBIAR ESTE VALOR. Porque la BD maneja l
 const int valorEtiquetaTodas = 999;
 const int valorNoHayEtiquetasCreadas = 998;
 
+//Base de Datos
+const nombreBD = 'mis_vehiculos.db';
+
 // Tablas
 const tablaGastos = 'gastos';
 const tablaVehiculos = 'vehiculos';
