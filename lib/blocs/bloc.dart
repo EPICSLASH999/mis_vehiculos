@@ -9,6 +9,7 @@ import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 
 /* --------------------------------- ESTADOS --------------------------------- */
 sealed class VehiculoEstado with EquatableMixin{}
@@ -203,7 +204,7 @@ class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
 /* --------------------------------------------------------------------------- */
 
 /* ---------------------------- VARIABLES GLOBALES --------------------------- */
-const int idEtiquetaTodas = 999;
+
 /* --------------------------------------------------------------------------- */
 
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
@@ -221,7 +222,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   final gastos = Gastos();
   DateTime fechaInicial = DateTime.now();
   DateTime fechaFinal = DateTime.now();
-  int filtroIdEtiqueta = idEtiquetaTodas;
+  int filtroIdEtiqueta = valorEtiquetaTodas;
 
   void gestionarIdVehiculoSeleccionado(int idVehiculo) {
     if (idsVehiculosSeleccionados.contains(idVehiculo)){
@@ -322,7 +323,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoConsultarGastos>((event, emit) async {    
       misGastos = gastos.fetchAllWhereVehiclesIds(idsVehiculosSeleccionados);
       misEtiquetas = etiquetas.fetchAll();
-      filtroIdEtiqueta = idEtiquetaTodas;
+      filtroIdEtiqueta = valorEtiquetaTodas;
       emit(MisGastos(misGastos: misGastos, fechaInicial: fechaInicial, fechaFinal: fechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta));
     });
     on<EliminadoGasto>((event, emit) async {
