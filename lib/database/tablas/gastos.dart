@@ -46,16 +46,16 @@ class Gastos {
     return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
   }
 
-  Future<List<Gasto>> fetchAllWhereVehiclesIds(List<int> idsVehiculosSeleccionados) async{
+  Future<List<Gasto>> fetchAllWhereVehiclesIds(List<int> idsVehiculosSeleccionados, DateTime fechaInicial, DateTime fechaFinal) async{
     final database = await DatabaseService().database;
     String values = "";
-    for(var id in idsVehiculosSeleccionados) {
-      values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';
-    }
+    for(var id in idsVehiculosSeleccionados) {values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';} // Crea lista similar a esta: 1,2,3
     //String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
     String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula from $tableName 
       INNER JOIN vehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 
-      WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
+      WHERE vehiculo IN ($values) 
+      AND fecha BETWEEN ${fechaInicial.millisecondsSinceEpoch} AND ${fechaFinal.millisecondsSinceEpoch} 
+      ORDER BY fecha DESC''';
     final registros = await database.rawQuery(
       query
     );

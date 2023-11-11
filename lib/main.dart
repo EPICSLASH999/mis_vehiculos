@@ -669,7 +669,6 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     if (numeroRecibido.toString().length == 1) numeroNormalizado += '0';
     return numeroNormalizado += numeroRecibido.toString();
   }
-
   bool enIntervaloFecha(String fecha) {
     DateTime fechaFinalNormalizada = DateTime.parse('${widget.fechaSeleccionadaFinal.year}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.month)}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.day)} 23:59:59.999');
     return ((DateTime.parse(fecha)).isAfter(widget.fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaFinalNormalizada)));
@@ -678,7 +677,8 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
     String filtroMecanico = controladorMecanico.text.trim();
-    if(filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
+    if (widget.idEtiquetaSeleccionada != valorEtiquetaTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta
+    if (filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
     return gastosRecibidos;
   }
   Future<List<Gasto>>? obtenerListaGastosFutura() async {
@@ -687,7 +687,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     return Future(() => lista);
   }
 
-   void escuchador(){
+  void escuchador(){
     //print(controlador.text);
     setState(() {
       //reglas = establecerReglas();
@@ -714,7 +714,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         children: [
           FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
           FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada),
-          CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
+          FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -724,10 +724,6 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                   return const WidgetCargando();
                 } else{
                   final gastos = snapshot.data?? [];
-
-                  gastos.removeWhere((element) => (!enIntervaloFecha(element.fecha))); // Filtrar por fecha
-                  if (widget.idEtiquetaSeleccionada != valorEtiquetaTodas) gastos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta
-                  // Filtrar por mecánico
 
                   return gastos.isEmpty
                       ? const Center(
@@ -850,6 +846,19 @@ class FiltroParaEtiqueta extends StatelessWidget {
         FiltroSeleccionadorEtiqueta(idEtiquetaSeleccionada: idEtiquetaSeleccionada, titulo: 'Etiqueta', misEtiquetas: misEtiquetas),
       ],
     );
+  }
+}
+
+class FiltroParaMecanico extends StatelessWidget {
+  const FiltroParaMecanico({super.key, required this.controladorMecanico, required this.titulo, required this.campoRequerido});
+
+  final TextEditingController controladorMecanico;
+  final String titulo;
+  final bool campoRequerido;
+
+  @override
+  Widget build(BuildContext context) {
+    return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false);
   }
 }
 

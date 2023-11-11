@@ -201,7 +201,7 @@ Future main() async {
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
-        MisGastos(misGastos: Gastos().fetchAllWhereVehiclesIds([1]), fechaFinal: DateTime.now(), fechaInicial: DateTime.now(), misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0),
+        MisGastos(misGastos: Gastos().fetchAllWhereVehiclesIds([1], DateTime.now(), DateTime.now()), fechaFinal: DateTime.now(), fechaInicial: DateTime.now(), misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0),
       ],
     );
      blocTest<VehiculoBloc, VehiculoEstado>(
