@@ -63,4 +63,9 @@ class Vehiculos {
     final database = await DatabaseService().database;
     await database.rawDelete('''DELETE FROM $tableName WHERE id_vehiculo = ?''', [id]);
   }
+
+  Future<String> obtenerNombreVehiculoDeId(int id) async {
+    Vehiculo vehiculo = await fetchById(id);
+    return vehiculo.matricula;
+  }
 }

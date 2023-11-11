@@ -54,4 +54,9 @@ class Etiquetas {
     final database = await DatabaseService().database;
     await database.rawDelete('''DELETE FROM $tableName WHERE id_etiqueta = ?''', [id]);
   }
+
+  Future<String> obtenerNombreEtiquetaDeId(int id) async {
+    Etiqueta etiqueta = await fetchById(id);
+    return etiqueta.nombre;
+  }
 }

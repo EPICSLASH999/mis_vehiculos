@@ -416,15 +416,6 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 /* ----------------------------------------------------------------------------- */
 
 /* ----------------------------------- GASTOS ----------------------------------- */
-Future<String> obtenerNombreEtiquetaDeId(int id) async {
-  Etiqueta etiqueta = await Etiquetas().fetchById(id);
-  return etiqueta.nombre;
-}
-Future<String> obtenerNombreVehiculoDeId(int id) async {
-  Vehiculo vehiculo = await Vehiculos().fetchById(id);
-  return vehiculo.matricula;
-}
-
 class WidgetPlantillaGasto extends StatefulWidget {
   final Gasto? gasto;
   final int idVehiculo;
@@ -515,7 +506,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         ],
       ),
       body: FutureBuilder<String>(
-        future: obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
+        future: Vehiculos().obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting){
             return const WidgetCargando();
@@ -676,8 +667,8 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
 
   List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
+    if (widget.idEtiquetaSeleccionada != valorEtiquetaTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta    
     String filtroMecanico = controladorMecanico.text.trim();
-    if (widget.idEtiquetaSeleccionada != valorEtiquetaTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta
     if (filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
     return gastosRecibidos;
   }
@@ -873,7 +864,7 @@ class TileGasto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime nuevaFecha = DateTime.parse(gasto.fecha);
-    Future<String> nombreEtiqueta = obtenerNombreEtiquetaDeId(gasto.etiqueta);
+    Future<String> nombreEtiqueta = Etiquetas().obtenerNombreEtiquetaDeId(gasto.etiqueta);
 
     return FutureBuilder<String>(
       future: nombreEtiqueta,
