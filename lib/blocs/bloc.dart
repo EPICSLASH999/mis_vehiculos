@@ -240,6 +240,21 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     filtroFechaInicial = DateTime(filtroFechaFinal.year);
     filtroIdEtiqueta = valorEtiquetaTodas;
   }
+  Future<void> archivarGastosDeIdVehiculo(int id) async {
+    List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(id);
+    for (var gasto in misGastosPorVehiculo) {
+      DateTime fechaNormalizada = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(gasto.fecha).millisecondsSinceEpoch);
+      Map<String,dynamic> datos = {
+        "vehiculo": gasto.nombreVehiculo,
+        "etiqueta": gasto.nombreEtiqueta,
+        "mecanico": gasto.mecanico,
+        "lugar": gasto.lugar,
+        "costo": gasto.costo,
+        "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
+      };
+      await gastosArchivados.create(datos: datos);
+    }
+  }
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
@@ -264,19 +279,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<EliminadoVehiculo>((event, emit) async {
-      List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(event.id);
-      for (var gasto in misGastosPorVehiculo) {
-        DateTime fechaNormalizada = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(gasto.fecha).millisecondsSinceEpoch);
-        Map<String,dynamic> datos = {
-          "vehiculo": gasto.nombreVehiculo,
-          "etiqueta": gasto.nombreEtiqueta,
-          "mecanico": gasto.mecanico,
-          "lugar": gasto.lugar,
-          "costo": gasto.costo,
-          "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
-        };
-        await gastosArchivados.create(datos: datos);
-      }
+      await archivarGastosDeIdVehiculo(event.id);
       await vehiculos.delete(event.id);
       misVehiculos = vehiculos.fetchAll();
       idsVehiculosSeleccionados = [];
