@@ -32,7 +32,14 @@ class WidgetMisVehiculos extends StatelessWidget {
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
             }, 
-            icon: const Icon(Icons.folder))
+            icon: const Icon(Icons.folder_copy)
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
+            }, 
+            icon: const Icon(Icons.label),
+          )
         ],
       ),
       body: Column(
@@ -202,14 +209,12 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTexto()),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
-            }, 
-            icon: const Icon(Icons.arrow_back_ios_new_outlined)
-          ),
-        ],
+        leading: IconButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+          }, 
+          icon: const Icon(Icons.arrow_back_ios_new_outlined)
+        ),
       ),
       body: Form(
         key: _formKey,

@@ -16,14 +16,12 @@ class WidgetAdministradorEtiquetas extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Etiquetas'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
-            }, 
-            icon: const Icon(Icons.arrow_back_ios_new_outlined)
-          ),
-        ],
+        leading: IconButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+          }, 
+          icon: const Icon(Icons.arrow_back_ios_new_outlined)
+        ),
       ),
       body: FutureBuilder<List<Etiqueta>>(
         future: misEtiquetas,
@@ -147,14 +145,12 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTexto()),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresarAAdministradorEtiquetas());
-            }, 
-            icon: const Icon(Icons.arrow_back_ios_new_outlined)
-          ),
-        ],
+        leading: IconButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAAdministradorEtiquetas());
+          }, 
+          icon: const Icon(Icons.arrow_back_ios_new_outlined)
+        ),
       ),
       body: Form(
         key: _formKey,

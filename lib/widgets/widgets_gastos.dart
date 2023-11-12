@@ -88,18 +88,16 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTexto()),
-        actions: [
-          IconButton(
-            onPressed: () {
-              if (widget.gasto == null) {
-                context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
-                return;
-              }
-              context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
-            }, 
-            icon: const Icon(Icons.arrow_back_ios_new_outlined)
-          ),
-        ],
+        leading: IconButton(
+          onPressed: () {
+            if (widget.gasto == null) {
+              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+              return;
+            }
+            context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
+          }, 
+          icon: const Icon(Icons.arrow_back_ios_new_outlined)
+        ),
       ),
       body: FutureBuilder<String>(
         future: Vehiculos().obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
@@ -275,9 +273,8 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   }
 
   void escuchador(){
-    //print(controlador.text);
     setState(() {
-      //reglas = establecerReglas();
+
     });
   }
 
@@ -288,14 +285,12 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Gastos'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
-            }, 
-            icon: const Icon(Icons.arrow_back_ios_new_outlined)
-          ),
-        ],
+        leading: IconButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+          }, 
+          icon: const Icon(Icons.arrow_back_ios_new_outlined)
+        ),
       ),
       body: Column(
         children: [
@@ -368,6 +363,7 @@ class FiltroParaFecha extends StatelessWidget {
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
       );
+      print(nuevaFecha);
       if (nuevaFecha != null) {
         fechaSeleccionadaInicial = nuevaFecha;
         // ignore: use_build_context_synchronously
@@ -384,11 +380,18 @@ class FiltroParaFecha extends StatelessWidget {
         lastDate: DateTime.now(),
       );
       if (nuevaFecha != null) {
-        fechaSeleccionadaFinal = nuevaFecha;
+        //2023-01-01 00:00:00.000
+        DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
+        fechaSeleccionadaFinal = fechaNormalizada;
         // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
       }
     };
+  }
+  String normalizarNumeroA2DigitosFecha(int numero){
+    String numeroRecibido = '';
+    if (numero.toString().length == 1) numeroRecibido += '0';
+    return numeroRecibido += numero.toString();
   }
 
   void inicializarTextBoxesConFechas() {

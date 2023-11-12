@@ -16,14 +16,12 @@ class WidgetMisGastosArchivados extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Gastos Archivados'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
-            }, 
-            icon: const Icon(Icons.arrow_back_ios_new_outlined)
-          ),
-        ],
+        leading: IconButton(
+          onPressed: () {
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+          }, 
+          icon: const Icon(Icons.arrow_back_ios_new_outlined)
+        ),
       ),
       body: Column(
         children: [
