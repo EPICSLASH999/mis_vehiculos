@@ -10,7 +10,7 @@ class Gastos {
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (
       "id_gasto" INTEGER NOT NULL,
       "vehiculo" INTEGER, 
-      "etiqueta" INTEGER,
+      "etiqueta" INTEGER DEFAULT $idSinEtiqueta,
       "mecanico" TEXT,
       "lugar" TEXT,
       "costo" INTEGER NOT NULL,
@@ -19,7 +19,7 @@ class Gastos {
       CONSTRAINT fk_etiqueta
         FOREIGN KEY (etiqueta)
         REFERENCES $tablaEtiquetas(id_etiqueta)
-        ON DELETE SET NULL,
+        ON DELETE SET DEFAULT,
       CONSTRAINT fk_vehiculo
         FOREIGN KEY (vehiculo)
         REFERENCES $tablaVehiculos(id_vehiculo)
@@ -40,8 +40,7 @@ class Gastos {
   Future<List<Gasto>> fetchAll() async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
-      ''' SELECT * from $tableName 
-      ORDER BY id_gasto'''
+      ''' SELECT * from $tableName ORDER BY id_gasto'''
     );
     return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
   }
@@ -51,8 +50,9 @@ class Gastos {
     String values = "";
     for(var id in idsVehiculosSeleccionados) {values+= '$id${(id != idsVehiculosSeleccionados.last)?',':''}';} // Crea lista similar a esta: 1,2,3
     //String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
-    String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula from $tableName 
+    String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula, nombre from $tableName 
       INNER JOIN $tablaVehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 
+      INNER JOIN $tablaEtiquetas ON $tablaEtiquetas.id_etiqueta = $tableName.etiqueta 
       WHERE vehiculo IN ($values) 
       AND fecha BETWEEN ${fechaInicial.millisecondsSinceEpoch} AND ${fechaFinal.millisecondsSinceEpoch} 
       ORDER BY fecha DESC''';
@@ -86,7 +86,7 @@ class Gastos {
   Future<int> update({required int id, required Map<String,dynamic> datos}) async {
     // En caso de que la etiqueta se haya eliminado del registro de gasto, y se desea actualizar dejando la etiqueta con valor nulo...
     // Normalizar el valor de la etiqueta a NULL para que no trate de actualizarlo y ocasione algun error
-    if(datos["etiqueta"] == valorEtiquetaNula) datos["etiqueta"] = null; 
+    if(datos["etiqueta"] == idSinEtiqueta) datos["etiqueta"] = null; 
 
     final database = await DatabaseService().database;
     return await database.update(

@@ -53,7 +53,7 @@ class DatabaseService {
 
   Future<void> recrearTablas(Database database) async {
     //database.execute('DROP TABLE IF EXISTS ${Gastos().tableName}'); await Gastos().createTable(database);
-    database.execute('DROP TABLE IF EXISTS ${GastosArchivados().tableName}');
-    await GastosArchivados().createTable(database);
+    database.execute('DROP TABLE IF EXISTS ${GastosArchivados().tableName}'); await GastosArchivados().createTable(database);
+    //database.execute('DROP TABLE IF EXISTS ${Etiquetas().tableName}'); await Etiquetas().createTable(database);
   }
 }

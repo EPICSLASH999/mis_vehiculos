@@ -382,6 +382,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // Etiquetas
     on<ClickeadoAdministrarEtiquetas>((event, emit) {
+      misEtiquetas = etiquetas.fetchAll();
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
     on<ClickeadoAgregarEtiqueta>((event, emit) {

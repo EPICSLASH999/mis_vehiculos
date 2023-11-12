@@ -161,24 +161,18 @@ class SeleccionadorEtiqueta extends StatefulWidget {
 }
 
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
-  
-  int? obtenerIdEtiquetaSeleccionada() {
-    int? idEtiqueta = int.tryParse(widget.etiquetaSeleccionada.text);
-    idEtiqueta = ((idEtiqueta != null) && (idEtiqueta == valorEtiquetaNula))?null:idEtiqueta;
-    return idEtiqueta;
-  }
+ 
+  int? get idEtiquetaSeleccionada => int.tryParse(widget.etiquetaSeleccionada.text); 
 
   @override
   Widget build(BuildContext context)  {
-    int? idEtiquetaSeleccionada = obtenerIdEtiquetaSeleccionada();
-    
-    bool esNulaEtiqueta() => idEtiquetaSeleccionada == null && widget.esEditarGasto;
+    bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
-      if ((esNulaEtiqueta()) && etiquetas.isNotEmpty) return valorEtiquetaNula;
-      return (idEtiquetaSeleccionada != null)?idEtiquetaSeleccionada:(etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
+      if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
+      if(idEtiquetaSeleccionada != null) return idEtiquetaSeleccionada!;
+      return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
     }
-    String obtenerEtiquetaSeleccionada() => (idEtiquetaSeleccionada == null)?'':idEtiquetaSeleccionada.toString();
-    
+
     return Column(
       children: [
         Text(widget.titulo),
@@ -191,18 +185,19 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 return const WidgetCargando();
               } else{
                 final etiquetas = snapshot.data?? [];
+                etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
                 
                 return DropdownButtonFormField(
                   validator: (value) {
                     if (value != null && value == valorNoHayEtiquetasCreadas) return 'Valor requerido';
                     
                     // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
-                    if (obtenerEtiquetaSeleccionada().isEmpty) widget.etiquetaSeleccionada.text = value.toString();
+                    widget.etiquetaSeleccionada.text = value.toString();
                     return null;
                   },
                   value: valorIdEtiquetaInicial(etiquetas),
                   items: [
-                    if(esNulaEtiqueta()) const DropdownMenuItem(value: valorEtiquetaNula, child: Text(nombreEtiquetaNula),),
+                    if(idEtiquetaSeleccionada == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {
@@ -224,6 +219,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
       ],
     );
   }
+
 }
 
 class WidgetMisGastos extends StatefulWidget {
@@ -363,7 +359,6 @@ class FiltroParaFecha extends StatelessWidget {
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
       );
-      print(nuevaFecha);
       if (nuevaFecha != null) {
         fechaSeleccionadaInicial = nuevaFecha;
         // ignore: use_build_context_synchronously
@@ -465,37 +460,26 @@ class TileGasto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime nuevaFecha = DateTime.parse(gasto.fecha);
-    Future<String> nombreEtiqueta = Etiquetas().obtenerNombreEtiquetaDeId(gasto.etiqueta);
 
-    return FutureBuilder<String>(
-      future: nombreEtiqueta,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting){
-          return const WidgetCargando();
-        } else{
-          final etiqueta = snapshot.data?? nombreEtiquetaNula;
-          
-          return ListTile(
-            title: Text(
-              etiqueta,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(DateFormat.yMMMd().format(nuevaFecha)),
-                Text(gasto.nombreVehiculo??''),
-                Text(obtenerMecanico),
-                Text('\$${gasto.costo}'),
-              ],
-            ),
-            trailing: BotonesTileGasto(gasto: gasto),
-            onTap: () {
-            },
-          );
-        }
-      }
+    return ListTile(
+      title: Text(
+        //etiqueta,
+        gasto.nombreEtiqueta??'',
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(DateFormat.yMMMd().format(nuevaFecha)),
+          Text(gasto.nombreVehiculo??''),
+          Text(obtenerMecanico),
+          Text('\$${gasto.costo}'),
+        ],
+      ),
+      trailing: BotonesTileGasto(gasto: gasto),
+      onTap: () {
+      },
     );
   }
 }
@@ -558,16 +542,17 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
                 return const WidgetCargando();
               } else{
                 final etiquetas = snapshot.data?? [];
+                etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if ((value != null && (value == valorEtiquetaNula || value == valorNoHayEtiquetasCreadas)) || value == valorEtiquetaTodas) return 'Valor requerido';
+                    if ((value != null && (value == idSinEtiqueta || value == valorNoHayEtiquetasCreadas)) || value == valorEtiquetaTodas) return 'Valor requerido';
                     return null;
                   },
                   value: idEtiquetaSeleccionada,
                   items: [
                     const DropdownMenuItem(value: valorEtiquetaTodas, child: Text('Todas')),
-                    const DropdownMenuItem(value: valorEtiquetaNula, child: Text(nombreEtiquetaNula),),
+                    const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {

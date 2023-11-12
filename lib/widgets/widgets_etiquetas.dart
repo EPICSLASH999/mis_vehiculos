@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- ETIQUETAS --------------------------------- */
@@ -30,6 +31,7 @@ class WidgetAdministradorEtiquetas extends StatelessWidget {
             return const WidgetCargando();
           } else{
             final etiquetas = snapshot.data?? [];
+            etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
 
             return etiquetas.isEmpty
                 ? const Center(

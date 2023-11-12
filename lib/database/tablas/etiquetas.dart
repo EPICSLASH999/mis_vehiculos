@@ -7,6 +7,13 @@ class Etiquetas {
   final tableName = tablaEtiquetas;
 
   Future<void> createTable(Database database) async {
+    await crearTabla(database);
+    await database.rawInsert('''INSERT INTO $tableName(id_etiqueta,nombre) 
+      SELECT $idSinEtiqueta, '$nombreSinEtiqueta' 
+      WHERE NOT EXISTS(SELECT 1 FROM $tableName WHERE id_etiqueta = $idSinEtiqueta AND nombre = '$nombreSinEtiqueta');'''); // Inserta la Etiqueta Desconocida (en caso de eliminar su etiqueta)   
+  }
+
+  Future<void> crearTabla(Database database) async {
     await database.execute("""CREATE TABLE IF NOT EXISTS $tableName (
       "id_etiqueta" INTEGER NOT NULL,
       "nombre" TEXT NOT NULL, 
@@ -55,8 +62,8 @@ class Etiquetas {
     await database.rawDelete('''DELETE FROM $tableName WHERE id_etiqueta = ?''', [id]);
   }
 
-  Future<String> obtenerNombreEtiquetaDeId(int id) async {
+  /*Future<String> obtenerNombreEtiquetaDeId(int id) async {
     Etiqueta etiqueta = await fetchById(id);
     return etiqueta.nombre;
-  }
+  }*/
 }
