@@ -15,7 +15,7 @@ class GastosArchivados {
       "lugar" TEXT,
       "costo" INTEGER NOT NULL,
       "fecha" INTEGER NOT NULL DEFAULT (cast(strftime('%s','now') as int)),
-      PRIMARY KEY("id_gasto_archivado" AUTOINCREMENT),
+      PRIMARY KEY("id_gasto_archivado" AUTOINCREMENT)
     );""");
   }
 

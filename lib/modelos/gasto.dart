@@ -36,6 +36,7 @@ class Gasto extends Equatable{
     nombreEtiqueta: datos['nombre']??'',
   );
   
+  
   @override
   List<Object?> get props => [id, vehiculo, etiqueta, mecanico, lugar, costo, fecha];
 }

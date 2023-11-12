@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 import 'package:mis_vehiculos/database/tablas/gastos_archivados.dart';
@@ -69,10 +70,6 @@ class MisGastos extends VehiculoEstado {
   @override
   List<Object?> get props => [misGastos, fechaInicial, fechaFinal, misEtiquetas, filtroIdEtiqueta];
 }
-class ConsultargastosArchivados extends VehiculoEstado {
-  @override
-  List<Object?> get props => [];
-}
 
 // ETIQUETAS
 class AdministradorEtiquetas extends VehiculoEstado {
@@ -90,6 +87,16 @@ class PlantillaEtiqueta extends VehiculoEstado {
 
   @override
   List<Object?> get props => [etiqueta];
+}
+
+// GASTOS ARCHIVADOS
+class MisGastosArchivados extends VehiculoEstado {
+  final Future <List<GastoArchivado>>? misGastosArchivados;
+
+  MisGastosArchivados({required this.misGastosArchivados});
+
+  @override
+  List<Object?> get props => [misGastosArchivados];
 }
 /* --------------------------------------------------------------------------- */
 
@@ -258,21 +265,19 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<EliminadoVehiculo>((event, emit) async {
-      // TODO: Pasar registros de gastos a tabla gastos_archivados y en lugar de id de coche, que sea matricula.
-      List<Gasto> misGastosTemp = await Gastos().fetchByVehicleId(event.id);
-      //vehiculo,etiqueta,mecanico,lugar,costo,fecha
-      for (var gasto in misGastosTemp) {
+      List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(event.id);
+      for (var gasto in misGastosPorVehiculo) {
+        DateTime fechaNormalizada = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(gasto.fecha).millisecondsSinceEpoch);
         Map<String,dynamic> datos = {
           "vehiculo": gasto.nombreVehiculo,
           "etiqueta": gasto.nombreEtiqueta,
           "mecanico": gasto.mecanico,
           "lugar": gasto.lugar,
           "costo": gasto.costo,
-          "fecha": gasto.fecha,
+          "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
         };
         await gastosArchivados.create(datos: datos);
       }
-
       await vehiculos.delete(event.id);
       misVehiculos = vehiculos.fetchAll();
       idsVehiculosSeleccionados = [];
@@ -397,6 +402,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       misEtiquetas = etiquetas.fetchAll();
       emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
     });
+
+    // Gastos Archivados
+    on<ClickeadoConsultarGastosArchivados>((event, emit) {
+      misGastosArchivados = gastosArchivados.fetchAll();
+      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados));
+    });
+  
   }
 }
 

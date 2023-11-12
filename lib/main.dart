@@ -7,6 +7,7 @@ import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
 import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
+import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 
@@ -40,6 +41,7 @@ class MainApp extends StatelessWidget {
           if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
           if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta,);
+          if (state is MisGastosArchivados) return WidgetMisGastosArchivados(misGastosArchivados: state.misGastosArchivados,);
           return const WidgetCargando();
         },
       )
@@ -197,6 +199,13 @@ class WidgetMisVehiculos extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Vehículos'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
+            }, 
+            icon: const Icon(Icons.folder))
+        ],
       ),
       body: Column(
         children: [
@@ -860,6 +869,8 @@ class TileGasto extends StatelessWidget {
   });
 
   final Gasto gasto;
+  
+  String get obtenerMecanico => (gasto.mecanico.isNotEmpty)? gasto.mecanico:'Sin mecánico';
 
   @override
   Widget build(BuildContext context) {
@@ -885,7 +896,7 @@ class TileGasto extends StatelessWidget {
               children: [
                 Text(DateFormat.yMMMd().format(nuevaFecha)),
                 Text(gasto.nombreVehiculo??''),
-                Text(gasto.mecanico),
+                Text(obtenerMecanico),
                 Text('\$${gasto.costo}'),
               ],
             ),
@@ -1160,3 +1171,103 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
 }
 /* ----------------------------------------------------------------------------- */
 
+/* ------------------------------ GASTOS ARCHIVADOS------------------------------ */
+class WidgetMisGastosArchivados extends StatelessWidget {
+  const WidgetMisGastosArchivados({super.key, required this.misGastosArchivados});
+
+  final Future<List<GastoArchivado>>? misGastosArchivados;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis Gastos Archivados'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+            }, 
+            icon: const Icon(Icons.arrow_back_ios_new_outlined)
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: 
+            FutureBuilder<List<GastoArchivado>>(
+              future: misGastosArchivados,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final gastosArchivados = snapshot.data?? [];
+
+                  return gastosArchivados.isEmpty
+                      ? const Center(
+                        child: Text(
+                          'Sin gastos archivados...',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 28,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                      separatorBuilder: (context, index) => 
+                          const SizedBox(height: 12,), 
+                      itemCount: gastosArchivados.length,
+                      itemBuilder: (context, index) {
+                        final gastoArchivado = gastosArchivados[index];
+                        return TileGastoArchivado(gastoArchivado: gastoArchivado);
+                      }, 
+                    );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TileGastoArchivado extends StatelessWidget {
+  const TileGastoArchivado({
+    super.key,
+    required this.gastoArchivado, 
+  });
+
+  final GastoArchivado gastoArchivado;
+  String get obtenerMecanico => (gastoArchivado.mecanico.isNotEmpty)? gastoArchivado.mecanico:'Sin mecánico';
+  String get fechaNormalizada {
+    DateTime fechaRecibida = DateTime.parse(DateTime.parse(gastoArchivado.fecha).toIso8601String());
+    return DateFormat.yMMMd().format(fechaRecibida);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return ListTile(
+      title: Text(
+        gastoArchivado.etiqueta,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(fechaNormalizada),
+          Text(gastoArchivado.vehiculo),
+          Text(obtenerMecanico),
+          Text('\$${gastoArchivado.costo}'),
+        ],
+      ),
+      onTap: () {
+      },
+    );
+  }
+}
+
+
+/* ----------------------------------------------------------------------------- */

@@ -43,7 +43,6 @@ class DatabaseService {
     await Etiquetas().createTable(database);
     await Gastos().createTable(database);
     await GastosArchivados().createTable(database);
-    print('CREATED');
   }
 
   Future<void> turnOnForeignKeys(Database database) async {
@@ -53,7 +52,9 @@ class DatabaseService {
   }
 
   Future<void> recrearTablas(Database database) async {
-    database.execute('DROP TABLE IF EXISTS ${Gastos().tableName}');
-    await Gastos().createTable(database);
+    //database.execute('DROP TABLE IF EXISTS ${Gastos().tableName}');
+    //await Gastos().createTable(database);
+    database.execute('DROP TABLE IF EXISTS ${GastosArchivados().tableName}');
+    await GastosArchivados().createTable(database);
   }
 }
