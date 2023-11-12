@@ -530,7 +530,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
                   SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
                   CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
-                  CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 30,),
+                  CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40,),
                   CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
                   SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
                 
@@ -1204,24 +1204,24 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                   final gastosArchivados = snapshot.data?? [];
 
                   return gastosArchivados.isEmpty
-                      ? const Center(
-                        child: Text(
-                          'Sin gastos archivados...',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 28,
-                          ),
+                    ? const Center(
+                      child: Text(
+                        'Sin gastos archivados...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
                         ),
-                      )
-                    : ListView.separated(
-                      separatorBuilder: (context, index) => 
-                          const SizedBox(height: 12,), 
-                      itemCount: gastosArchivados.length,
-                      itemBuilder: (context, index) {
-                        final gastoArchivado = gastosArchivados[index];
-                        return TileGastoArchivado(gastoArchivado: gastoArchivado);
-                      }, 
-                    );
+                      ),
+                    )
+                  : ListView.separated(
+                    separatorBuilder: (context, index) => 
+                        const SizedBox(height: 12,), 
+                    itemCount: gastosArchivados.length,
+                    itemBuilder: (context, index) {
+                      final gastoArchivado = gastosArchivados[index];
+                      return TileGastoArchivado(gastoArchivado: gastoArchivado);
+                    }, 
+                  );
                 }
               },
             ),
@@ -1239,7 +1239,8 @@ class TileGastoArchivado extends StatelessWidget {
   });
 
   final GastoArchivado gastoArchivado;
-  String get obtenerMecanico => (gastoArchivado.mecanico.isNotEmpty)? gastoArchivado.mecanico:'Sin mecánico';
+  String get mecanico => (gastoArchivado.mecanico.isNotEmpty)? gastoArchivado.mecanico:'Sin mecánico';
+  String get lugar => (gastoArchivado.lugar.isNotEmpty)? gastoArchivado.lugar:'Sin lugar';
   String get fechaNormalizada {
     DateTime fechaRecibida = DateTime.parse(DateTime.parse(gastoArchivado.fecha).toIso8601String());
     return DateFormat.yMMMd().format(fechaRecibida);
@@ -1259,7 +1260,8 @@ class TileGastoArchivado extends StatelessWidget {
         children: [
           Text(fechaNormalizada),
           Text(gastoArchivado.vehiculo),
-          Text(obtenerMecanico),
+          Text(mecanico),
+          Text(lugar),
           Text('\$${gastoArchivado.costo}'),
         ],
       ),
@@ -1268,6 +1270,4 @@ class TileGastoArchivado extends StatelessWidget {
     );
   }
 }
-
-
 /* ----------------------------------------------------------------------------- */
