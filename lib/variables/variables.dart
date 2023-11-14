@@ -1,6 +1,6 @@
 // Variables constantes para administrar los valores de etiquetas Nulas, Todas o vacías
 // Puesto que ellas no se encuentran en la Base de Datos.
-const String nombreSinEtiqueta = 'Desconocida';
+const String nombreSinEtiqueta = 'Desconocida'; // NO CAMBIAR despues de inicializar tabla en la base de datos.
 const int idSinEtiqueta = 1; // NO CAMBIAR ESTE VALOR. 
 const int valorEtiquetaTodas = 999;
 const int valorNoHayEtiquetasCreadas = 998;
