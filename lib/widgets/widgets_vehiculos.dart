@@ -216,31 +216,34 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-            // Add TextFormFields and ElevatedButton here.
-            CuadroDeTexto(controlador: controladorMatricula, titulo: 'Matricula', maxCaracteres: 7,),          
-            CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
-            CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
-            CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15,),
-            CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4,),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  if (widget.vehiculo == null) {
-                    context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
-                    return;
+      //resizeToAvoidBottomInset: false,
+      body: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              // Add TextFormFields and ElevatedButton here.
+              CuadroDeTexto(controlador: controladorMatricula, titulo: 'Matricula', maxCaracteres: 7,),          
+              CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
+              CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
+              CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15,),
+              CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4,),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    if (widget.vehiculo == null) {
+                      context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
+                      return;
+                    }
+                    context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
                   }
-                  context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
-                }
-              },
-              child: Text(obtenerTexto()),
-            ),
-          ],
-        ),
-      )
+                },
+                child: Text(obtenerTexto()),
+              ),
+            ],
+          ),
+        )
+      ),
     );
   }
 

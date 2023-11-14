@@ -154,24 +154,26 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-            CuadroDeTexto(controlador: controladorNombre, titulo: 'Nombre'),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  if (etiqueta == null) {
-                    context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
-                    return;
+      body: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              CuadroDeTexto(controlador: controladorNombre, titulo: 'Nombre'),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    if (etiqueta == null) {
+                      context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
+                      return;
+                    }
+                    context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta()));
                   }
-                  context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta()));
-                }
-              },
-              child: Text(obtenerTexto()),
-            ),
-          ],
+                },
+                child: Text(obtenerTexto()),
+              ),
+            ],
+          ),
         ),
       ),
     );

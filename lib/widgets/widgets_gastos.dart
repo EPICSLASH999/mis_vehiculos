@@ -107,31 +107,33 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
             final nombreVehiculo = snapshot.data?? '';
             controladorVehiculo.text = nombreVehiculo;
             
-            return Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
-                  SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
-                  CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
-                  CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40,),
-                  CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
-                  SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
-                
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        if (widget.gasto == null) {
-                          context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
-                          return;
+            return SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
+                    SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
+                    CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
+                    CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40,),
+                    CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
+                    SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
+                  
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          if (widget.gasto == null) {
+                            context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                            return;
+                          }
+                          context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
                         }
-                        context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
-                      }
-                    },
-                    child: Text(obtenerTexto()),
-                  ),
-                ],
-              ),
+                      },
+                      child: Text(obtenerTexto()),
+                    ),
+                  ],
+                ),
+              )
             );
           }
         },
