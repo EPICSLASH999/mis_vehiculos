@@ -50,19 +50,30 @@ class CuadroDeTexto extends StatelessWidget {
     return TextInputType.text;
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
+    final caracteresEspeciales = RegExp(
+      r'[\^$*\[\]{}()?\"!@#%&/\><:;_~`+=' 
+      "'" 
+      ']'
+    );
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           Text(titulo),
           TextFormField(
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
-              if (value != null && value.isEmpty && campoRequerido) return 'Campo requerido';
-              if (esInt && !esNumerico(value)) return 'Debe ser número entero';  
-              if (esDouble && !esNumerico(value)) return 'Debe ser numerico';  
-              if((!esInt && !esDouble) && esNumerico(value)) return 'Campo inválido';
+              String valorNormalizado = (value??'').trim();
+              if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
+              if (esInt && !esNumerico(valorNormalizado)) return 'Debe ser número entero';  
+              if (esDouble && !esNumerico(valorNormalizado)) return 'Debe ser numerico';  
+              if((!esInt && !esDouble) && esNumerico(valorNormalizado)) return 'Campo inválido';
+              if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
               return null;
             },
             maxLength: maxCaracteres,

@@ -175,7 +175,8 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   final TextEditingController controladorColor = TextEditingController();
   final TextEditingController controladorAno = TextEditingController();
 
-  String obtenerTexto() => (widget.vehiculo == null)? 'Agregar Vehiculo':'Editar Vehiculo';
+  bool get esEditar => widget.vehiculo != null;
+  String obtenerTexto() => (!esEditar)? 'Agregar Vehiculo':'Editar Vehiculo';
   Vehiculo obtenerVehiculo(){
     return Vehiculo(
       id: (widget.vehiculo?.id)??0, 
@@ -187,7 +188,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
     );
   }
   void inicializarValoresDeControladores(){
-    if (widget.vehiculo == null) return;
+    if (!esEditar) return;
     controladorMatricula.text = widget.vehiculo?.matricula??'';
     controladorMarca.text = widget.vehiculo?.marca??'';
     controladorModelo.text = widget.vehiculo?.modelo??'';
@@ -231,7 +232,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    if (widget.vehiculo == null) {
+                    if (!esEditar) {
                       context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
                       return;
                     }

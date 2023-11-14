@@ -114,6 +114,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   children: <Widget>[
                     CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
                     SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
+                    if(widget.gasto == null) const BotonAdministrarEtiquetas(),
                     CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
                     CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40,),
                     CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
@@ -211,16 +212,26 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
             },
           ),
         ),
-        TextButton(
-          onPressed: () {
-            context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
-          }, 
-          child: const Text('Administrar Etiquetas')
-        ),
       ],
     );
   }
 
+}
+
+class BotonAdministrarEtiquetas extends StatelessWidget {
+  const BotonAdministrarEtiquetas({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
+      }, 
+      child: const Text('Administrar Etiquetas')
+    );
+  }
 }
 
 class WidgetMisGastos extends StatefulWidget {
