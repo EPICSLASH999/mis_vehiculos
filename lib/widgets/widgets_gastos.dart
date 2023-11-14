@@ -80,6 +80,17 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   }
 
   @override
+  void dispose() {
+    controladorVehiculo.dispose();
+    controladorEtiqueta.dispose();
+    controladorMecanico.dispose();
+    controladorLugar.dispose();
+    controladorCosto.dispose();
+    controladorFecha.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
     var pressedFecha = funcionAlPresionarFecha();
@@ -143,9 +154,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   }
 }
 
-// ignore: must_be_immutable
 class SeleccionadorEtiqueta extends StatefulWidget {
-  SeleccionadorEtiqueta({
+  const SeleccionadorEtiqueta({
     super.key,
     required this.etiquetaSeleccionada,
     required this.titulo, 
@@ -153,7 +163,7 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     this.esEditarGasto = false,
   });
 
-  TextEditingController etiquetaSeleccionada;
+  final TextEditingController etiquetaSeleccionada;
   final String titulo;
   final Future <List<Etiqueta>>? misEtiquetas;
   final bool esEditarGasto;
@@ -285,6 +295,12 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
 
     });
   }
+  
+  @override
+  void dispose() {
+    controladorMecanico.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -316,24 +332,24 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                   final gastos = snapshot.data?? [];
 
                   return gastos.isEmpty
-                      ? const Center(
-                        child: Text(
-                          'Sin gastos...',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 28,
-                          ),
+                    ? const Center(
+                      child: Text(
+                        'Sin gastos...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
                         ),
-                      )
-                    : ListView.separated(
-                      separatorBuilder: (context, index) => 
-                          const SizedBox(height: 12,), 
-                      itemCount: gastos.length,
-                      itemBuilder: (context, index) {
-                        final gasto = gastos[index];
-                        return TileGasto(gasto: gasto);
-                      }, 
-                    );
+                      ),
+                    )
+                  : ListView.separated(
+                    separatorBuilder: (context, index) => 
+                        const SizedBox(height: 12,), 
+                    itemCount: gastos.length,
+                    itemBuilder: (context, index) {
+                      final gasto = gastos[index];
+                      return TileGasto(gasto: gasto);
+                    }, 
+                  );
                 }
               },
             ),
@@ -341,11 +357,6 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         ],
       ),
     );
-  }
-  @override
-  void dispose() {
-    controladorMecanico.dispose();
-    super.dispose();
   }
 }
 
