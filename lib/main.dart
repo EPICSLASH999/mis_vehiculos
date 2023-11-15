@@ -8,7 +8,7 @@ import 'package:mis_vehiculos/widgets/widgets_vehiculos.dart';
 
 void main() {
   runApp(const AplicacionInyectada());
-}
+} 
 
 class AplicacionInyectada extends StatelessWidget {
   const AplicacionInyectada({super.key});
