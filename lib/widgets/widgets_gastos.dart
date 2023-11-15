@@ -286,7 +286,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
     if (widget.idEtiquetaSeleccionada != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta  
-    if (widget.idVehiculoSeleccionado != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.vehiculo != widget.idVehiculoSeleccionado)); // Filtrar por vehiculo    
+    //if (widget.idVehiculoSeleccionado != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.vehiculo != widget.idVehiculoSeleccionado)); // Filtrar por vehiculo    
     String filtroMecanico = controladorMecanico.text.trim();
     if (filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
     return gastosRecibidos;
