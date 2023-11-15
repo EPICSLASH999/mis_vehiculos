@@ -26,4 +26,4 @@ int indiceMisEtiquetas = 1;
 int indiceMisGastosArchivados = 2;
 
 // Colores
-Color colorIcono = const Color.fromARGB(255, 13, 126, 37);
+Color colorIcono = const Color.fromARGB(255, 158, 190, 42);

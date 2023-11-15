@@ -112,7 +112,7 @@ class TileVehiculo extends StatelessWidget {
       },
       selected: estaSeleccionado,
       selectedColor: Colors.black,
-      selectedTileColor: Colors.amber,
+      selectedTileColor: const Color.fromARGB(104, 201, 255, 7),
     );
   }
 }
