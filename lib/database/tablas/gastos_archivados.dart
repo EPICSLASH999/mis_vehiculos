@@ -35,6 +35,25 @@ class GastosArchivados {
     return registros.map((gastoArchivado) => GastoArchivado.fromSQfliteDatabase(gastoArchivado)).toList();
   }
 
+  Future<List<GastoArchivado>> fetchByVehicule(String vehiculo) async{
+    final database = await DatabaseService().database;
+    final registros = await database.rawQuery(
+      ''' SELECT * from $tableName 
+      WHERE vehiculo = '$vehiculo'
+      ORDER BY fecha DESC'''
+    );
+    return registros.map((gastoArchivado) => GastoArchivado.fromSQfliteDatabase(gastoArchivado)).toList();
+  }
+
+  //SELECT DISTINCT Country FROM Customers;
+  Future<List<String>> fetchAllVehicles() async{
+    final database = await DatabaseService().database;
+    final registros = await database.rawQuery(
+      ''' SELECT DISTINCT vehiculo from $tableName'''
+    );
+    return registros.map((gastoArchivado) => gastoArchivado["vehiculo"] as String).toList();
+  }
+
   Future<void> delete(int id) async {
     final database = await DatabaseService().database;
     await database.rawDelete('''DELETE FROM $tableName WHERE id_gasto_archivado = ?''', [id]);

@@ -9,9 +9,12 @@ import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* ------------------------------ GASTOS ARCHIVADOS------------------------------ */
 class WidgetMisGastosArchivados extends StatelessWidget {
-  const WidgetMisGastosArchivados({super.key, required this.misGastosArchivados});
+  const WidgetMisGastosArchivados({super.key, required this.misGastosArchivados, required this.vehiculoSeleccionado, required this.misVehiculosArchivados});
 
   final Future<List<GastoArchivado>>? misGastosArchivados;
+  final String vehiculoSeleccionado;
+  final Future<List<String>>? misVehiculosArchivados;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +31,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
       bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisGastosArchivados),
       body: Column(
         children: [
+          FiltroSeleccionadorVehiculo(vehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo', misVehiculos: misVehiculosArchivados),
           Expanded(
             child: 
             FutureBuilder<List<GastoArchivado>>(
@@ -105,4 +109,55 @@ class TileGastoArchivado extends StatelessWidget {
     );
   }
 }
+
+class FiltroSeleccionadorVehiculo extends StatelessWidget{
+  const FiltroSeleccionadorVehiculo({
+    super.key,
+    required this.vehiculoSeleccionado,
+    required this.titulo, 
+    required this.misVehiculos
+  });
+
+  final String vehiculoSeleccionado;
+  final String titulo;
+  final Future <List<String>>? misVehiculos;
+
+  @override
+  Widget build(BuildContext context)  {
+    return Column(
+      children: [
+        TituloComponente(titulo: titulo),
+        SizedBox(
+          width: 160,
+          child: FutureBuilder<List<String>>(
+            future: misVehiculos,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return const WidgetCargando();
+              } else{
+                final vehiculos = snapshot.data?? [];
+                
+                return DropdownButtonFormField(
+                  validator: (value) {
+                    return null;
+                  },
+                  value: vehiculoSeleccionado,
+                  items: [
+                    DropdownMenuItem(value: valorEtiquetaTodas.toString(), child: const Text('Todos')),
+                    for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo, child: Text(vehiculo),)
+                  ],
+                  onChanged: (value) {
+                    context.read<VehiculoBloc>().add(FiltradoGastoArchivadoPorVehiculo(matricula: value as String));
+                  },
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
 /* ----------------------------------------------------------------------------- */

@@ -4,6 +4,19 @@ import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 
 /* -------------------------------- COMPONENTES -------------------------------- */
+class TituloComponente extends StatelessWidget {
+  const TituloComponente({
+    super.key,
+    required this.titulo,
+  });
+
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),);
+  }
+}
 
 class CuadroDeTexto extends StatelessWidget {
   const CuadroDeTexto({
@@ -88,19 +101,6 @@ class CuadroDeTexto extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-class TituloComponente extends StatelessWidget {
-  const TituloComponente({
-    super.key,
-    required this.titulo,
-  });
-
-  final String titulo;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),);
   }
 }
 

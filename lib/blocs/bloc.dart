@@ -91,11 +91,13 @@ class PlantillaEtiqueta extends VehiculoEstado {
 // GASTOS ARCHIVADOS
 class MisGastosArchivados extends VehiculoEstado {
   final Future <List<GastoArchivado>>? misGastosArchivados;
+  final String vehiculoSeleccionado;
+  final Future <List<String>>? misVehiculosArchivados;
 
-  MisGastosArchivados({required this.misGastosArchivados});
+  MisGastosArchivados({required this.misGastosArchivados, required this.vehiculoSeleccionado, required this.misVehiculosArchivados, });
 
   @override
-  List<Object?> get props => [misGastosArchivados];
+  List<Object?> get props => [misGastosArchivados, vehiculoSeleccionado, misVehiculosArchivados];
 }
 /* --------------------------------------------------------------------------- */
 
@@ -155,7 +157,6 @@ class AgregadoEtiqueta extends VehiculoEvento {
 }
 
 // GASTOS
-/*class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}*/
 class ClickeadoAgregarGasto extends VehiculoEvento {
   final int idVehiculo;
 
@@ -192,6 +193,15 @@ class FiltradoGastosPorEtiqueta extends VehiculoEvento {
   final int idEtiqueta;
 
   FiltradoGastosPorEtiqueta({required this.idEtiqueta});
+}
+
+
+// GASTOS ARCHIVADOS
+/*class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}*/
+class FiltradoGastoArchivadoPorVehiculo extends VehiculoEvento {
+  final String matricula;
+
+  FiltradoGastoArchivadoPorVehiculo({required this.matricula});
 }
 
 // MISC
@@ -234,6 +244,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Gastos Archivados
   Future<List<GastoArchivado>>? misGastosArchivados;
   final gastosArchivados = GastosArchivados();
+  String filtroVehiculo = valorEtiquetaTodas.toString();
+  Future<List<String>>? misVehiculosArchivados;
 
   // Bottom Bar
   int indiceBottomBarSeleccionado = 0;
@@ -264,6 +276,14 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await gastosArchivados.create(datos: datos);
     }
+  }
+
+
+  Future<List<GastoArchivado>> obtenerGastosArchivados(String matricula) {
+    if(matricula == valorEtiquetaTodas.toString()) {
+      return gastosArchivados.fetchAll();
+    }
+    return gastosArchivados.fetchByVehicule(filtroVehiculo);
   }
 
   VehiculoBloc() : super(Inicial()) {
@@ -422,6 +442,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       misGastosArchivados = gastosArchivados.fetchAll();
       emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados));
     });*/
+    on<FiltradoGastoArchivadoPorVehiculo>((event, emit) {
+      filtroVehiculo = event.matricula;
+      misGastosArchivados = obtenerGastosArchivados(event.matricula);
+
+      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+    });
 
     // Bottom Bar
     on<CambiadoDePantalla>((event, emit) {
@@ -429,6 +456,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       misVehiculos = vehiculos.fetchAll();
       misEtiquetas = etiquetas.fetchAll();
       misGastosArchivados = gastosArchivados.fetchAll();
+      filtroVehiculo = valorEtiquetaTodas.toString();
+      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
 
       if(event.pantalla == Pantallas.misVehiculos){
         emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
@@ -438,10 +467,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         emit(MisEtiquetas(misEtiquetas: misEtiquetas));
         return;
       }
-      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados));
+      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
     });
 
   }
+
 }
 
 
