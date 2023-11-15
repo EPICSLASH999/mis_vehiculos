@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- VEHICULOS --------------------------------- */
@@ -30,19 +31,12 @@ class WidgetMisVehiculos extends StatelessWidget {
         title: const Text('Mis Vehículos'),
         actions: [
           IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
-            }, 
-            icon: const Icon(Icons.folder_copy)
+            onPressed: pressedConsultarGastos, 
+            icon: const Icon(Icons.monetization_on_sharp),
           ),
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
-            }, 
-            icon: const Icon(Icons.label),
-          )
         ],
       ),
+      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisVehiculos),
       body: Column(
         children: [
           Expanded(
@@ -78,10 +72,10 @@ class WidgetMisVehiculos extends StatelessWidget {
               },
             ),
           ),
-          TextButton(
+          /*TextButton(
             onPressed: pressedConsultarGastos,
             child: const Text('Consultar gastos'),
-          ),
+          ),*/
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -145,19 +139,19 @@ class BotonesTileVehiculo extends StatelessWidget {
         children: [
           IconButton(
             onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este vehículo?', funcionAlProceder: eliminarVehiculo(context)),
-            icon: const Icon(Icons.delete, color: Colors.red)
+            icon: Icon(Icons.delete, color: colorIcono)
           ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
             }, 
-            icon: const Icon(Icons.edit, color: Colors.red)
+            icon: Icon(Icons.edit, color: colorIcono)
           ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
             }, 
-            icon: const Icon(Icons.monetization_on, color: Colors.red)
+            icon: Icon(Icons.add_card_outlined, color: colorIcono)
           ),
         ],
       ),
@@ -222,6 +216,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
+      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisVehiculos),
       //resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         child: Form(

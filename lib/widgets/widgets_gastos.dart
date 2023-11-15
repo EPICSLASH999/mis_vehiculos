@@ -529,13 +529,13 @@ class BotonesTileGasto extends StatelessWidget {
         children: [
           IconButton(
             onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context)), 
-            icon: const Icon(Icons.delete, color: Colors.red)
+            icon: Icon(Icons.delete, color: colorIcono)
           ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoEditarGasto(gasto: gasto));
             }, 
-            icon: const Icon(Icons.edit, color: Colors.red)
+            icon: Icon(Icons.edit, color: colorIcono)
           ),
         ],
       ),

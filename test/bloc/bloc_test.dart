@@ -265,7 +265,7 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -279,9 +279,9 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -296,10 +296,10 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -315,11 +315,11 @@ Future main() async {
       },
       expect: () => <VehiculoEstado>[
         MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(etiqueta: const Etiqueta(id: 1, nombre: 'Gasolina2')),
-        AdministradorEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
+        MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
     

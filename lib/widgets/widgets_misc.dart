@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mis_vehiculos/blocs/bloc.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 
 /* -------------------------------- COMPONENTES -------------------------------- */
 
@@ -163,3 +166,50 @@ VoidCallback dialogoAlerta ({required BuildContext context, required String text
   }
 
 /* ------------------------------------------------------------------------------ */
+
+/* --------------------------------- BOTTOM BAR --------------------------------- */
+class BarraInferior extends StatelessWidget {
+  const BarraInferior({
+    super.key, required this.indiceSeleccionado,
+  });
+
+  final int indiceSeleccionado;
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      currentIndex: indiceSeleccionado,
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.car_repair),
+          label: 'vehiculos',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.card_travel),
+          label: 'Etiquetas',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.folder),
+          label: 'Gastos Archivados',
+        ),
+      ],
+      onTap: (value) {
+        switch (value) {
+          case 0:
+              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misVehiculos));
+            break;
+          case 1:
+              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misEtiquetas));
+            break;
+          case 2:
+              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misGastosArchivados));
+            break;
+            
+          default:
+        }
+      },
+    );
+  }
+}
+
+/* ------------------------------------------------------------------------------- */

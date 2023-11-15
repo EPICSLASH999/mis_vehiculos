@@ -7,8 +7,8 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- ETIQUETAS --------------------------------- */
-class WidgetAdministradorEtiquetas extends StatelessWidget {
-  const WidgetAdministradorEtiquetas({super.key, required this.misEtiquetas});
+class WidgetMisEtiquetas extends StatelessWidget {
+  const WidgetMisEtiquetas({super.key, required this.misEtiquetas});
 
   final Future <List<Etiqueta>>? misEtiquetas;
 
@@ -24,6 +24,7 @@ class WidgetAdministradorEtiquetas extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
+      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
       body: FutureBuilder<List<Etiqueta>>(
         future: misEtiquetas,
         builder: (context, snapshot) {
@@ -110,13 +111,13 @@ class BotonesTileEtiqueta extends StatelessWidget {
         children: [
           IconButton(
             onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context)), 
-            icon: const Icon(Icons.delete, color: Colors.red)
+            icon: Icon(Icons.delete, color: colorIcono)
           ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
             }, 
-            icon: const Icon(Icons.edit, color: Colors.red)
+            icon: Icon(Icons.edit, color: colorIcono)
           ),
         ],
       ),
@@ -158,6 +159,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
+      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
       body: SingleChildScrollView(
         child: Form(
           key: _formKey,

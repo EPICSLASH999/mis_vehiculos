@@ -28,12 +28,18 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  MaterialApp(
+      theme: ThemeData(
+      primarySwatch: Colors.blue,
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.green,
+      ).copyWith(),      
+    ),
       home: BlocBuilder<VehiculoBloc, VehiculoEstado>(
         builder: (context, state) {
           if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos, idsVehiculosSeleccionados: state.idsVehiculosSeleccionados,);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
-          if (state is AdministradorEtiquetas) return WidgetAdministradorEtiquetas(misEtiquetas: state.misEtiquetas,);
+          if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas,);
           if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
           if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta,);
           if (state is MisGastosArchivados) return WidgetMisGastosArchivados(misGastosArchivados: state.misGastosArchivados,);

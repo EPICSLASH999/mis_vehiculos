@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
+import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* ------------------------------ GASTOS ARCHIVADOS------------------------------ */
 class WidgetMisGastosArchivados extends StatelessWidget {
@@ -23,6 +25,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
+      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisGastosArchivados),
       body: Column(
         children: [
           Expanded(

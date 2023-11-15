@@ -71,10 +71,10 @@ class MisGastos extends VehiculoEstado {
 }
 
 // ETIQUETAS
-class AdministradorEtiquetas extends VehiculoEstado {
+class MisEtiquetas extends VehiculoEstado {
   final Future<List<Etiqueta>>? misEtiquetas;
 
-  AdministradorEtiquetas({required this.misEtiquetas});
+  MisEtiquetas({required this.misEtiquetas});
   
   @override
   List<Object?> get props => [misEtiquetas];
@@ -155,7 +155,7 @@ class AgregadoEtiqueta extends VehiculoEvento {
 }
 
 // GASTOS
-class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}
+/*class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}*/
 class ClickeadoAgregarGasto extends VehiculoEvento {
   final int idVehiculo;
 
@@ -200,6 +200,13 @@ class ClickeadoRegresarAMisvehiculos extends VehiculoEvento {}
 class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
 /*class ClickeadoRegresarDesdeAdministradorEtiquetas extends VehiculoEvento {}*/
 class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
+
+// BOTTOM BAR
+class CambiadoDePantalla extends VehiculoEvento {
+  final Pantallas pantalla;
+
+  CambiadoDePantalla({required this.pantalla});
+}
 /* --------------------------------------------------------------------------- */
 
 
@@ -227,6 +234,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Gastos Archivados
   Future<List<GastoArchivado>>? misGastosArchivados;
   final gastosArchivados = GastosArchivados();
+
+  // Bottom Bar
+  int indiceBottomBarSeleccionado = 0;
 
   void gestionarIdVehiculoSeleccionado(int idVehiculo) {
     if (idsVehiculosSeleccionados.contains(idVehiculo)){
@@ -316,7 +326,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
-      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
     });
     on<ClickeadoregresarAConsultarGastos>((event, emit) {
       misGastos = gastos.fetchAllWithFilters(idsVehiculosSeleccionados, filtroFechaInicial, filtroFechaFinal);
@@ -383,7 +393,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // Etiquetas
     on<ClickeadoAdministrarEtiquetas>((event, emit) {
       misEtiquetas = etiquetas.fetchAll();
-      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
     });
     on<ClickeadoAgregarEtiqueta>((event, emit) {
       emit(PlantillaEtiqueta());
@@ -391,12 +401,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<AgregadoEtiqueta>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
       misEtiquetas = etiquetas.fetchAll();
-      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
     });
     on<EliminadaEtiqueta>((event, emit) async {
       await etiquetas.delete(event.id);
       misEtiquetas = etiquetas.fetchAll();
-      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
     });
     on<ClickeadoEditarEtiqueta>((event, emit) {
       emit(PlantillaEtiqueta(etiqueta: event.etiqueta));
@@ -404,15 +414,33 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<EditadoEtiqueta>((event, emit) async {
       await etiquetas.update(id: event.etiqueta.id, nombre: event.etiqueta.nombre);
       misEtiquetas = etiquetas.fetchAll();
-      emit(AdministradorEtiquetas(misEtiquetas: misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
     });
 
     // Gastos Archivados
-    on<ClickeadoConsultarGastosArchivados>((event, emit) {
+    /*on<ClickeadoConsultarGastosArchivados>((event, emit) {
       misGastosArchivados = gastosArchivados.fetchAll();
       emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados));
+    });*/
+
+    // Bottom Bar
+    on<CambiadoDePantalla>((event, emit) {
+      //indiceBottomBarSeleccionado = event.indicePantalla;
+      misVehiculos = vehiculos.fetchAll();
+      misEtiquetas = etiquetas.fetchAll();
+      misGastosArchivados = gastosArchivados.fetchAll();
+
+      if(event.pantalla == Pantallas.misVehiculos){
+        emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+        return;
+      }
+      if(event.pantalla == Pantallas.misEtiquetas){
+        emit(MisEtiquetas(misEtiquetas: misEtiquetas));
+        return;
+      }
+      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados));
     });
-  
+
   }
 }
 
