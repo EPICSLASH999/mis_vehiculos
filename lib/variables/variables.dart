@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 // Etiquetas
 const String nombreSinEtiqueta = 'Desconocida'; // NO CAMBIAR despues de inicializar tabla en la base de datos.
 const int idSinEtiqueta = 1; // NO CAMBIAR ESTE VALOR. 
-const int valorEtiquetaTodas = 999;
+const int valorOpcionTodas = 999;
 const int valorNoHayEtiquetasCreadas = 998;
 
 //Base de Datos

@@ -145,37 +145,40 @@ class FiltroSeleccionadorVehiculo extends StatelessWidget{
 
   @override
   Widget build(BuildContext context)  {
-    return Column(
-      children: [
-        TituloComponente(titulo: titulo),
-        SizedBox(
-          width: 160,
-          child: FutureBuilder<List<String>>(
-            future: misVehiculos,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting){
-                return const WidgetCargando();
-              } else{
-                final vehiculos = snapshot.data?? [];
-                
-                return DropdownButtonFormField(
-                  validator: (value) {
-                    return null;
-                  },
-                  value: vehiculoSeleccionado,
-                  items: [
-                    DropdownMenuItem(value: valorEtiquetaTodas.toString(), child: const Text('Todos')),
-                    for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo, child: Text(vehiculo),)
-                  ],
-                  onChanged: (value) {
-                    context.read<VehiculoBloc>().add(FiltradoGastoArchivadoPorVehiculo(matricula: value as String));
-                  },
-                );
-              }
-            },
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          TituloComponente(titulo: titulo),
+          SizedBox(
+            width: 160,
+            child: FutureBuilder<List<String>>(
+              future: misVehiculos,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final vehiculos = snapshot.data?? [];
+                  
+                  return DropdownButtonFormField(
+                    validator: (value) {
+                      return null;
+                    },
+                    value: vehiculoSeleccionado,
+                    items: [
+                      DropdownMenuItem(value: valorOpcionTodas.toString(), child: const Text('Todos')),
+                      for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo, child: Text(vehiculo),)
+                    ],
+                    onChanged: (value) {
+                      context.read<VehiculoBloc>().add(FiltradoGastoArchivadoPorVehiculo(matricula: value as String));
+                    },
+                  );
+                }
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

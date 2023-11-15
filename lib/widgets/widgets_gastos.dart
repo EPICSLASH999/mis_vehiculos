@@ -7,6 +7,7 @@ import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
+import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
@@ -251,6 +252,8 @@ class WidgetMisGastos extends StatefulWidget {
   final DateTime fechaSeleccionadaInicial;
   final Future<List<Etiqueta>>? misEtiquetas;
   final int idEtiquetaSeleccionada;
+  final int idVehiculoSeleccionado;
+  final Future <List<Vehiculo>>? misVehiculos;
 
    const WidgetMisGastos({
     super.key, 
@@ -258,7 +261,9 @@ class WidgetMisGastos extends StatefulWidget {
     required this.fechaSeleccionadaFinal, 
     required this.fechaSeleccionadaInicial, 
     required this.misEtiquetas, 
-    required this.idEtiquetaSeleccionada
+    required this.idEtiquetaSeleccionada,
+    required this.idVehiculoSeleccionado,
+    required this.misVehiculos,
   }); 
 
   @override
@@ -280,7 +285,8 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
 
   List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
-    if (widget.idEtiquetaSeleccionada != valorEtiquetaTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta    
+    if (widget.idEtiquetaSeleccionada != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta  
+    if (widget.idVehiculoSeleccionado != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.vehiculo != widget.idVehiculoSeleccionado)); // Filtrar por vehiculo    
     String filtroMecanico = controladorMecanico.text.trim();
     if (filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
     return gastosRecibidos;
@@ -332,6 +338,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         children: [
           FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
           FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada),
+          FiltroSeleccionadorVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
           FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
           Expanded(
             child: 
@@ -620,12 +627,12 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if ((value != null && (value == idSinEtiqueta || value == valorNoHayEtiquetasCreadas)) || value == valorEtiquetaTodas) return 'Valor requerido';
+                    if ((value != null && (value == idSinEtiqueta || value == valorNoHayEtiquetasCreadas)) || value == valorOpcionTodas) return 'Valor requerido';
                     return null;
                   },
                   value: idEtiquetaSeleccionada,
                   items: [
-                    const DropdownMenuItem(value: valorEtiquetaTodas, child: Text('Todas')),
+                    const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todas')),
                     const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
@@ -642,4 +649,53 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
   }
 }
 
+class FiltroSeleccionadorVehiculo extends StatelessWidget{
+  const FiltroSeleccionadorVehiculo({
+    super.key,
+    required this.idVehiculoSeleccionado,
+    required this.titulo, 
+    required this.misVehiculos
+  });
+
+  final int idVehiculoSeleccionado;
+  final String titulo;
+  final Future <List<Vehiculo>>? misVehiculos;
+
+  @override
+  Widget build(BuildContext context)  {
+    return Column(
+      children: [
+        TituloComponente(titulo: titulo),
+        SizedBox(
+          width: 160,
+          child: FutureBuilder<List<Vehiculo>>(
+            future: misVehiculos,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return const WidgetCargando();
+              } else{
+                final vehiculos = snapshot.data?? [];
+                
+                return DropdownButtonFormField(
+                  validator: (value) {
+                    if ((value != null) && value == valorOpcionTodas) return 'Valor requerido';
+                    return null;
+                  },
+                  value: idVehiculoSeleccionado,
+                  items: [
+                    const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todos')),
+                    for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo.id, child: Text(vehiculo.matricula),)
+                  ],
+                  onChanged: (value) {
+                    context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
+                  },
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
 /* ------------------------------------------------------------------------------ */
