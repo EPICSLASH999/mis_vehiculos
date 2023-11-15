@@ -477,9 +477,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       //indiceBottomBarSeleccionado = event.indicePantalla;
       misVehiculos = vehiculos.fetchAll();
       misEtiquetas = etiquetas.fetchAll();
-      misGastosArchivados = gastosArchivados.fetchAll();
-      filtroVehiculo = valorEtiquetaTodas.toString();
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
 
       if(event.pantalla == Pantallas.misVehiculos){
         emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
@@ -489,7 +486,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         emit(MisEtiquetas(misEtiquetas: misEtiquetas));
         return;
       }
-      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+      reiniciarFiltros();
+      misGastos = gastos.fetchAllWithFilters(idsVehiculosSeleccionados, filtroFechaInicial, filtroFechaFinal);
+      misEtiquetas = etiquetas.fetchAll();
+      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta));
+    
     });
 
   }

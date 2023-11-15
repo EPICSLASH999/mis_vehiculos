@@ -204,8 +204,8 @@ class BarraInferior extends StatelessWidget {
           label: 'Etiquetas',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.folder),
-          label: 'Gastos Archivados',
+          icon: Icon(Icons.monetization_on_rounded),
+          label: 'Gastos',
         ),
       ],
       onTap: (value) {
@@ -217,7 +217,7 @@ class BarraInferior extends StatelessWidget {
               context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misEtiquetas));
             break;
           case 2:
-              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misGastosArchivados));
+              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misGastos));
             break;
             
           default:

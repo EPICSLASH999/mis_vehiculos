@@ -20,11 +20,11 @@ const tablaEtiquetas = 'etiquetas';
 const tablaGastosArchivados = 'gastos_archivados';
 
 // Pantallas
-enum Pantallas {misVehiculos, misEtiquetas, misGastosArchivados}
+enum Pantallas {misVehiculos, misEtiquetas, misGastos}
 
 int indiceMisVehiculos = 0;
 int indiceMisEtiquetas = 1;
-int indiceMisGastosArchivados = 2;
+int indiceMisGastos = 2;
 
 // Colores
 Color colorIcono = const Color.fromARGB(255, 158, 190, 42);

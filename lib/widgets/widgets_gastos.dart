@@ -109,6 +109,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
+      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: FutureBuilder<String>(
         future: Vehiculos().obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
         builder: (context, snapshot) {
@@ -326,6 +327,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
+      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(
         children: [
           FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),

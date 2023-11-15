@@ -15,25 +15,13 @@ class WidgetMisVehiculos extends StatelessWidget {
 
   const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.idsVehiculosSeleccionados});
 
-  VoidCallback? funcionConsultarGastos(BuildContext context){
-    if (idsVehiculosSeleccionados.isEmpty) return null;
-    return (){
-      context.read<VehiculoBloc>().add(ClickeadoConsultarGastos());
-    };
-  }
-  
   @override
   Widget build(BuildContext context) {
-    var pressedConsultarGastos = funcionConsultarGastos(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Vehículos'),
         actions: [
-          IconButton(
-            onPressed: pressedConsultarGastos, 
-            icon: const Icon(Icons.monetization_on_rounded),
-          ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
