@@ -11,9 +11,8 @@ import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 // Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
   final Future <List<Vehiculo>>? misVehiculos;
-  final List<int> idsVehiculosSeleccionados;
 
-  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.idsVehiculosSeleccionados});
+  const WidgetMisVehiculos({super.key, required this.misVehiculos});
 
   @override
   Widget build(BuildContext context) {
@@ -59,17 +58,13 @@ class WidgetMisVehiculos extends StatelessWidget {
                       itemCount: vehiculos.length,
                       itemBuilder: (context, index) {
                         final vehiculo = vehiculos[index];
-                        return TileVehiculo(vehiculo: vehiculo, estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id),);
+                        return TileVehiculo(vehiculo: vehiculo);
                       }, 
                     );
                 }
               },
             ),
           ),
-          /*TextButton(
-            onPressed: pressedConsultarGastos,
-            child: const Text('Consultar gastos'),
-          ),*/
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -86,11 +81,9 @@ class TileVehiculo extends StatelessWidget {
   const TileVehiculo({
     super.key,
     required this.vehiculo, 
-    required this.estaSeleccionado,
   });
 
   final Vehiculo vehiculo;
-  final bool estaSeleccionado;
 
   @override
   Widget build(BuildContext context) {
@@ -102,11 +95,7 @@ class TileVehiculo extends StatelessWidget {
       subtitle: Text(vehiculo.matricula),
       trailing: BotonesTileVehiculo(vehiculo: vehiculo),
       onTap: () {
-        context.read<VehiculoBloc>().add(SeleccionadoVehiculo(idVehiculo: vehiculo.id));
       },
-      selected: estaSeleccionado,
-      selectedColor: Colors.black,
-      selectedTileColor: const Color.fromARGB(104, 201, 255, 7),
     );
   }
 }

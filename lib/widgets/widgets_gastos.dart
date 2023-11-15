@@ -338,7 +338,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         children: [
           FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
           FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada),
-          FiltroSeleccionadorVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
+          FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
           FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
           Expanded(
             child: 
@@ -649,8 +649,8 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
   }
 }
 
-class FiltroSeleccionadorVehiculo extends StatelessWidget{
-  const FiltroSeleccionadorVehiculo({
+class FiltroParaVehiculo extends StatelessWidget{
+  const FiltroParaVehiculo({
     super.key,
     required this.idVehiculoSeleccionado,
     required this.titulo, 
@@ -663,38 +663,59 @@ class FiltroSeleccionadorVehiculo extends StatelessWidget{
 
   @override
   Widget build(BuildContext context)  {
-    return Column(
-      children: [
-        TituloComponente(titulo: titulo),
-        SizedBox(
-          width: 160,
-          child: FutureBuilder<List<Vehiculo>>(
-            future: misVehiculos,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting){
-                return const WidgetCargando();
-              } else{
-                final vehiculos = snapshot.data?? [];
-                
-                return DropdownButtonFormField(
-                  validator: (value) {
-                    if ((value != null) && value == valorOpcionTodas) return 'Valor requerido';
-                    return null;
-                  },
-                  value: idVehiculoSeleccionado,
-                  items: [
-                    const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todos')),
-                    for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo.id, child: Text(vehiculo.matricula),)
-                  ],
-                  onChanged: (value) {
-                    context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
-                  },
-                );
-              }
-            },
+    return SeleccionadorVehiculo(titulo: titulo, misVehiculos: misVehiculos, idVehiculoSeleccionado: idVehiculoSeleccionado);
+  }
+}
+
+class SeleccionadorVehiculo extends StatelessWidget {
+  const SeleccionadorVehiculo({
+    super.key,
+    required this.titulo,
+    required this.misVehiculos,
+    required this.idVehiculoSeleccionado,
+  });
+
+  final String titulo;
+  final Future<List<Vehiculo>>? misVehiculos;
+  final int idVehiculoSeleccionado;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          TituloComponente(titulo: titulo),
+          SizedBox(
+            width: 160,
+            child: FutureBuilder<List<Vehiculo>>(
+              future: misVehiculos,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final vehiculos = snapshot.data?? [];
+                  
+                  return DropdownButtonFormField(
+                    validator: (value) {
+                      if ((value != null) && value == valorOpcionTodas) return 'Valor requerido';
+                      return null;
+                    },
+                    value: idVehiculoSeleccionado,
+                    items: [
+                      const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todos')),
+                      for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo.id, child: Text(vehiculo.matricula),)
+                    ],
+                    onChanged: (value) {
+                      context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
+                    },
+                  );
+                }
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

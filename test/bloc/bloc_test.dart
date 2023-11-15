@@ -66,7 +66,7 @@ Future main() async {
         //await testingMethod();
         bloc.add(Inicializado());
       },
-      expect: () =>  <VehiculoEstado>[MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: [])],
+      expect: () =>  <VehiculoEstado>[MisVehiculos(misVehiculos: Vehiculos().fetchAll())],
     );
     blocTest<VehiculoBloc, VehiculoEstado> (
       'Auto agregado es lista con 1 elemento',
@@ -77,7 +77,7 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [])
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]))
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -88,7 +88,7 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
         bloc.add(EliminadoVehiculo(id: 1));
       },
-      expect: () => <VehiculoEstado>[MisVehiculos(misVehiculos: Future.value([]), idsVehiculosSeleccionados: [])],
+      expect: () => <VehiculoEstado>[MisVehiculos(misVehiculos: Future.value([]))],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
       'Editado vehiculo correctamente.',
@@ -99,7 +99,7 @@ Future main() async {
         bloc.add(EditadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-2', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-2', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [])
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-2', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]))
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -110,7 +110,7 @@ Future main() async {
         bloc.add(ClickeadoAgregarVehiculo());
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Future.value([]), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Future.value([])),
         PlantillaVehiculo(),
       ],
     );
@@ -122,7 +122,7 @@ Future main() async {
         bloc.add(ClickeadoEditarVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Future.value([]), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Future.value([])),
         PlantillaVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969))
       ],
     );
@@ -135,38 +135,11 @@ Future main() async {
         bloc.add(ClickeadoRegresarAMisvehiculos());
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         PlantillaVehiculo(),
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
       ],
     );
-    blocTest<VehiculoBloc, VehiculoEstado>(
-      'Seleccionar un vehiculo lo añade a la lista de seleccionados.',
-      build: () => VehiculoBloc(),
-      act: (bloc) {
-        bloc.add(Inicializado());
-        bloc.add((SeleccionadoVehiculo(idVehiculo: 1)));
-      },
-      expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: [1]),
-      ],
-    );
-    blocTest<VehiculoBloc, VehiculoEstado>(
-      'Deseleccionar un vehiculo lo remueve de la lista de seleccionados.',
-      build: () => VehiculoBloc(),
-      act: (bloc) {
-        bloc.add(Inicializado());
-        bloc.add((SeleccionadoVehiculo(idVehiculo: 1)));
-        bloc.add((SeleccionadoVehiculo(idVehiculo: 1)));
-      },
-      expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: [1]),
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
-      ],
-    );
-  
   });
 
   group('Gastos: ', () {
@@ -178,7 +151,7 @@ Future main() async {
         bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
@@ -191,16 +164,14 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
         bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
         bloc.add(AgregadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
-        bloc.add(SeleccionadoVehiculo(idVehiculo: 1));
         bloc.add(ClickeadoConsultarGastos());
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         PlantillaVehiculo(),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)])),
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)])),        
         MisGastos(misGastos: Gastos().fetchAllWithFilters(DateTime.now(), DateTime.now()), fechaFinal: DateTime.now(), fechaInicial: DateTime.now(), misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0, filtroIdVehiculo: 0, misVehiculos: Future(() => [])),
       ],
     );
@@ -213,17 +184,15 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
         bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
         bloc.add(AgregadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
-        bloc.add(SeleccionadoVehiculo(idVehiculo: 1));
         bloc.add(ClickeadoConsultarGastos());
         bloc.add(EliminadoGasto(id: 1));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         PlantillaVehiculo(),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)])),
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)])),        
         MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0, filtroIdVehiculo: 0, misVehiculos: Future(() => [])),
         MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0, filtroIdVehiculo: 0, misVehiculos: Future(() => [])),
       ],
@@ -237,18 +206,17 @@ Future main() async {
         bloc.add(AgregadoVehiculo(vehiculo: const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)));
         bloc.add(ClickeadoAgregarGasto(idVehiculo: 1));
         bloc.add(AgregadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
-        bloc.add(SeleccionadoVehiculo(idVehiculo: 1));
+
         bloc.add(ClickeadoConsultarGastos());
         bloc.add(ClickeadoEditarGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
         bloc.add(EditadoGasto(gasto: const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         PlantillaVehiculo(),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)])),
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: []),
-        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), idsVehiculosSeleccionados: [1]),
+        MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)])),
         MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0, filtroIdVehiculo: 0, misVehiculos: Future(() => [])),
         MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: 0, filtroIdVehiculo: 0, misVehiculos: Future(() => [])),
       ],
@@ -264,7 +232,7 @@ Future main() async {
         bloc.add(ClickeadoAdministrarEtiquetas());
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
       ],
     );
@@ -278,7 +246,7 @@ Future main() async {
         bloc.add(AgregadoEtiqueta(nombreEtiqueta: 'Gasolina'));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(),
         MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
@@ -295,7 +263,7 @@ Future main() async {
         bloc.add(EliminadaEtiqueta(id: 1));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(),
         MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
@@ -314,7 +282,7 @@ Future main() async {
         bloc.add(EditadoEtiqueta(etiqueta: const Etiqueta(id: 1, nombre: 'Gasolina2')));
       },
       expect: () => <VehiculoEstado>[
-        MisVehiculos(misVehiculos: Vehiculos().fetchAll(), idsVehiculosSeleccionados: []),
+        MisVehiculos(misVehiculos: Vehiculos().fetchAll()),
         MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),
         PlantillaEtiqueta(),
         MisEtiquetas(misEtiquetas: Etiquetas().fetchAll()),

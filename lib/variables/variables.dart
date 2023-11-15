@@ -28,3 +28,4 @@ int indiceMisGastos = 2;
 
 // Colores
 Color colorIcono = const Color.fromARGB(255, 158, 190, 42);
+Color colorTileSeleccionado = const Color.fromARGB(104, 201, 255, 7);

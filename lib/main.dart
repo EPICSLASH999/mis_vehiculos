@@ -37,7 +37,7 @@ class MainApp extends StatelessWidget {
     ),
       home: BlocBuilder<VehiculoBloc, VehiculoEstado>(
         builder: (context, state) {
-          if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos, idsVehiculosSeleccionados: state.idsVehiculosSeleccionados,);
+          if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos);
           if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
           if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto,);
           if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas,);

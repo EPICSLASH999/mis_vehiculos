@@ -6,7 +6,6 @@ import 'package:mis_vehiculos/database/tablas/gastos.dart';
 import 'package:mis_vehiculos/database/tablas/gastos_archivados.dart';
 
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
-import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
@@ -24,12 +23,11 @@ class Inicial extends VehiculoEstado{
 // VEHICULOS
 class MisVehiculos extends VehiculoEstado {
   final Future<List<Vehiculo>>? misVehiculos;
-  final List<int> idsVehiculosSeleccionados;
   
-  MisVehiculos({required this.misVehiculos, required this.idsVehiculosSeleccionados});
+  MisVehiculos({required this.misVehiculos});
 
   @override
-  List<Object?> get props => [misVehiculos, idsVehiculosSeleccionados];
+  List<Object?> get props => [misVehiculos];
 }
 class PlantillaVehiculo extends VehiculoEstado {
    final Vehiculo? vehiculo;
@@ -130,11 +128,11 @@ class EditadoVehiculo extends VehiculoEvento {
 
   EditadoVehiculo({required this.vehiculo});
 }
-class SeleccionadoVehiculo extends VehiculoEvento {
+/*class SeleccionadoVehiculo extends VehiculoEvento {
   final int idVehiculo;
 
   SeleccionadoVehiculo({required this.idVehiculo});
-}
+}*/
 
 // ETIQUETAS
 class ClickeadoAdministrarEtiquetas extends VehiculoEvento {}
@@ -241,7 +239,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Vehiculos
   Future <List<Vehiculo>>? misVehiculos;
   final vehiculos = Vehiculos();
-  List<int> idsVehiculosSeleccionados = [];
+  //List<int> idsVehiculosSeleccionados = [];
 
   // Etiquetas
   Future <List<Etiqueta>>? misEtiquetas;
@@ -264,13 +262,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Bottom Bar
   int indiceBottomBarSeleccionado = 0;
 
-  void gestionarIdVehiculoSeleccionado(int idVehiculo) {
+  /*void gestionarIdVehiculoSeleccionado(int idVehiculo) {
     if (idsVehiculosSeleccionados.contains(idVehiculo)){
       idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..remove(idVehiculo);
       return;
     }
     idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..add(idVehiculo);
-  } 
+  } */
   String normalizarNumeroA2DigitosFecha(int numero){
     String numeroRecibido = '';
     if (numero.toString().length == 1) numeroRecibido += '0';
@@ -319,7 +317,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       reiniciarFiltros();
       misVehiculos = vehiculos.fetchAll();
       misEtiquetas = etiquetas.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     
     // Vehiculos
@@ -333,15 +331,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.create(datos: datos);
       misVehiculos = vehiculos.fetchAll();
-      idsVehiculosSeleccionados = [];
-      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     on<EliminadoVehiculo>((event, emit) async {
       await archivarGastosDeIdVehiculo(event.id);
       await vehiculos.delete(event.id);
       misVehiculos = vehiculos.fetchAll();
-      idsVehiculosSeleccionados = [];
-      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     on<EditadoVehiculo>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -353,8 +349,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.update(id: event.vehiculo.id, datos: datos);
       misVehiculos = vehiculos.fetchAll();
-      idsVehiculosSeleccionados = [];
-      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo());
@@ -362,17 +357,16 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoEditarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));
     });
-    on<SeleccionadoVehiculo>((event, emit) {
+    /*on<SeleccionadoVehiculo>((event, emit) {
       gestionarIdVehiculoSeleccionado(event.idVehiculo);
       emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
-    });
+    });*/
 
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
-      idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..clear();
       reiniciarFiltros();
       misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
       emit(MisEtiquetas(misEtiquetas: misEtiquetas));
@@ -397,7 +391,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": event.gasto.fecha,
       };
       await gastos.create(datos: datos);
-      emit(MisVehiculos(misVehiculos: misVehiculos,idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+      emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
       reiniciarFiltros();
@@ -501,7 +495,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       misEtiquetas = etiquetas.fetchAll();
 
       if(event.pantalla == Pantallas.misVehiculos){
-        emit(MisVehiculos(misVehiculos: misVehiculos, idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+        emit(MisVehiculos(misVehiculos: misVehiculos));
         return;
       }
       if(event.pantalla == Pantallas.misEtiquetas){
