@@ -64,8 +64,9 @@ class CuadroDeTexto extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(titulo),
+          TituloComponente(titulo: titulo),
           TextFormField(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
@@ -89,6 +90,20 @@ class CuadroDeTexto extends StatelessWidget {
     );
   }
 }
+class TituloComponente extends StatelessWidget {
+  const TituloComponente({
+    super.key,
+    required this.titulo,
+  });
+
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),);
+  }
+}
+
 class SeleccionadorDeFecha extends StatelessWidget {
   const SeleccionadorDeFecha({
     super.key,
@@ -109,7 +124,7 @@ class SeleccionadorDeFecha extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Text(titulo),
+            TituloComponente(titulo: titulo),
             TextFormField(
               validator: (value) {
                 if (value != null && value.isEmpty) return 'Valor requerido';

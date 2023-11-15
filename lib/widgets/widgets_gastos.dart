@@ -187,7 +187,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
 
     return Column(
       children: [
-        Text(widget.titulo),
+        TituloComponente(titulo: widget.titulo),
         SizedBox(
           width: 160,
           child: FutureBuilder<List<Etiqueta>>(
@@ -559,7 +559,7 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
   Widget build(BuildContext context)  {
     return Column(
       children: [
-        Text(titulo),
+        TituloComponente(titulo: titulo),
         SizedBox(
           width: 160,
           child: FutureBuilder<List<Etiqueta>>(
