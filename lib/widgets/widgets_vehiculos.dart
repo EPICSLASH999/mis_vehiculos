@@ -21,7 +21,7 @@ class WidgetMisVehiculos extends StatelessWidget {
       context.read<VehiculoBloc>().add(ClickeadoConsultarGastos());
     };
   }
-
+  
   @override
   Widget build(BuildContext context) {
     var pressedConsultarGastos = funcionConsultarGastos(context);
@@ -32,7 +32,13 @@ class WidgetMisVehiculos extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: pressedConsultarGastos, 
-            icon: const Icon(Icons.monetization_on_sharp),
+            icon: const Icon(Icons.monetization_on_rounded),
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
+            }, 
+            icon: const Icon(Icons.folder),
           ),
         ],
       ),

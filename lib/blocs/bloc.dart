@@ -197,7 +197,7 @@ class FiltradoGastosPorEtiqueta extends VehiculoEvento {
 
 
 // GASTOS ARCHIVADOS
-/*class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}*/
+class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}
 class FiltradoGastoArchivadoPorVehiculo extends VehiculoEvento {
   final String matricula;
 
@@ -451,10 +451,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
 
     // Gastos Archivados
-    /*on<ClickeadoConsultarGastosArchivados>((event, emit) {
+    on<ClickeadoConsultarGastosArchivados>((event, emit) {
       misGastosArchivados = gastosArchivados.fetchAll();
-      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados));
-    });*/
+      filtroVehiculo = valorEtiquetaTodas.toString();
+      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+    });
     on<FiltradoGastoArchivadoPorVehiculo>((event, emit) {
       filtroVehiculo = event.matricula;
       misGastosArchivados = obtenerGastosArchivados(event.matricula);
