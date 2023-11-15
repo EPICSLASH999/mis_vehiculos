@@ -28,7 +28,8 @@ class CuadroDeTexto extends StatelessWidget {
     this.esSoloLectura = false, 
     this.funcionAlPresionar,
     this.campoRequerido = true,
-    this.maxCaracteres = 20,
+    this.maxCaracteres = 20, 
+    this.minCaracteres,
   });
 
   final TextEditingController controlador;
@@ -39,6 +40,7 @@ class CuadroDeTexto extends StatelessWidget {
   final VoidCallback? funcionAlPresionar;
   final bool campoRequerido;
   final int maxCaracteres;
+  final int? minCaracteres;
 
   bool esNumerico(String? s) {
     if(s == null) return false;    
@@ -89,6 +91,7 @@ class CuadroDeTexto extends StatelessWidget {
               if (esDouble && !esNumerico(valorNormalizado)) return 'Debe ser numerico';  
               if((!esInt && !esDouble) && esNumerico(valorNormalizado)) return 'Campo inválido';
               if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
+              if(minCaracteres != null && valorNormalizado.length < minCaracteres!) return 'Debe tener al menos $minCaracteres caracteres';
               return null;
             },
             maxLength: maxCaracteres,
