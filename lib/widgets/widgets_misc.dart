@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/* ----------------------------------- MISC ------------------------------------ */
+/* -------------------------------- COMPONENTES -------------------------------- */
 
 class CuadroDeTexto extends StatelessWidget {
   const CuadroDeTexto({
@@ -49,8 +49,6 @@ class CuadroDeTexto extends StatelessWidget {
     if(esInt || esDouble) return TextInputType.number;
     return TextInputType.text;
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -129,3 +127,39 @@ class SeleccionadorDeFecha extends StatelessWidget {
 }
 
 /* ----------------------------------------------------------------------------- */
+
+
+/* -------------------------------- ALERT DIALOG -------------------------------- */
+//Función de AlertDialog
+VoidCallback dialogoAlerta ({required BuildContext context, required String texto, required Function funcionAlProceder}) {
+    return (){
+      showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text('¿Desea continuar?'),
+            content: Text(texto),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  funcionAlProceder();
+                  // Cerrar cuadro de diálogo
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Si') // Botón de "Si" 
+              ),
+              TextButton(
+                onPressed: () {
+                  // Cerrar cuadro de diálogo
+                  Navigator.of(context).pop();
+                },
+                child: const Text('No') // Botón de "No" 
+              )
+            ],
+          );
+        }
+      );
+    };
+  }
+
+/* ------------------------------------------------------------------------------ */

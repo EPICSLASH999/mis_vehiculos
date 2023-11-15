@@ -515,6 +515,12 @@ class BotonesTileGasto extends StatelessWidget {
 
   final Gasto gasto;
 
+  Function eliminarGasto(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadoGasto(id: gasto.id));
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -522,9 +528,7 @@ class BotonesTileGasto extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(EliminadoGasto(id: gasto.id));
-            }, 
+            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context)), 
             icon: const Icon(Icons.delete, color: Colors.red)
           ),
           IconButton(

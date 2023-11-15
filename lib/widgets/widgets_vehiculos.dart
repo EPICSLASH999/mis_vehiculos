@@ -6,6 +6,7 @@ import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- VEHICULOS --------------------------------- */
+
 // Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
   final Future <List<Vehiculo>>? misVehiculos;
@@ -130,6 +131,12 @@ class BotonesTileVehiculo extends StatelessWidget {
 
   final Vehiculo vehiculo;
 
+  Function eliminarVehiculo(BuildContext context){
+    return (){
+      context.read<VehiculoBloc>().add(EliminadoVehiculo(id: vehiculo.id));
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -137,9 +144,7 @@ class BotonesTileVehiculo extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(EliminadoVehiculo(id: vehiculo.id));
-            }, 
+            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este vehículo?', funcionAlProceder: eliminarVehiculo(context)),
             icon: const Icon(Icons.delete, color: Colors.red)
           ),
           IconButton(

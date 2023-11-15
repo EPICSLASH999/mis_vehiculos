@@ -96,6 +96,12 @@ class BotonesTileEtiqueta extends StatelessWidget {
 
   final Etiqueta etiqueta;
 
+  Function eliminarEtiqueta(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: etiqueta.id));
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -103,9 +109,7 @@ class BotonesTileEtiqueta extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: etiqueta.id));
-            }, 
+            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context)), 
             icon: const Icon(Icons.delete, color: Colors.red)
           ),
           IconButton(
