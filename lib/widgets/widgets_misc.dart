@@ -56,7 +56,7 @@ class CuadroDeTexto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caracteresEspeciales = RegExp(
-      r'[\^$*\[\]{}()?\"!@#%&/\><:;_~`+=' 
+      r'[\^$*\[\]{}()?\"!@%&/\><:,;_~`+=' 
       "'" 
       ']'
     );

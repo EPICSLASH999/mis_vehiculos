@@ -302,6 +302,16 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     super.dispose();
   }
 
+
+  double sumarGastos(List<Gasto> gastos) {
+    double gastosAcumulados = 0.0;
+    if (gastos.isEmpty) return gastosAcumulados;
+    for (var gasto in gastos) {
+      gastosAcumulados+= gasto.costo;
+    }
+    return gastosAcumulados;
+  }
+
   @override
   Widget build(BuildContext context) {
     controladorMecanico.addListener(escuchador);
@@ -330,7 +340,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                   return const WidgetCargando();
                 } else{
                   final gastos = snapshot.data?? [];
-
+                  
                   return gastos.isEmpty
                     ? const Center(
                       child: Text(
@@ -354,9 +364,44 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
               },
             ),
           ),
+          TotalGastos(listaGastos: obtenerListaGastos())
         ],
       ),
     );
+  }
+}
+
+class TotalGastos extends StatelessWidget {
+  const TotalGastos({super.key, required this.listaGastos});
+
+  final Future<List<Gasto>>? listaGastos;
+
+  double sumarGastos(List<Gasto> gastos) {
+    double gastosAcumulados = 0.0;
+    if (gastos.isEmpty) return gastosAcumulados;
+    for (var gasto in gastos) {
+      gastosAcumulados+= gasto.costo;
+    }
+    return gastosAcumulados;
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+            future: listaGastos, 
+            builder: (context, snapshot) {
+              if (snapshot.hasData){
+                final gastos = snapshot.data?? [];
+                double gastosTotales = sumarGastos(gastos);
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Total: \$${gastosTotales.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold),),
+                );
+              }
+              return const CircularProgressIndicator();
+            },
+          );
   }
 }
 
