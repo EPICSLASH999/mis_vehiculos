@@ -203,6 +203,11 @@ class FiltradoGastoArchivadoPorVehiculo extends VehiculoEvento {
 
   FiltradoGastoArchivadoPorVehiculo({required this.matricula});
 }
+class EliminadosGastosArchivados extends VehiculoEvento {
+  final String matricula;
+
+  EliminadosGastosArchivados({required this.matricula});
+}
 
 // MISC
 class Inicializado extends VehiculoEvento {}
@@ -285,6 +290,14 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     }
     return gastosArchivados.fetchByVehicule(filtroVehiculo);
   }
+  Future<void> eliminarGastosArchivados(EliminadosGastosArchivados event) async {
+    if(event.matricula == valorEtiquetaTodas.toString()) {
+      await gastosArchivados.deleteAll();
+      return;
+    }
+    await gastosArchivados.deleteWhereVehicle(event.matricula);
+  }
+
 
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
@@ -449,6 +462,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
       emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
     });
+    on<EliminadosGastosArchivados>((event, emit) async {
+      await eliminarGastosArchivados(event);
+      misGastosArchivados = gastosArchivados.fetchAll();
+      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      filtroVehiculo = valorEtiquetaTodas.toString();
+      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+    });
 
     // Bottom Bar
     on<CambiadoDePantalla>((event, emit) {
@@ -472,6 +492,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   }
 
+  
 }
 
 

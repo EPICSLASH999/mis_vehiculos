@@ -15,6 +15,11 @@ class WidgetMisGastosArchivados extends StatelessWidget {
   final String vehiculoSeleccionado;
   final Future<List<String>>? misVehiculosArchivados;
   
+  Function eliminarGastosArchivados(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadosGastosArchivados(matricula: vehiculoSeleccionado));
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +32,23 @@ class WidgetMisGastosArchivados extends StatelessWidget {
           }, 
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
+        actions: [
+          FutureBuilder(
+            future: misGastosArchivados, 
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return const WidgetCargando();
+              } else{
+                final gastosArchivados = snapshot.data?? [];
+
+                return IconButton(
+                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos seleccionados?', funcionAlProceder: eliminarGastosArchivados(context)), 
+                  icon: const Icon(Icons.delete_forever)
+                );
+              }
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisGastosArchivados),
       body: Column(
