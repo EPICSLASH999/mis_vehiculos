@@ -42,10 +42,12 @@ class Vehiculos {
     return Vehiculo.fromSQfliteDatabase(todo.first);
   }
 
-  Future<List<String>> fetchAllPlates() async{
+  Future<List<String>> fetchAllPlatesExcept(String plate) async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
-      ''' SELECT matricula from $tableName ORDER BY id_vehiculo'''
+      ''' SELECT matricula from $tableName 
+      WHERE matricula NOT IN ('$plate') 
+      ORDER BY id_vehiculo'''
     );
     return registros.map((vehiculo) => vehiculo["matricula"] as String).toList();
   }

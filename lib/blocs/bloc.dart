@@ -348,11 +348,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
-      matriculasVehiculos = vehiculos.fetchAllPlates();
+      matriculasVehiculos = vehiculos.fetchAllPlatesExcept('0');
       emit(PlantillaVehiculo(matriculasVehiculos: matriculasVehiculos));
     });
     on<ClickeadoEditarVehiculo>((event, emit) async {
-      emit(PlantillaVehiculo(vehiculo: event.vehiculo));
+      matriculasVehiculos = vehiculos.fetchAllPlatesExcept(event.vehiculo.matricula);
+      emit(PlantillaVehiculo(vehiculo: event.vehiculo, matriculasVehiculos: matriculasVehiculos));
     });
    
     // MISC
