@@ -7,6 +7,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 Database? _baseDeDatosEnEjecucion;
+var fabricaBaseDatos = databaseFactory;
 
 class DatabaseService {
   Database? get _database => _baseDeDatosEnEjecucion;
@@ -21,18 +22,22 @@ class DatabaseService {
 
   Future<String> get fullPath async {
     const name = nombreBD;
-    final path = await getDatabasesPath();
+    final path = await fabricaBaseDatos.getDatabasesPath();
     return join(path,name);
   }
 
   Future<Database> _initialize() async {
+    
+
     final path = await fullPath;
-    var database = await openDatabase(
+    var database = await fabricaBaseDatos.openDatabase(
       path,
-      version: 2,
-      onOpen: turnOnForeignKeys,
-      onCreate: create,
-      singleInstance: true,
+      options: OpenDatabaseOptions(
+        version: 2,
+        onOpen: turnOnForeignKeys,
+        onCreate: create,
+        singleInstance: true,
+      )
     );
     //recrearTablas(database);
     return database;

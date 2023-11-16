@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
@@ -89,6 +90,7 @@ class CuadroDeTexto extends StatelessWidget {
               if(minCaracteres != null && valorNormalizado.length < minCaracteres!) return 'Debe tener al menos $minCaracteres caracteres';
               return null;
             },
+            textCapitalization: TextCapitalization.sentences,
             maxLength: maxCaracteres,
             readOnly: esSoloLectura,
             controller: controlador,
