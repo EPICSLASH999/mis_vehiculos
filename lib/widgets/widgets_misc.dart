@@ -141,7 +141,6 @@ class SeleccionadorDeFecha extends StatelessWidget {
     );
   }
 }
-
 /* ----------------------------------------------------------------------------- */
 
 
@@ -177,7 +176,6 @@ VoidCallback dialogoAlerta ({required BuildContext context, required String text
       );
     };
   }
-
 /* ------------------------------------------------------------------------------ */
 
 /* --------------------------------- BOTTOM BAR --------------------------------- */
@@ -224,5 +222,4 @@ class BarraInferior extends StatelessWidget {
     );
   }
 }
-
 /* ------------------------------------------------------------------------------- */
