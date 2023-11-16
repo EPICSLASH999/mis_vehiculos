@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 import 'package:mis_vehiculos/database/tablas/gastos_archivados.dart';
-
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
@@ -129,11 +128,6 @@ class EditadoVehiculo extends VehiculoEvento {
 
   EditadoVehiculo({required this.vehiculo});
 }
-/*class SeleccionadoVehiculo extends VehiculoEvento {
-  final int idVehiculo;
-
-  SeleccionadoVehiculo({required this.idVehiculo});
-}*/
 
 // ETIQUETAS
 class ClickeadoAdministrarEtiquetas extends VehiculoEvento {}
@@ -233,22 +227,24 @@ class CambiadoDePantalla extends VehiculoEvento {
 
 
 /* ---------------------------- VARIABLES GLOBALES --------------------------- */
+// Vehiculos
+Future <List<Vehiculo>>? _misVehiculos;
+final vehiculos = Vehiculos();
 
+// Etiquetas
+Future <List<Etiqueta>>? _misEtiquetas;
+final etiquetas = Etiquetas();
+
+// Gastos
+Future <List<Gasto>>? _misGastos;
+final gastos = Gastos();
 /* --------------------------------------------------------------------------- */
 
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Vehiculos
-  Future <List<Vehiculo>>? misVehiculos;
-  final vehiculos = Vehiculos();
   Future<List<String>>? matriculasVehiculos;
 
-  // Etiquetas
-  Future <List<Etiqueta>>? misEtiquetas;
-  final etiquetas = Etiquetas();
-
   // Gastos
-  Future <List<Gasto>>? misGastos;
-  final gastos = Gastos();
   DateTime filtroFechaInicial = DateTime.now();
   DateTime filtroFechaFinal = DateTime.now();
   int filtroIdEtiqueta = valorOpcionTodas;
@@ -311,9 +307,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
       reiniciarFiltros();
-      misVehiculos = vehiculos.fetchAll();
-      misEtiquetas = etiquetas.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      _misVehiculos = vehiculos.fetchAll();
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisVehiculos(misVehiculos: _misVehiculos));
     });
     
     // Vehiculos
@@ -326,14 +322,14 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "ano": event.vehiculo.ano,
       };
       await vehiculos.create(datos: datos);
-      misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      _misVehiculos = vehiculos.fetchAll();
+      emit(MisVehiculos(misVehiculos: _misVehiculos));
     });
     on<EliminadoVehiculo>((event, emit) async {
       await archivarGastosDeIdVehiculo(event.id);
       await vehiculos.delete(event.id);
-      misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      _misVehiculos = vehiculos.fetchAll();
+      emit(MisVehiculos(misVehiculos: _misVehiculos));
     });
     on<EditadoVehiculo>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -344,8 +340,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "ano": event.vehiculo.ano,
       };
       await vehiculos.update(id: event.vehiculo.id, datos: datos);
-      misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      _misVehiculos = vehiculos.fetchAll();
+      emit(MisVehiculos(misVehiculos: _misVehiculos));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
       matriculasVehiculos = vehiculos.fetchAllPlatesExcept('0');
@@ -359,21 +355,21 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
       reiniciarFiltros();
-      misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      _misVehiculos = vehiculos.fetchAll();
+      emit(MisVehiculos(misVehiculos: _misVehiculos));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
-      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
     });
     on<ClickeadoregresarAConsultarGastos>((event, emit) {
-      misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
 
     // Gastos
     on<ClickeadoAgregarGasto>((event, emit) async {
-      misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: misEtiquetas));
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas));
     });
     on<AgregadoGasto>((event, emit) async {
        Map<String,dynamic> datos = {
@@ -385,22 +381,22 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": event.gasto.fecha,
       };
       await gastos.create(datos: datos);
-      emit(MisVehiculos(misVehiculos: misVehiculos));
+      emit(MisVehiculos(misVehiculos: _misVehiculos));
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
       reiniciarFiltros();
-      misGastos = obtenerGastos();
-      misEtiquetas = etiquetas.fetchAll();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));
+      _misGastos = obtenerGastos();
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
     on<EliminadoGasto>((event, emit) async {
       await gastos.delete(event.id);
-      misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
     on<ClickeadoEditarGasto>((event, emit) {
-      misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: misEtiquetas, gasto: event.gasto));
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: _misEtiquetas, gasto: event.gasto));
     });
     on<EditadoGasto>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -412,52 +408,52 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": event.gasto.fecha,
       };
       await gastos.update(id: event.gasto.id, datos: datos);
-      misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
     on<FiltradoGastosPorFecha>((event, emit) {
       filtroFechaInicial = event.fechaInicial;
       filtroFechaFinal = event.fechaFinal;
-      misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
     on<FiltradoGastosPorEtiqueta>((event, emit) {
       filtroIdEtiqueta = event.idEtiqueta;
-      misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
     on<FiltradoGastosPorVehiculo>((event, emit) {
       filtroIdVehiculo = event.idVehiculo;
-      misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     
     });
 
     // Etiquetas
     on<ClickeadoAdministrarEtiquetas>((event, emit) {
-      misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
     });
     on<ClickeadoAgregarEtiqueta>((event, emit) {
       emit(PlantillaEtiqueta());
     });
     on<AgregadoEtiqueta>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
-      misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
     });
     on<EliminadaEtiqueta>((event, emit) async {
       await etiquetas.delete(event.id);
-      misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
     });
     on<ClickeadoEditarEtiqueta>((event, emit) {
       emit(PlantillaEtiqueta(etiqueta: event.etiqueta));
     });
     on<EditadoEtiqueta>((event, emit) async {
       await etiquetas.update(id: event.etiqueta.id, nombre: event.etiqueta.nombre);
-      misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: misEtiquetas));
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
     });
 
     // Gastos Archivados
@@ -484,21 +480,21 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // Bottom Bar
     on<CambiadoDePantalla>((event, emit) {
-      misVehiculos = vehiculos.fetchAll();
-      misEtiquetas = etiquetas.fetchAll();
+      _misVehiculos = vehiculos.fetchAll();
+      _misEtiquetas = etiquetas.fetchAll();
 
       if(event.pantalla == Pantallas.misVehiculos){
-        emit(MisVehiculos(misVehiculos: misVehiculos));
+        emit(MisVehiculos(misVehiculos: _misVehiculos));
         return;
       }
       if(event.pantalla == Pantallas.misEtiquetas){
-        emit(MisEtiquetas(misEtiquetas: misEtiquetas));
+        emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
         return;
       }
       reiniciarFiltros();
-      misGastos = obtenerGastos();
-      misEtiquetas = etiquetas.fetchAll();
-      emit(MisGastos(misGastos: misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: misVehiculos));    
+      _misGastos = obtenerGastos();
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));    
     });
 
   }

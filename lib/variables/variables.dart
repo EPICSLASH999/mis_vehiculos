@@ -1,7 +1,5 @@
 // Variables constantes para administrar los valores de etiquetas Nulas, Todas o vacías
 // Puesto que ellas no se encuentran en la Base de Datos.
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 // Etiquetas
