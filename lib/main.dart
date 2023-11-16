@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/widgets/widgets_etiquetas.dart';
@@ -7,6 +8,12 @@ import 'package:mis_vehiculos/widgets/widgets_gastos_archivados.dart';
 import 'package:mis_vehiculos/widgets/widgets_vehiculos.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([ // Para que solo permita orientación vertical
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown
+  ]);
+
   runApp(const AplicacionInyectada());
 } 
 

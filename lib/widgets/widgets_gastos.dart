@@ -376,6 +376,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
           TotalGastos(listaGastos: obtenerListaGastos())
         ],
       ),
+      
     );
   }
 }
