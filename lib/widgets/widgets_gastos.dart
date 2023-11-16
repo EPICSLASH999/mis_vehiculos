@@ -555,8 +555,7 @@ class TileGasto extends StatelessWidget {
         ],
       ),
       trailing: BotonesTileGasto(gasto: gasto),
-      onTap: () {
-      },
+      onTap: null,
     );
   }
 }

@@ -82,9 +82,7 @@ class TileEtiqueta extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       trailing: BotonesTileEtiqueta(etiqueta: etiqueta),
-      onTap: () {
-        
-      },
+      onTap: null,
     );
   }
 }

@@ -51,14 +51,14 @@ class DatabaseService {
   }
 
   Future<void> turnOnForeignKeys(Database database) async {
-     // Sql-lite necesita hacer esto manualmente para poder usar llaver foraneas
+    // Sql-lite necesita hacer esto manualmente para poder usar llaver foraneas
     await database.execute("""PRAGMA foreign_keys = ON;""");
-    //print('---> ACTIVATED FK !');
   }
 
   Future<void> recrearTablas(Database database) async {
     //database.execute('DROP TABLE IF EXISTS ${Gastos().tableName}'); await Gastos().createTable(database);
-    database.execute('DROP TABLE IF EXISTS ${GastosArchivados().tableName}'); await GastosArchivados().createTable(database);
+    //database.execute('DROP TABLE IF EXISTS ${GastosArchivados().tableName}'); await GastosArchivados().createTable(database);
     //database.execute('DROP TABLE IF EXISTS ${Etiquetas().tableName}'); await Etiquetas().createTable(database);
+    //database.execute('DROP TABLE IF EXISTS ${Vehiculos().tableName}'); await Vehiculos().createTable(database);
   }
 }

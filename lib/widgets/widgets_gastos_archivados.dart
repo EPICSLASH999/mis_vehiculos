@@ -125,8 +125,7 @@ class TileGastoArchivado extends StatelessWidget {
           Text('\$${gastoArchivado.costo}'),
         ],
       ),
-      onTap: () {
-      },
+      onTap: null,
     );
   }
 }
@@ -182,6 +181,5 @@ class FiltroSeleccionadorVehiculo extends StatelessWidget{
     );
   }
 }
-
 
 /* ----------------------------------------------------------------------------- */
