@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+
 import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 import 'package:mis_vehiculos/database/tablas/gastos_archivados.dart';
@@ -256,6 +257,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   String filtroVehiculo = valorOpcionTodas.toString();
   Future<List<String>>? misVehiculosArchivados;
 
+  // MÉTODOS
   String normalizarNumeroA2DigitosFecha(int numero){
     String numeroRecibido = '';
     if (numero.toString().length == 1) numeroRecibido += '0';
@@ -498,11 +500,5 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
 
   }
-
-  
 }
-
-
-
-// Eliminiada Ramita
 
