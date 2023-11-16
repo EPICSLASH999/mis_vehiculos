@@ -215,7 +215,6 @@ class EliminadosGastosArchivados extends VehiculoEvento {
 class Inicializado extends VehiculoEvento {}
 class ClickeadoRegresarAMisvehiculos extends VehiculoEvento {}
 class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
-/*class ClickeadoRegresarDesdeAdministradorEtiquetas extends VehiculoEvento {}*/
 class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
 
 // BOTTOM BAR
@@ -239,6 +238,10 @@ final etiquetas = Etiquetas();
 // Gastos
 Future <List<Gasto>>? _misGastos;
 final gastos = Gastos();
+
+// Gastos Archivados
+Future<List<GastoArchivado>>? _misGastosArchivados;
+final gastosArchivados = GastosArchivados();
 /* --------------------------------------------------------------------------- */
 
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
@@ -252,8 +255,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   int filtroIdVehiculo = valorOpcionTodas;
 
   // Gastos Archivados
-  Future<List<GastoArchivado>>? misGastosArchivados;
-  final gastosArchivados = GastosArchivados();
   String filtroVehiculo = valorOpcionTodas.toString();
   Future<List<String>>? misVehiculosArchivados;
 
@@ -263,12 +264,17 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     if (numero.toString().length == 1) numeroRecibido += '0';
     return numeroRecibido += numero.toString();
   }
-  void reiniciarFiltros() {
+  void reiniciarFiltrosGastos() {
     filtroFechaFinal  = DateTime.now();
     filtroFechaInicial = DateTime.parse('${filtroFechaFinal.year}-${normalizarNumeroA2DigitosFecha(filtroFechaFinal.month)}-01');
     filtroIdEtiqueta = valorOpcionTodas;
     filtroIdVehiculo = valorOpcionTodas;
   }
+  Future<List<Gasto>> obtenerGastos(){
+    int? idVehiculo = (filtroIdVehiculo == valorOpcionTodas)?null:filtroIdVehiculo;
+    return gastos.fetchAllWithFilters(filtroFechaInicial, filtroFechaFinal, idVehiculo);
+  }
+
   Future<void> archivarGastosDeIdVehiculo(int id) async {
     List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(id);
     for (var gasto in misGastosPorVehiculo) {
@@ -284,8 +290,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await gastosArchivados.create(datos: datos);
     }
   }
-
-
   Future<List<GastoArchivado>> obtenerGastosArchivados(String matricula) {
     if(matricula == valorOpcionTodas.toString()) {
       return gastosArchivados.fetchAll();
@@ -300,15 +304,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     await gastosArchivados.deleteWhereVehicle(event.matricula);
   }
 
-  Future<List<Gasto>> obtenerGastos(){
-    int? idVehiculo = (filtroIdVehiculo == valorOpcionTodas)?null:filtroIdVehiculo;
-    return gastos.fetchAllWithFilters(filtroFechaInicial, filtroFechaFinal, idVehiculo);
-  }
-
-
+  
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
-      reiniciarFiltros();
+      reiniciarFiltrosGastos();
       _misVehiculos = vehiculos.fetchAll();
       _misEtiquetas = etiquetas.fetchAll();
       emit(MisVehiculos(misVehiculos: _misVehiculos));
@@ -354,20 +353,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo, matriculasVehiculos: matriculasVehiculos));
     });
    
-    // MISC
-    on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
-      reiniciarFiltros();
-      _misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: _misVehiculos));
-    });
-    on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
-    });
-    on<ClickeadoregresarAConsultarGastos>((event, emit) {
-      _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
-    });
-
     // Gastos
     on<ClickeadoAgregarGasto>((event, emit) async {
       _misEtiquetas = etiquetas.fetchAll();
@@ -386,7 +371,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: _misVehiculos));
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
-      reiniciarFiltros();
+      reiniciarFiltrosGastos();
       _misGastos = obtenerGastos();
       _misEtiquetas = etiquetas.fetchAll();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
@@ -460,24 +445,38 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // Gastos Archivados
     on<ClickeadoConsultarGastosArchivados>((event, emit) {
-      misGastosArchivados = gastosArchivados.fetchAll();
+      _misGastosArchivados = gastosArchivados.fetchAll();
       filtroVehiculo = valorOpcionTodas.toString();
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
     });
     on<FiltradoGastoArchivadoPorVehiculo>((event, emit) {
       filtroVehiculo = event.matricula;
-      misGastosArchivados = obtenerGastosArchivados(event.matricula);
+      _misGastosArchivados = obtenerGastosArchivados(event.matricula);
 
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
     });
     on<EliminadosGastosArchivados>((event, emit) async {
       await eliminarGastosArchivados(event);
-      misGastosArchivados = gastosArchivados.fetchAll();
+      _misGastosArchivados = gastosArchivados.fetchAll();
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
       filtroVehiculo = valorOpcionTodas.toString();
-      emit(MisGastosArchivados(misGastosArchivados: misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+    });
+
+    // MISC
+    on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
+      reiniciarFiltrosGastos();
+      _misVehiculos = vehiculos.fetchAll();
+      emit(MisVehiculos(misVehiculos: _misVehiculos));
+    });
+    on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+    });
+    on<ClickeadoregresarAConsultarGastos>((event, emit) {
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
 
     // Bottom Bar
@@ -493,7 +492,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
         return;
       }
-      reiniciarFiltros();
+      reiniciarFiltrosGastos();
       _misGastos = obtenerGastos();
       _misEtiquetas = etiquetas.fetchAll();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));    
