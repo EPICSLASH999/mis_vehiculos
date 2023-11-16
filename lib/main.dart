@@ -21,7 +21,7 @@ class AplicacionInyectada extends StatelessWidget {
           create: (context) => VehiculoBloc()..add(Inicializado()),
         ),
         BlocProvider(
-          create: (context) => GastoBloc()..add(InicializadoGasto()),
+          create: (context) => GastoBloc(),
         ),
       ],
       child: const MainApp(),

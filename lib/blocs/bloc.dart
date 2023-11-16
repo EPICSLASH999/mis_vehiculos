@@ -105,7 +105,6 @@ class MisGastosArchivados extends VehiculoEstado {
 
 /* --------------------------------- EVENTOS --------------------------------- */
 sealed class VehiculoEvento {}
-sealed class GastoEvento {}
 
 // VEHICULOS
 class ClickeadoAgregarVehiculo extends VehiculoEvento {}
@@ -155,44 +154,44 @@ class AgregadoEtiqueta extends VehiculoEvento {
 }
 
 // GASTOS
-class ClickeadoAgregarGasto extends GastoEvento {
+class ClickeadoAgregarGasto extends VehiculoEvento {
   final int idVehiculo;
 
   ClickeadoAgregarGasto({required this.idVehiculo});
 }
-class ClickeadoConsultarGastos extends GastoEvento {}
-class AgregadoGasto extends GastoEvento {
+class ClickeadoConsultarGastos extends VehiculoEvento {}
+class AgregadoGasto extends VehiculoEvento {
   final Gasto gasto;
 
   AgregadoGasto({required this.gasto});
 }
-class FiltradoGastosPorFecha extends GastoEvento {
+class FiltradoGastosPorFecha extends VehiculoEvento {
   final DateTime fechaInicial;
   final DateTime fechaFinal;
 
   FiltradoGastosPorFecha({required this.fechaInicial, required this.fechaFinal});
 }
-class ClickeadoEditarGasto extends GastoEvento {
+class ClickeadoEditarGasto extends VehiculoEvento {
   final Gasto gasto;
 
   ClickeadoEditarGasto({required this.gasto});
 }
-class EditadoGasto extends GastoEvento {
+class EditadoGasto extends VehiculoEvento {
   final Gasto gasto;
 
   EditadoGasto({required this.gasto});
 }
-class EliminadoGasto extends GastoEvento {
+class EliminadoGasto extends VehiculoEvento {
   final int id;
 
   EliminadoGasto({required this.id});
 }
-class FiltradoGastosPorEtiqueta extends GastoEvento {
+class FiltradoGastosPorEtiqueta extends VehiculoEvento {
   final int idEtiqueta;
 
   FiltradoGastosPorEtiqueta({required this.idEtiqueta});
 }
-class FiltradoGastosPorVehiculo extends GastoEvento {
+class FiltradoGastosPorVehiculo extends VehiculoEvento {
   final int idVehiculo;
 
   FiltradoGastosPorVehiculo({required this.idVehiculo});
@@ -213,14 +212,14 @@ class EliminadosGastosArchivados extends VehiculoEvento {
 
 // MISC
 class Inicializado extends VehiculoEvento {}
-class InicializadoGasto extends GastoEvento {}
+class InicializadoGasto extends VehiculoEvento {}
 class ClickeadoRegresarAMisvehiculos extends VehiculoEvento {}
 class ClickeadoRegresarAAdministradorEtiquetas extends VehiculoEvento {}
 /*class ClickeadoRegresarDesdeAdministradorEtiquetas extends VehiculoEvento {}*/
-class ClickeadoregresarAConsultarGastos extends GastoEvento {}
+class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
 
 // BOTTOM BAR
-class CambiadoDePantalla extends GastoEvento {
+class CambiadoDePantalla extends VehiculoEvento {
   final Pantallas pantalla;
 
   CambiadoDePantalla({required this.pantalla});
@@ -514,7 +513,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   
 }
 
-class GastoBloc extends Bloc<GastoEvento, VehiculoEstado> {
+class GastoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Gastos
   DateTime filtroFechaInicial = DateTime.now();
   DateTime filtroFechaFinal = DateTime.now();
@@ -539,10 +538,6 @@ class GastoBloc extends Bloc<GastoEvento, VehiculoEstado> {
 
 
   GastoBloc() : super(Inicial()) {
-    on<InicializadoGasto>((event, emit) async {
-      reiniciarFiltros();
-    });
-
     on<ClickeadoAgregarGasto>((event, emit) async {
       _misEtiquetas = etiquetas.fetchAll();
       emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas));
