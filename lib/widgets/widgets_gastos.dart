@@ -105,7 +105,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
               context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
               return;
             }
-            context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
+            context.read<GastoBloc>().add(ClickeadoregresarAConsultarGastos());
           }, 
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
@@ -137,10 +137,10 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           if (widget.gasto == null) {
-                            context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                            context.read<GastoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
                             return;
                           }
-                          context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
+                          context.read<GastoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
                         }
                       },
                       child: Text(obtenerTexto()),
@@ -439,7 +439,7 @@ class FiltroParaFecha extends StatelessWidget {
       if (nuevaFecha != null) {
         fechaSeleccionadaInicial = nuevaFecha;
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
+        context.read<GastoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
       }
     };
   }
@@ -456,7 +456,7 @@ class FiltroParaFecha extends StatelessWidget {
         DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
         fechaSeleccionadaFinal = fechaNormalizada;
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
+        context.read<GastoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
       }
     };
   }
@@ -571,7 +571,7 @@ class BotonesTileGasto extends StatelessWidget {
 
   Function eliminarGasto(BuildContext context){
     return () {
-      context.read<VehiculoBloc>().add(EliminadoGasto(id: gasto.id));
+      context.read<GastoBloc>().add(EliminadoGasto(id: gasto.id));
     };
   }
 
@@ -587,7 +587,7 @@ class BotonesTileGasto extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoEditarGasto(gasto: gasto));
+              context.read<GastoBloc>().add(ClickeadoEditarGasto(gasto: gasto));
             }, 
             icon: Icon(Icons.edit, color: colorIcono)
           ),
@@ -637,7 +637,7 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
                     for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
                   ],
                   onChanged: (value) {
-                    context.read<VehiculoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value!));
+                    context.read<GastoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value!));
                   },
                 );
               }
@@ -707,7 +707,7 @@ class SeleccionadorVehiculo extends StatelessWidget {
                       for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo.id, child: Text(vehiculo.matricula),)
                     ],
                     onChanged: (value) {
-                      context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
+                      context.read<GastoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
                     },
                   );
                 }

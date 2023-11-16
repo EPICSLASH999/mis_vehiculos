@@ -132,7 +132,7 @@ class BotonesTileVehiculo extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+              context.read<GastoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
             }, 
             icon: Icon(Icons.add_card_outlined, color: colorIcono)
           ),

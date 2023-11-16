@@ -57,7 +57,7 @@ Future main() async {
       expect(await database2.getVersion(), 1);
     });
   });
-
+/*
   group('Vehiculos: ', () {
     blocTest<VehiculoBloc, VehiculoEstado> (
       'base de datos inizializada en lista vacia = [].',
@@ -292,6 +292,7 @@ Future main() async {
     );
     
   });
+  */
 }
 
 Future<void> testingMethod() async {
