@@ -276,7 +276,6 @@ class CuadroDeTextoMatricula extends StatelessWidget {
         } else{
           final matriculasVehiculos = snapshot.data?? [];
 
-          //return ValodadorDeMatricula(controlador: controladorMatricula, titulo: titulo, maxCaracteres: 7, minCaracteres: 4, matriculasVehiculos: matriculasVehiculos,);
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -295,12 +294,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                   },
                   maxLength: maxCaracteres,
                   controller: controladorMatricula,
-                  decoration: const InputDecoration(
-                    hintText: "", 
-                    prefixIcon: Icon(Icons.label_important),
-                    prefixIconColor: Colors.red,
-                    suffixIcon: Icon(Icons.car_rental)
-                  ),
+                  decoration: decoracionParaCampoObligatorio,
                   keyboardType: TextInputType.text,
                 ),
               ],
@@ -311,73 +305,5 @@ class CuadroDeTextoMatricula extends StatelessWidget {
     );
   }
 }
-/*
-class ValodadorDeMatricula extends StatelessWidget {
-  const ValodadorDeMatricula({
-    super.key,
-    required this.controlador,
-    required this.titulo, 
-    this.campoRequerido = true,
-    this.maxCaracteres = 20, 
-    this.minCaracteres, 
-    required this.matriculasVehiculos,
-  });
-
-  final TextEditingController controlador;
-  final String titulo;
-  final bool campoRequerido;
-  final int maxCaracteres;
-  final int? minCaracteres;
-  final List<String> matriculasVehiculos;
-
-  InputDecoration obtenerDecoracion(){
-    if (campoRequerido){
-      return const InputDecoration(
-        hintText: "", 
-        prefixIcon: Icon(Icons.label_important),
-        prefixIconColor: Colors.red,
-        suffixIcon: Icon(Icons.car_rental)
-      );
-    }
-    return const InputDecoration(
-      hintText: "", 
-      suffixIcon: Icon(Icons.car_rental)
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final caracteresEspeciales = RegExp(
-      r'[\^$*\[\]{}()?\"!@%&/\><:,;_~`+=' 
-      "'" 
-      ']'
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          TituloComponente(titulo: titulo),
-          TextFormField(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (value) {
-              String valorNormalizado = (value??'').trim();
-              if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
-              if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
-              if(minCaracteres != null && valorNormalizado.length < minCaracteres!) return 'Debe tener al menos $minCaracteres caracteres';
-              if(matriculasVehiculos.contains(valorNormalizado)) return 'Matricula ya existente';
-              return null;
-            },
-            maxLength: maxCaracteres,
-            controller: controlador,
-            decoration: obtenerDecoracion(),
-            keyboardType: TextInputType.text,
-          ),
-        ],
-      ),
-    );
-  }
-}*/
 
 /* ----------------------------------------------------------------------------- */

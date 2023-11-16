@@ -50,12 +50,7 @@ class CuadroDeTexto extends StatelessWidget {
   InputDecoration obtenerDecoracion(){
 
     if (campoRequerido && !esSoloLectura){
-      return const InputDecoration(
-        hintText: "", 
-        prefixIcon: Icon(Icons.label_important),
-        prefixIconColor: Colors.red,
-        suffixIcon: Icon(Icons.car_rental)
-      );
+      return decoracionParaCampoObligatorio;
     }
 
     return const InputDecoration(
