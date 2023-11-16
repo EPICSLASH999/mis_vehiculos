@@ -87,6 +87,47 @@ class TileVehiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future openDialog() => showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.car_repair_outlined),
+            const SizedBox(width: 12,),
+            Text(vehiculo.modelo, style: const TextStyle(fontSize: 25),),
+            
+          ],
+        ),
+        content: SizedBox(
+          height: 200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Dato(titulo: 'Matricula', valor: vehiculo.matricula),
+              Dato(titulo: 'Marca', valor: vehiculo.marca),
+              Dato(titulo: 'Color', valor: vehiculo.color),
+              Dato(titulo: 'Año', valor: vehiculo.ano.toString()),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
+            }, 
+            child: const Text('Editar')
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            }, 
+            child: const Text('Aceptar')
+          )
+        ],
+      ),
+    );
+
     return ListTile(
       title: Text(
         vehiculo.modelo,
@@ -95,10 +136,36 @@ class TileVehiculo extends StatelessWidget {
       subtitle: Text(vehiculo.matricula),
       trailing: BotonesTileVehiculo(vehiculo: vehiculo),
       onTap: () {
+        openDialog();
       },
     );
   }
 }
+
+class Dato extends StatelessWidget {
+  const Dato({
+    super.key,
+    required this.titulo, 
+    required this.valor,
+  });
+
+  final String titulo;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold),),
+          Text(valor),
+        ],
+      ),
+    );
+  }
+}
+
 
 class BotonesTileVehiculo extends StatelessWidget {
   const BotonesTileVehiculo({
@@ -117,18 +184,12 @@ class BotonesTileVehiculo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 145,
+      width: 100,
       child: Row(
         children: [
           IconButton(
             onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este vehículo?', funcionAlProceder: eliminarVehiculo(context)),
             icon: Icon(Icons.delete, color: colorIcono)
-          ),
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
-            }, 
-            icon: Icon(Icons.edit, color: colorIcono)
           ),
           IconButton(
             onPressed: () {
