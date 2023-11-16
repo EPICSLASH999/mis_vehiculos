@@ -31,8 +31,9 @@ class MisVehiculos extends VehiculoEstado {
 }
 class PlantillaVehiculo extends VehiculoEstado {
    final Vehiculo? vehiculo;
+   final Future <List<String>>? matriculasVehiculos;
 
-  PlantillaVehiculo({this.vehiculo});
+  PlantillaVehiculo({this.vehiculo, this.matriculasVehiculos,});
 
   @override
   List<Object?> get props => [vehiculo];
@@ -239,7 +240,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Vehiculos
   Future <List<Vehiculo>>? misVehiculos;
   final vehiculos = Vehiculos();
-  //List<int> idsVehiculosSeleccionados = [];
+  Future<List<String>>? matriculasVehiculos;
 
   // Etiquetas
   Future <List<Etiqueta>>? misEtiquetas;
@@ -347,7 +348,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: misVehiculos));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
-      emit(PlantillaVehiculo());
+      matriculasVehiculos = vehiculos.fetchAllPlates();
+      emit(PlantillaVehiculo(matriculasVehiculos: matriculasVehiculos));
     });
     on<ClickeadoEditarVehiculo>((event, emit) async {
       emit(PlantillaVehiculo(vehiculo: event.vehiculo));

@@ -42,6 +42,14 @@ class Vehiculos {
     return Vehiculo.fromSQfliteDatabase(todo.first);
   }
 
+  Future<List<String>> fetchAllPlates() async{
+    final database = await DatabaseService().database;
+    final registros = await database.rawQuery(
+      ''' SELECT matricula from $tableName ORDER BY id_vehiculo'''
+    );
+    return registros.map((vehiculo) => vehiculo["matricula"] as String).toList();
+  }
+
   Future<int> update({required int id, required Map<String,dynamic> datos}) async {
     final database = await DatabaseService().database;
     return await database.update(
