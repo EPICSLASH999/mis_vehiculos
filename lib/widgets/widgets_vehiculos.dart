@@ -166,7 +166,6 @@ class Dato extends StatelessWidget {
   }
 }
 
-
 class BotonesTileVehiculo extends StatelessWidget {
   const BotonesTileVehiculo({
     super.key,
@@ -193,7 +192,13 @@ class BotonesTileVehiculo extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text("Primero cree etiquetas!"),
+                duration: Duration(seconds: 1),
+                //backgroundColor: Colors.blueGrey,
+              ));
+              //context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
             }, 
             icon: Icon(Icons.add_card_outlined, color: colorIcono)
           ),
@@ -202,6 +207,7 @@ class BotonesTileVehiculo extends StatelessWidget {
     );
   }
 }
+
 
 class WidgetPlantillaVehiculo extends StatefulWidget {
   final Vehiculo? vehiculo;
