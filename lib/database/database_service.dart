@@ -55,7 +55,7 @@ class DatabaseService {
     await database.execute("""PRAGMA foreign_keys = ON;""");
   }
 
-  Future<void> recrearTablas(Database database) async {
+  Future<void> recrearTablas(Database database) async { // Método para recrear las tablas (y borrar todos los registros)
     //database.execute('DROP TABLE IF EXISTS ${Gastos().tableName}'); await Gastos().createTable(database);
     //database.execute('DROP TABLE IF EXISTS ${GastosArchivados().tableName}'); await GastosArchivados().createTable(database);
     //database.execute('DROP TABLE IF EXISTS ${Etiquetas().tableName}'); await Etiquetas().createTable(database);

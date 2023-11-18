@@ -285,9 +285,16 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
     if (widget.idEtiquetaSeleccionada != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta  
-    //if (widget.idVehiculoSeleccionado != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.vehiculo != widget.idVehiculoSeleccionado)); // Filtrar por vehiculo    
     String filtroMecanico = controladorMecanico.text.trim();
-    if (filtroMecanico.isNotEmpty) gastosRecibidos.removeWhere((element) => (!element.mecanico.containsIgnoreCase(filtroMecanico) || (element.mecanico.isEmpty))); // Filtrar por mecánico
+
+    
+    if (filtroMecanico.isNotEmpty) { // Filtrar por mecánico
+      gastosRecibidos.removeWhere((element) {
+        String mecanicoRecibido = element.mecanico;
+        mecanicoRecibido = mecanicoRecibido.isEmpty?valorSinMecanico:mecanicoRecibido; // Asignar valor 'Sin mecánico' en caso de no tener asignado uno.
+        return (!mecanicoRecibido.containsIgnoreCase(filtroMecanico) || (mecanicoRecibido.isEmpty));
+      }); 
+    }
     return gastosRecibidos;
   }
   Future<List<Gasto>>? obtenerListaGastos() async {
@@ -532,7 +539,7 @@ class TileGasto extends StatelessWidget {
 
   final Gasto gasto;
   
-  String get obtenerMecanico => (gasto.mecanico.isNotEmpty)? gasto.mecanico:'Sin mecánico';
+  String get obtenerMecanico => (gasto.mecanico.isNotEmpty)? gasto.mecanico:valorSinMecanico;
 
   @override
   Widget build(BuildContext context) {
@@ -540,7 +547,6 @@ class TileGasto extends StatelessWidget {
 
     return ListTile(
       title: Text(
-        //etiqueta,
         gasto.nombreEtiqueta??'',
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),

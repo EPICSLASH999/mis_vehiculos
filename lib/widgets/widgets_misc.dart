@@ -194,7 +194,7 @@ class BarraInferior extends StatelessWidget {
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.car_repair),
-          label: 'vehiculos',
+          label: 'Vehículos',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.card_travel),
@@ -208,13 +208,13 @@ class BarraInferior extends StatelessWidget {
       onTap: (value) {
         switch (value) {
           case 0:
-              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misVehiculos));
+              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: OpcionesBottomBar.misVehiculos));
             break;
           case 1:
-              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misEtiquetas));
+              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: OpcionesBottomBar.misEtiquetas));
             break;
           case 2:
-              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: Pantallas.misGastos));
+              context.read<VehiculoBloc>().add(CambiadoDePantalla(pantalla: OpcionesBottomBar.misGastos));
             break;
             
           default:

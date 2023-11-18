@@ -20,6 +20,10 @@ class WidgetMisGastosArchivados extends StatelessWidget {
       context.read<VehiculoBloc>().add(EliminadosGastosArchivados(matricula: vehiculoSeleccionado));
     };
   }
+  String obtenerVehiculoSeleccionado(){
+    if(vehiculoSeleccionado == valorOpcionTodas.toString()) return 'Todos';
+    return vehiculoSeleccionado;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +46,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                 final gastosArchivados = snapshot.data?? [];
 
                 return IconButton(
-                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos seleccionados?', funcionAlProceder: eliminarGastosArchivados(context)), 
+                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerVehiculoSeleccionado()}?', funcionAlProceder: eliminarGastosArchivados(context)), 
                   icon: const Icon(Icons.delete_forever)
                 );
               }
@@ -99,8 +103,8 @@ class TileGastoArchivado extends StatelessWidget {
   });
 
   final GastoArchivado gastoArchivado;
-  String get mecanico => (gastoArchivado.mecanico.isNotEmpty)? gastoArchivado.mecanico:'Sin mecánico';
-  String get lugar => (gastoArchivado.lugar.isNotEmpty)? gastoArchivado.lugar:'Sin lugar';
+  String get mecanico => (gastoArchivado.mecanico.isNotEmpty)? gastoArchivado.mecanico:valorSinMecanico;
+  String get lugar => (gastoArchivado.lugar.isNotEmpty)? gastoArchivado.lugar:valorSinLugar;
   String get fechaNormalizada {
     DateTime fechaRecibida = DateTime.parse(DateTime.parse(gastoArchivado.fecha).toIso8601String());
     return DateFormat.yMMMd().format(fechaRecibida);

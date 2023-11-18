@@ -148,7 +148,7 @@ class TileVehiculo extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Material(
         color: Colors.white,
-        elevation: 4,
+        elevation: 2,
         shadowColor: Colors.green,
         child: ListTile(
           title: Text(
@@ -213,6 +213,7 @@ class BotonesTileVehiculo extends StatelessWidget {
     return SizedBox(
       width: 110,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
               onPressed: dialogoAlerta(
@@ -239,7 +240,7 @@ class BotonesTileVehiculo extends StatelessWidget {
                 // ignore: use_build_context_synchronously
                 context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
               },
-              icon: Icon(Icons.add_card_outlined, color: colorIcono)),
+              icon: Icon(Icons.monetization_on, color: colorIcono)),
         ],
       ),
     );

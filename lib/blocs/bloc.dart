@@ -220,7 +220,7 @@ class ClickeadoregresarAConsultarGastos extends VehiculoEvento {}
 
 // BOTTOM BAR
 class CambiadoDePantalla extends VehiculoEvento {
-  final Pantallas pantalla;
+  final OpcionesBottomBar pantalla;
 
   CambiadoDePantalla({required this.pantalla});
 }
@@ -260,6 +260,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   Future<List<String>>? misVehiculosArchivados;
 
   // MÉTODOS
+  //Métodos para gastos.
   String normalizarNumeroA2DigitosFecha(int numero){
     String numeroRecibido = '';
     if (numero.toString().length == 1) numeroRecibido += '0';
@@ -276,6 +277,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     return gastos.fetchAllWithFilters(filtroFechaInicial, filtroFechaFinal, idVehiculo);
   }
 
+  // Métodos para gastos archivados.
   Future<void> archivarGastosDeIdVehiculo(int id) async {
     List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(id);
     for (var gasto in misGastosPorVehiculo) {
@@ -485,11 +487,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       _misVehiculos = vehiculos.fetchAll();
       _misEtiquetas = etiquetas.fetchAll();
 
-      if(event.pantalla == Pantallas.misVehiculos){
+      if(event.pantalla == OpcionesBottomBar.misVehiculos){
         emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
         return;
       }
-      if(event.pantalla == Pantallas.misEtiquetas){
+      if(event.pantalla == OpcionesBottomBar.misEtiquetas){
         emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
         return;
       }
