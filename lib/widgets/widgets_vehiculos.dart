@@ -60,11 +60,11 @@ class WidgetMisVehiculos extends StatelessWidget {
                                 ),
                               ),
                             )
-                          : ListView.separated(
-                              separatorBuilder: (context, index) =>
+                          : ListView.builder(
+                              /*separatorBuilder: (context, index) =>
                                   const SizedBox(
                                 height: 12,
-                              ),
+                              ),*/
                               itemCount: vehiculos.length,
                               itemBuilder: (context, index) {
                                 final vehiculo = vehiculos[index];
@@ -144,17 +144,26 @@ class TileVehiculo extends StatelessWidget {
           ),
         );
 
-    return ListTile(
-      title: Text(
-        vehiculo.modelo,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Material(
+        color: Colors.white,
+        elevation: 4,
+        shadowColor: Colors.green,
+        child: ListTile(
+          title: Text(
+            vehiculo.modelo,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(vehiculo.matricula),
+          trailing: BotonesTileVehiculo(vehiculo: vehiculo),
+          onTap: () {
+            openDialog();
+          },
+        ),
       ),
-      subtitle: Text(vehiculo.matricula),
-      trailing: BotonesTileVehiculo(vehiculo: vehiculo),
-      onTap: () {
-        openDialog();
-      },
     );
+    
   }
 }
 
