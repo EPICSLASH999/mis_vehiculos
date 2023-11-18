@@ -15,8 +15,7 @@ class WidgetMisVehiculos extends StatelessWidget {
   final Future<List<Vehiculo>>? misVehiculos;
   final Future<List<Etiqueta>>? misEtiquetas;
 
-  const WidgetMisVehiculos(
-      {super.key, required this.misVehiculos, required this.misEtiquetas});
+  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.misEtiquetas});
 
   @override
   Widget build(BuildContext context) {
@@ -33,16 +32,13 @@ class WidgetMisVehiculos extends StatelessWidget {
             actions: [
               IconButton(
                 onPressed: () {
-                  context
-                      .read<VehiculoBloc>()
-                      .add(ClickeadoConsultarGastosArchivados());
+                  context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
                 },
                 icon: const Icon(Icons.folder),
               ),
             ],
           ),
-          bottomNavigationBar:
-              BarraInferior(indiceSeleccionado: indiceMisVehiculos),
+          bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisVehiculos),
           body: Column(
             children: [
               Expanded(
@@ -218,8 +214,7 @@ class BotonesTileVehiculo extends StatelessWidget {
           IconButton(
               onPressed: () async {
                 var etiquetas = await etiquetasGlobales ?? [];
-                etiquetas.removeWhere((element) => (element.id ==
-                    idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
+                etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
 
                 if (etiquetas.isEmpty) {
                   // ignore: use_build_context_synchronously
@@ -233,9 +228,7 @@ class BotonesTileVehiculo extends StatelessWidget {
                   return;
                 }
                 // ignore: use_build_context_synchronously
-                context
-                    .read<VehiculoBloc>()
-                    .add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+                context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
               },
               icon: Icon(Icons.add_card_outlined, color: colorIcono)),
         ],
@@ -244,15 +237,14 @@ class BotonesTileVehiculo extends StatelessWidget {
   }
 }
 
+
 class WidgetPlantillaVehiculo extends StatefulWidget {
   final Vehiculo? vehiculo;
   final Future<List<String>>? matriculasVehiculos;
-  const WidgetPlantillaVehiculo(
-      {super.key, this.vehiculo, this.matriculasVehiculos});
+  const WidgetPlantillaVehiculo({super.key, this.vehiculo, this.matriculasVehiculos});
 
   @override
-  State<WidgetPlantillaVehiculo> createState() =>
-      _WidgetPlantillaVehiculoState();
+  State<WidgetPlantillaVehiculo> createState() => _WidgetPlantillaVehiculoState();
 }
 
 class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
@@ -314,24 +306,11 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
         child: Column(
           children: <Widget>[
             // Add TextFormFields and ElevatedButton here.
-            CuadroDeTextoMatricula(
-                matriculasVehiculos: widget.matriculasVehiculos,
-                controladorMatricula: controladorMatricula,
-                titulo: 'Matricula'),
+            CuadroDeTextoMatricula(matriculasVehiculos: widget.matriculasVehiculos, controladorMatricula: controladorMatricula, titulo: 'Matricula'),
             CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
             CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
-            CuadroDeTexto(
-              controlador: controladorColor,
-              titulo: 'Color',
-              maxCaracteres: 15,
-            ),
-            CuadroDeTexto(
-              controlador: controladorAno,
-              titulo: 'Año',
-              esInt: true,
-              maxCaracteres: 4,
-              minCaracteres: 4,
-            ),
+            CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15,),
+            CuadroDeTexto(controlador: controladorAno, titulo: 'Año',esInt: true,maxCaracteres: 4,minCaracteres: 4,),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -405,18 +384,10 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     String valorNormalizado = (value ?? '').trim();
-                    if (valorNormalizado.isEmpty && campoRequerido) {
-                      return 'Campo requerido';
-                    }
-                    if ((valorNormalizado).contains(caracteresEspeciales)) {
-                      return 'No se permiten caracteres especiales';
-                    }
-                    if (valorNormalizado.length < minCaracteres) {
-                      return 'Debe tener al menos $minCaracteres caracteres';
-                    }
-                    if (matriculasVehiculos.contains(valorNormalizado)) {
-                      return 'Matricula ya existente';
-                    }
+                    if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
+                    if ((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
+                    if (valorNormalizado.length < minCaracteres) return 'Debe tener al menos $minCaracteres caracteres';
+                    if (matriculasVehiculos.contains(valorNormalizado)) return 'Matricula ya existente';
                     return null;
                   },
                   maxLength: maxCaracteres,
