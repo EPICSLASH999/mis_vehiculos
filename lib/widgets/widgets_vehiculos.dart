@@ -2,20 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/main.dart';
+import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- VEHICULOS --------------------------------- */
+Future <List<Etiqueta>>? etiquetasGlobales;
 
 // Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
   final Future <List<Vehiculo>>? misVehiculos;
+  final Future <List<Etiqueta>>? misEtiquetas;
 
-  const WidgetMisVehiculos({super.key, required this.misVehiculos});
+  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.misEtiquetas});
 
   @override
   Widget build(BuildContext context) {
+    etiquetasGlobales = misEtiquetas;
 
     return Scaffold(
       appBar: AppBar(
@@ -95,7 +99,6 @@ class TileVehiculo extends StatelessWidget {
             const Icon(Icons.car_repair_outlined),
             const SizedBox(width: 12,),
             Text(vehiculo.modelo, style: const TextStyle(fontSize: 25),),
-            
           ],
         ),
         content: SizedBox(
@@ -182,8 +185,8 @@ class BotonesTileVehiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
+    return  SizedBox(
+      width: 110,
       child: Row(
         children: [
           IconButton(
@@ -191,14 +194,23 @@ class BotonesTileVehiculo extends StatelessWidget {
             icon: Icon(Icons.delete, color: colorIcono)
           ),
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text("Primero cree etiquetas!"),
-                duration: Duration(seconds: 1),
-                //backgroundColor: Colors.blueGrey,
-              ));
-              //context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+            onPressed: () async {
+              var etiquetas = await etiquetasGlobales??[];
+              etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
+
+              if(etiquetas.isEmpty) {
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Primero cree etiquetas!"),
+                  duration: Duration(seconds: 1),
+                  //backgroundColor: Colors.blueGrey,
+                ));
+                return;
+              }
+              // ignore: use_build_context_synchronously
+              context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
             }, 
             icon: Icon(Icons.add_card_outlined, color: colorIcono)
           ),
