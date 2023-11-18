@@ -8,75 +8,87 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- VEHICULOS --------------------------------- */
-Future <List<Etiqueta>>? etiquetasGlobales;
+Future<List<Etiqueta>>? etiquetasGlobales;
 
 // Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
-  final Future <List<Vehiculo>>? misVehiculos;
-  final Future <List<Etiqueta>>? misEtiquetas;
+  final Future<List<Vehiculo>>? misVehiculos;
+  final Future<List<Etiqueta>>? misEtiquetas;
 
-  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.misEtiquetas});
+  const WidgetMisVehiculos(
+      {super.key, required this.misVehiculos, required this.misEtiquetas});
 
   @override
   Widget build(BuildContext context) {
     etiquetasGlobales = misEtiquetas;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Vehículos'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
-            }, 
-            icon: const Icon(Icons.folder),
+    return BlocConsumer<VehiculoBloc, VehiculoEstado>(
+      listener: (context, state) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Mis Vehículos'),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  context
+                      .read<VehiculoBloc>()
+                      .add(ClickeadoConsultarGastosArchivados());
+                },
+                icon: const Icon(Icons.folder),
+              ),
+            ],
           ),
-        ],
-      ),
-      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisVehiculos),
-      body: Column(
-        children: [
-          Expanded(
-            child: 
-            FutureBuilder<List<Vehiculo>>(
-              future: misVehiculos,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const WidgetCargando();
-                } else{
-                  final vehiculos = snapshot.data?? [];
+          bottomNavigationBar:
+              BarraInferior(indiceSeleccionado: indiceMisVehiculos),
+          body: Column(
+            children: [
+              Expanded(
+                child: FutureBuilder<List<Vehiculo>>(
+                  future: misVehiculos,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const WidgetCargando();
+                    } else {
+                      final vehiculos = snapshot.data ?? [];
 
-                  return vehiculos.isEmpty
-                      ? const Center(
-                        child: Text(
-                          'Sin vehiculos...',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 28,
-                          ),
-                        ),
-                      )
-                    : ListView.separated(
-                      separatorBuilder: (context, index) => 
-                          const SizedBox(height: 12,), 
-                      itemCount: vehiculos.length,
-                      itemBuilder: (context, index) {
-                        final vehiculo = vehiculos[index];
-                        return TileVehiculo(vehiculo: vehiculo);
-                      }, 
-                    );
-                }
-              },
-            ),
+                      return vehiculos.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'Sin vehiculos...',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 28,
+                                ),
+                              ),
+                            )
+                          : ListView.separated(
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(
+                                height: 12,
+                              ),
+                              itemCount: vehiculos.length,
+                              itemBuilder: (context, index) {
+                                final vehiculo = vehiculos[index];
+                                return TileVehiculo(vehiculo: vehiculo);
+                              },
+                            );
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
-        },
-      ),
+          floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -84,7 +96,7 @@ class WidgetMisVehiculos extends StatelessWidget {
 class TileVehiculo extends StatelessWidget {
   const TileVehiculo({
     super.key,
-    required this.vehiculo, 
+    required this.vehiculo,
   });
 
   final Vehiculo vehiculo;
@@ -92,44 +104,49 @@ class TileVehiculo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future openDialog() => showDialog(
-      context: context, 
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.car_repair_outlined),
-            const SizedBox(width: 12,),
-            Text(vehiculo.modelo, style: const TextStyle(fontSize: 25),),
-          ],
-        ),
-        content: SizedBox(
-          height: 200,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Dato(titulo: 'Matricula', valor: vehiculo.matricula),
-              Dato(titulo: 'Marca', valor: vehiculo.marca),
-              Dato(titulo: 'Color', valor: vehiculo.color),
-              Dato(titulo: 'Año', valor: vehiculo.ano.toString()),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.car_repair_outlined),
+                const SizedBox(
+                  width: 12,
+                ),
+                Text(
+                  vehiculo.modelo,
+                  style: const TextStyle(fontSize: 25),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              height: 200,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Dato(titulo: 'Matricula', valor: vehiculo.matricula),
+                  Dato(titulo: 'Marca', valor: vehiculo.marca),
+                  Dato(titulo: 'Color', valor: vehiculo.color),
+                  Dato(titulo: 'Año', valor: vehiculo.ano.toString()),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    context
+                        .read<VehiculoBloc>()
+                        .add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
+                  },
+                  child: const Text('Editar')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Aceptar'))
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
-            }, 
-            child: const Text('Editar')
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            }, 
-            child: const Text('Aceptar')
-          )
-        ],
-      ),
-    );
+        );
 
     return ListTile(
       title: Text(
@@ -148,7 +165,7 @@ class TileVehiculo extends StatelessWidget {
 class Dato extends StatelessWidget {
   const Dato({
     super.key,
-    required this.titulo, 
+    required this.titulo,
     required this.valor,
   });
 
@@ -161,7 +178,10 @@ class Dato extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold),),
+          Text(
+            titulo,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           Text(valor),
         ],
       ),
@@ -177,57 +197,62 @@ class BotonesTileVehiculo extends StatelessWidget {
 
   final Vehiculo vehiculo;
 
-  Function eliminarVehiculo(BuildContext context){
-    return (){
+  Function eliminarVehiculo(BuildContext context) {
+    return () {
       context.read<VehiculoBloc>().add(EliminadoVehiculo(id: vehiculo.id));
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    return  SizedBox(
+    return SizedBox(
       width: 110,
       child: Row(
         children: [
           IconButton(
-            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este vehículo?', funcionAlProceder: eliminarVehiculo(context)),
-            icon: Icon(Icons.delete, color: colorIcono)
-          ),
+              onPressed: dialogoAlerta(
+                  context: context,
+                  texto: '¿Seguro de eliminar este vehículo?',
+                  funcionAlProceder: eliminarVehiculo(context)),
+              icon: Icon(Icons.delete, color: colorIcono)),
           IconButton(
-            onPressed: () async {
-              var etiquetas = await etiquetasGlobales??[];
-              etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
+              onPressed: () async {
+                var etiquetas = await etiquetasGlobales ?? [];
+                etiquetas.removeWhere((element) => (element.id ==
+                    idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
 
-              if(etiquetas.isEmpty) {
+                if (etiquetas.isEmpty) {
+                  // ignore: use_build_context_synchronously
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  // ignore: use_build_context_synchronously
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("Primero cree etiquetas!"),
+                    duration: Duration(seconds: 1),
+                    //backgroundColor: Colors.blueGrey,
+                  ));
+                  return;
+                }
                 // ignore: use_build_context_synchronously
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                // ignore: use_build_context_synchronously
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text("Primero cree etiquetas!"),
-                  duration: Duration(seconds: 1),
-                  //backgroundColor: Colors.blueGrey,
-                ));
-                return;
-              }
-              // ignore: use_build_context_synchronously
-              context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
-            }, 
-            icon: Icon(Icons.add_card_outlined, color: colorIcono)
-          ),
+                context
+                    .read<VehiculoBloc>()
+                    .add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+              },
+              icon: Icon(Icons.add_card_outlined, color: colorIcono)),
         ],
       ),
     );
   }
 }
 
-
 class WidgetPlantillaVehiculo extends StatefulWidget {
   final Vehiculo? vehiculo;
   final Future<List<String>>? matriculasVehiculos;
-  const WidgetPlantillaVehiculo({super.key, this.vehiculo, this.matriculasVehiculos});
+  const WidgetPlantillaVehiculo(
+      {super.key, this.vehiculo, this.matriculasVehiculos});
 
   @override
-  State<WidgetPlantillaVehiculo> createState() => _WidgetPlantillaVehiculoState();
+  State<WidgetPlantillaVehiculo> createState() =>
+      _WidgetPlantillaVehiculoState();
 }
 
 class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
@@ -238,26 +263,26 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   final TextEditingController controladorAno = TextEditingController();
 
   bool get esEditar => widget.vehiculo != null;
-  String obtenerTexto() => (!esEditar)? 'Agregar Vehiculo':'Editar Vehiculo';
-  Vehiculo obtenerVehiculo(){
+  String obtenerTexto() => (!esEditar) ? 'Agregar Vehiculo' : 'Editar Vehiculo';
+  Vehiculo obtenerVehiculo() {
     return Vehiculo(
-      id: (widget.vehiculo?.id)??0, 
-      matricula: controladorMatricula.text, 
-      marca: controladorMarca.text, 
-      modelo: controladorModelo.text, 
-      color: controladorColor.text, 
-      ano: int.parse(controladorAno.text)
-    );
+        id: (widget.vehiculo?.id) ?? 0,
+        matricula: controladorMatricula.text,
+        marca: controladorMarca.text,
+        modelo: controladorModelo.text,
+        color: controladorColor.text,
+        ano: int.parse(controladorAno.text));
   }
-  void inicializarValoresDeControladores(){
+
+  void inicializarValoresDeControladores() {
     if (!esEditar) return;
-    controladorMatricula.text = widget.vehiculo?.matricula??'';
-    controladorMarca.text = widget.vehiculo?.marca??'';
-    controladorModelo.text = widget.vehiculo?.modelo??'';
-    controladorColor.text = widget.vehiculo?.color??'';
-    controladorAno.text = (widget.vehiculo?.ano??0000).toString();
+    controladorMatricula.text = widget.vehiculo?.matricula ?? '';
+    controladorMarca.text = widget.vehiculo?.marca ?? '';
+    controladorModelo.text = widget.vehiculo?.modelo ?? '';
+    controladorColor.text = widget.vehiculo?.color ?? '';
+    controladorAno.text = (widget.vehiculo?.ano ?? 0000).toString();
   }
-  
+
   // Create a global key that uniquely identifies the Form widget
   // and allows validation of the form.
   //
@@ -273,41 +298,59 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
       appBar: AppBar(
         title: Text(obtenerTexto()),
         leading: IconButton(
-          onPressed: () {
-            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
-          }, 
-          icon: const Icon(Icons.arrow_back_ios_new_outlined)
-        ),
+            onPressed: () {
+              context
+                  .read<VehiculoBloc>()
+                  .add(ClickeadoRegresarAMisvehiculos());
+            },
+            icon: const Icon(Icons.arrow_back_ios_new_outlined)),
       ),
-      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisVehiculos),
+      bottomNavigationBar:
+          BarraInferior(indiceSeleccionado: indiceMisVehiculos),
       //resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              // Add TextFormFields and ElevatedButton here.
-              CuadroDeTextoMatricula(matriculasVehiculos: widget.matriculasVehiculos, controladorMatricula: controladorMatricula, titulo: 'Matricula'),
-              CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
-              CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
-              CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15,),
-              CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4,),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    if (!esEditar) {
-                      context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
-                      return;
-                    }
-                    context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
+          child: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            // Add TextFormFields and ElevatedButton here.
+            CuadroDeTextoMatricula(
+                matriculasVehiculos: widget.matriculasVehiculos,
+                controladorMatricula: controladorMatricula,
+                titulo: 'Matricula'),
+            CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
+            CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
+            CuadroDeTexto(
+              controlador: controladorColor,
+              titulo: 'Color',
+              maxCaracteres: 15,
+            ),
+            CuadroDeTexto(
+              controlador: controladorAno,
+              titulo: 'Año',
+              esInt: true,
+              maxCaracteres: 4,
+              minCaracteres: 4,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  if (!esEditar) {
+                    context
+                        .read<VehiculoBloc>()
+                        .add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
+                    return;
                   }
-                },
-                child: Text(obtenerTexto()),
-              ),
-            ],
-          ),
-        )
-      ),
+                  context
+                      .read<VehiculoBloc>()
+                      .add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
+                }
+              },
+              child: Text(obtenerTexto()),
+            ),
+          ],
+        ),
+      )),
     );
   }
 
@@ -326,7 +369,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
   CuadroDeTextoMatricula({
     super.key,
     required this.matriculasVehiculos,
-    required this.controladorMatricula, 
+    required this.controladorMatricula,
     required this.titulo,
   });
 
@@ -338,22 +381,19 @@ class CuadroDeTextoMatricula extends StatelessWidget {
   final int maxCaracteres = 7;
   final int minCaracteres = 4;
 
-  final caracteresEspeciales = RegExp(
-      r'[\^$*\[\]{}()?\"!@%&/\><:,;_~`+=' 
-      "'" 
-      ']'
-    );
-
+  final caracteresEspeciales = RegExp(r'[\^$*\[\]{}()?\"!@%&/\><:,;_~`+='
+      "'"
+      ']');
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: matriculasVehiculos, 
+      future: matriculasVehiculos,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting){
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const WidgetCargando();
-        } else{
-          final matriculasVehiculos = snapshot.data?? [];
+        } else {
+          final matriculasVehiculos = snapshot.data ?? [];
 
           return Padding(
             padding: const EdgeInsets.all(8.0),
@@ -364,11 +404,19 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                 TextFormField(
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
-                    String valorNormalizado = (value??'').trim();
-                    if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
-                    if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
-                    if(valorNormalizado.length < minCaracteres) return 'Debe tener al menos $minCaracteres caracteres';
-                    if(matriculasVehiculos.contains(valorNormalizado)) return 'Matricula ya existente';
+                    String valorNormalizado = (value ?? '').trim();
+                    if (valorNormalizado.isEmpty && campoRequerido) {
+                      return 'Campo requerido';
+                    }
+                    if ((valorNormalizado).contains(caracteresEspeciales)) {
+                      return 'No se permiten caracteres especiales';
+                    }
+                    if (valorNormalizado.length < minCaracteres) {
+                      return 'Debe tener al menos $minCaracteres caracteres';
+                    }
+                    if (matriculasVehiculos.contains(valorNormalizado)) {
+                      return 'Matricula ya existente';
+                    }
                     return null;
                   },
                   maxLength: maxCaracteres,
