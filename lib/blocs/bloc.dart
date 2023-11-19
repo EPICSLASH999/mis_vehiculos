@@ -44,8 +44,9 @@ class PlantillaGasto extends VehiculoEstado {
   final int idVehiculo;
   final Future<List<Etiqueta>>? misEtiquetas;
   final Gasto? gasto;
+  final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
 
-  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto});
+  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto, this.listaMecanicoPorEtiqueta});
 
   @override
   List<Object?> get props => [idVehiculo, misEtiquetas, gasto];
@@ -253,6 +254,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   DateTime filtroFechaFinal = DateTime.now();
   int filtroIdEtiqueta = valorOpcionTodas;
   int filtroIdVehiculo = valorOpcionTodas;
+  Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta; // IA para rellenar automáticamente campo mecánico.
 
   // Gastos Archivados
   String filtroVehiculo = valorOpcionTodas.toString();
@@ -306,23 +308,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     await gastosArchivados.deleteWhereVehicle(event.matricula);
   }
 
-  // Métodos IA
-  int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> ocurrencias) {
-    if(ocurrencias.isEmpty) return 0;
-    int idEtiquetaConMayorOcurrencias = (ocurrencias.first["etiqueta"] as int);
-    return idEtiquetaConMayorOcurrencias;
-  }
-  String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> ocurrencias, int idEtiqueta) {
-    if(ocurrencias.isEmpty) return "";
-    for (var element in ocurrencias) {
-      if((element["etiqueta"] as int) == idEtiqueta){
-        String mecanico = (element["mecanico"]??'') as String;
-        return mecanico;
-      }
-    }
-    return "";
-  }
-
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
       reiniciarFiltrosGastos();
@@ -373,21 +358,17 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
    
     // Gastos
-    on<ClickeadoAgregarGasto>((event, emit) async {
-      var ocurrencias = await gastos.fetchMostOccurencesMecanics(event.idVehiculo);
-      /*for (var element in ocurrencias) {
-        print('Etiqueta: ${element["etiqueta"]}');
-        print('Count: ${element["count_etiqueta"]}');
-        print('Mecánico: ${element["mecanico"]}');
+    on<ClickeadoAgregarGasto>((event, emit) {
+      listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.idVehiculo);
+      /*var mapa = await listaMecanicoPorEtiqueta; // para test
+      for (var element in mapa) {
+        print(element["etiqueta"]);
+        print(element["mecanico"]);
         print('----------------');
       }*/
-      int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(ocurrencias);
-      print('Etiqueta con mayor ocurencias: ${obtenerEtiquetaConMayorOcurrencias(ocurrencias)}');
-      print('Mecánico: ${obtenerMecanicoConMayorOcurrenciasDeEtiqueta(ocurrencias, idEtiquetaConMayorOcurrencias)}');
-
 
       _misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas));
+      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta));
     });
     on<AgregadoGasto>((event, emit) async {
        Map<String,dynamic> datos = {

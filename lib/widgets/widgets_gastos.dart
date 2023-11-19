@@ -12,12 +12,15 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* ----------------------------------- GASTOS ----------------------------------- */
+Future<List<Map<String, Object?>>>? listaMecanicoPorEtiquetaGlobal;
+
 class WidgetPlantillaGasto extends StatefulWidget {
   final Gasto? gasto;
   final int idVehiculo;
   final Future <List<Etiqueta>>? misEtiquetas;
+  final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
 
-  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, required this.misEtiquetas});
+  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, required this.misEtiquetas, this.listaMecanicoPorEtiqueta});
 
   @override
   State<WidgetPlantillaGasto> createState() => _WidgetPlantillaGastoState();
@@ -36,7 +39,9 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   DateTime fechaSeleccionada = DateTime.now();
   String idVehiculo = "";
 
-  String obtenerTexto() => '${(widget.gasto == null)? 'Agregar':'Editar'} Gasto';
+  String obtenerTexto() => '${(!esEditarGasto)? 'Agregar':'Editar'} Gasto';
+  bool get esEditarGasto => widget.gasto != null;
+
   void inicializarValoresDeControladores(){
     idVehiculo = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
     controladorVehiculo.text = idVehiculo;
@@ -80,6 +85,26 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     };
   }
 
+  
+  // Métodos IA
+  int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
+    if(listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
+    int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
+    if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return 0;
+    return idEtiquetaConMayorOcurrencias;
+  }
+  String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> listaMecanicoPorEtiqueta, int idEtiqueta) {
+    if(listaMecanicoPorEtiqueta.isEmpty) return "";
+    for (var element in listaMecanicoPorEtiqueta) {
+      if((element["etiqueta"] as int) == idEtiqueta){
+        String mecanico = (element["mecanico"]??'') as String;
+        return mecanico;
+      }
+    }
+    return "";
+  }
+
+
   @override
   void dispose() {
     controladorVehiculo.dispose();
@@ -95,6 +120,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
     var pressedFecha = funcionAlPresionarFecha();
+    listaMecanicoPorEtiquetaGlobal = widget.listaMecanicoPorEtiqueta;
     
     return Scaffold(
       appBar: AppBar(
@@ -120,34 +146,50 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
             final nombreVehiculo = snapshot.data?? '';
             controladorVehiculo.text = nombreVehiculo;
             
-            return SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: <Widget>[
-                    CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
-                    SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),),
-                    CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
-                    CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40,),
-                    CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
-                    SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
-                  
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          if (widget.gasto == null) {
-                            context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
-                            return;
-                          }
-                          context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
-                        }
-                      },
-                      child: Text(obtenerTexto()),
-                    ),
-                  ],
-                ),
-              )
+            return FutureBuilder(
+              future: listaMecanicoPorEtiquetaGlobal, 
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final listaMecanicoPorEtiqueta = snapshot.data?? [];
+                  int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
+                  String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
+                  if(!esEditarGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
+                  //if(!esEditarGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString();
+                    
+                  return SingleChildScrollView(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: <Widget>[
+                          CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
+                          SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),controladorMecanico: controladorMecanico),
+                          CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
+                          CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40,),
+                          CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 10,),
+                          SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
+                        
+                          ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                if (widget.gasto == null) {
+                                  context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
+                                  return;
+                                }
+                                context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
+                              }
+                            },
+                            child: Text(obtenerTexto()),
+                          ),
+                        ],
+                      ),
+                    )
+                  );
+                }
+              },
             );
+            
           }
         },
       ),
@@ -161,13 +203,15 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     required this.etiquetaSeleccionada,
     required this.titulo, 
     required this.misEtiquetas,
-    this.esEditarGasto = false,
+    this.esEditarGasto = false, 
+    required this.controladorMecanico,
   });
 
   final TextEditingController etiquetaSeleccionada;
   final String titulo;
   final Future <List<Etiqueta>>? misEtiquetas;
   final bool esEditarGasto;
+  final TextEditingController controladorMecanico;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
@@ -176,6 +220,25 @@ class SeleccionadorEtiqueta extends StatefulWidget {
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
  
   int? get idEtiquetaSeleccionada => int.tryParse(widget.etiquetaSeleccionada.text); 
+
+  // Métodos IA
+  int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
+    if(listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
+    int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
+    if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return 0;
+    return idEtiquetaConMayorOcurrencias;
+  }
+  String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> listaMecanicoPorEtiqueta, int idEtiqueta) {
+    if(listaMecanicoPorEtiqueta.isEmpty) return "";
+    for (var element in listaMecanicoPorEtiqueta) {
+      if((element["etiqueta"] as int) == idEtiqueta){
+        String mecanico = (element["mecanico"]??'') as String;
+        return mecanico;
+      }
+    }
+    return "";
+  }
+
 
   @override
   Widget build(BuildContext context)  {
@@ -199,25 +262,40 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
               } else{
                 final etiquetas = snapshot.data?? [];
                 
-                return DropdownButtonFormField(
-                  validator: (value) {
-                    if (value != null && value == valorNoHayEtiquetasCreadas) return 'Valor requerido';
-                    
-                    // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
-                    widget.etiquetaSeleccionada.text = value.toString();
-                    return null;
-                  },
-                  value: valorIdEtiquetaInicial(etiquetas),
-                  items: [
-                    if(idEtiquetaSeleccionada == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
-                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
-                  ],
-                  onChanged: (value) {
-                     setState(() {
-                      widget.etiquetaSeleccionada.text = value.toString();
-                    });
+                return FutureBuilder(
+                  future: listaMecanicoPorEtiquetaGlobal, 
+                  builder: (context, snapshot) {
+                     if (snapshot.connectionState == ConnectionState.waiting){
+                      return const WidgetCargando();
+                    } else{
+                      final listaMecanicoPorEtiqueta = snapshot.data?? [];
+                      int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
+
+                      return DropdownButtonFormField(
+                        validator: (value) {
+                          if (value != null && value == valorNoHayEtiquetasCreadas) return 'Valor requerido';
+                          
+                          // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
+                          widget.etiquetaSeleccionada.text = value.toString();
+                          return null;
+                        },
+                        value: (idEtiquetaConMayorOcurrencias == valorNoTieneEtiquetaConMayorOcurrencias)?valorIdEtiquetaInicial(etiquetas):idEtiquetaConMayorOcurrencias,
+                        items: [
+                          if(idEtiquetaSeleccionada == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
+                          for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            widget.etiquetaSeleccionada.text = value.toString();
+
+                            widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, value!);
+                          });
+                        },
+                      );
+                    }
                   },
                 );
+                
               }
             },
           ),

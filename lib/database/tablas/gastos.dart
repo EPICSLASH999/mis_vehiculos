@@ -74,16 +74,17 @@ class Gastos {
     return registros.map((gasto) => Gasto.fromSQfliteDatabase(gasto)).toList();
   }
 
-  Future<List<Map<String, Object?>>> fetchMostOccurencesMecanics(int idVehiculo) async{
+  Future<List<Map<String, Object?>>> fetchMostOccurringMechanics(int idVehiculo) async{
     final database = await DatabaseService().database;
-    String query = ''' 
+    /*String query = ''' 
       WITH CTE AS (
         SELECT
-          etiqueta,
+          etiqueta, 
           mecanico,
           ROW_NUMBER() OVER (PARTITION BY etiqueta ORDER BY COUNT(*) DESC) AS rn
         FROM $tableName
-        WHERE vehiculo = $idVehiculo
+        WHERE vehiculo = $idVehiculo 
+        AND etiqueta != $idSinEtiqueta
         GROUP BY etiqueta, mecanico
       )
       SELECT etiqueta, mecanico
@@ -98,7 +99,31 @@ class Gastos {
             )
       )
       ORDER BY (SELECT COUNT(*) FROM $tableName WHERE etiqueta = CTE.etiqueta) DESC; -- Ordenar por la cuenta de etiquetas de forma descendente
-    ''';
+    ''';*/
+    String query = ''' WITH CTE AS (
+        SELECT
+          etiqueta, 
+          mecanico,
+          ROW_NUMBER() OVER (PARTITION BY etiqueta ORDER BY COUNT(*) DESC) AS rn
+        FROM $tableName
+        WHERE vehiculo = $idVehiculo 
+        AND etiqueta != $idSinEtiqueta
+        AND (
+            mecanico <> '' 
+            OR NOT EXISTS (
+              SELECT 1
+              FROM $tableName c2
+              WHERE c2.etiqueta = $tableName.etiqueta AND c2.mecanico <> ''
+            )
+      )
+        GROUP BY etiqueta, mecanico
+      )
+      SELECT etiqueta, mecanico
+      FROM CTE
+      WHERE rn = 1
+        
+      ORDER BY (SELECT COUNT(*) FROM $tableName WHERE etiqueta = CTE.etiqueta) DESC; -- Ordenar por la cuenta de etiquetas de forma descendente ''';
+   
     final registros = await database.rawQuery(
       query
     );

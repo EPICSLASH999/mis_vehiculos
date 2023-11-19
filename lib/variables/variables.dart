@@ -13,6 +13,7 @@ const int valorOpcionTodas = 999;
 const String nombreSinEtiqueta = 'Sin etiqueta'; // NO CAMBIAR despues de inicializar tabla en la base de datos.
 const int idSinEtiqueta = 1; // NO CAMBIAR ESTE VALOR. 
 const int valorNoHayEtiquetasCreadas = 998;
+const int valorNoTieneEtiquetaConMayorOcurrencias = 0;
 
 //Gastos
 const String valorSinMecanico = 'Sin mecanico';
@@ -35,7 +36,7 @@ const int indiceMisGastos = 2;
 const Color colorIcono = Color.fromARGB(255, 158, 190, 42);
 const Color colorTileSeleccionado = Color.fromARGB(104, 201, 255, 7);
 
-//Decoracion
+//Decoración
 InputDecoration get decoracionParaCampoObligatorio => const InputDecoration(
         hintText: "", 
         prefixIcon: Icon(Icons.label_important),

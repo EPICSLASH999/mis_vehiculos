@@ -26,7 +26,6 @@ class CuadroDeTexto extends StatelessWidget {
     this.esInt = false, 
     this.esDouble = false,
     this.esSoloLectura = false, 
-    this.funcionAlPresionar,
     this.campoRequerido = true,
     this.maxCaracteres = 20, 
     this.minCaracteres,
@@ -38,7 +37,6 @@ class CuadroDeTexto extends StatelessWidget {
   final bool esInt;
   final bool esDouble;
   final bool esSoloLectura;
-  final VoidCallback? funcionAlPresionar;
   final bool campoRequerido;
   final int maxCaracteres;
   final int? minCaracteres;
@@ -96,7 +94,6 @@ class CuadroDeTexto extends StatelessWidget {
             readOnly: esSoloLectura,
             controller: controlador,
             decoration: obtenerDecoracion(),
-            onTap: funcionAlPresionar,
             keyboardType: obtenerTipoTeclado(),
             autofocus: focusTecaldo,
           ),
