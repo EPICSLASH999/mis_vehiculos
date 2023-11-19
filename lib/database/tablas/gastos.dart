@@ -113,7 +113,8 @@ class Gastos {
             OR NOT EXISTS (
               SELECT 1
               FROM $tableName c2
-              WHERE c2.etiqueta = $tableName.etiqueta AND c2.mecanico <> ''
+              WHERE vehiculo = $idVehiculo 
+              AND c2.etiqueta = $tableName.etiqueta AND c2.mecanico <> ''
             )
       )
         GROUP BY etiqueta, mecanico
@@ -121,8 +122,7 @@ class Gastos {
       SELECT etiqueta, mecanico
       FROM CTE
       WHERE rn = 1
-        
-      ORDER BY (SELECT COUNT(*) FROM $tableName WHERE etiqueta = CTE.etiqueta) DESC; -- Ordenar por la cuenta de etiquetas de forma descendente ''';
+      ORDER BY (SELECT COUNT(*) FROM $tableName WHERE etiqueta = CTE.etiqueta and vehiculo = $idVehiculo) DESC; -- Ordenar por la cuenta de etiquetas de forma descendente ''';
    
     final registros = await database.rawQuery(
       query
