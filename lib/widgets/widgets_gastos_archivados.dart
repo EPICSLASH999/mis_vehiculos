@@ -46,7 +46,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                 final gastosArchivados = snapshot.data?? [];
 
                 return IconButton(
-                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerVehiculoSeleccionado()}?', funcionAlProceder: eliminarGastosArchivados(context)), 
+                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerVehiculoSeleccionado()}?', funcionAlProceder: eliminarGastosArchivados(context), titulo: 'Eliminar'), 
                   icon: const Icon(Icons.delete_forever)
                 );
               }

@@ -571,7 +571,7 @@ class BotonesTileGasto extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context)), 
+            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context), titulo: 'Eliminar'), 
             icon: const Icon(Icons.delete, color: colorIcono)
           ),
           IconButton(

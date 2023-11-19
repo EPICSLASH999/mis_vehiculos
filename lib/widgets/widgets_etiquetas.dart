@@ -107,14 +107,14 @@ class BotonesTileEtiqueta extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context)), 
-            icon: const Icon(Icons.delete, color: colorIcono)
+            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context), titulo: 'Eliminar'), 
+            icon: const Icon(Icons.delete, color: colorIcono),
           ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
             }, 
-            icon: const Icon(Icons.edit, color: colorIcono)
+            icon: const Icon(Icons.edit, color: colorIcono),
           ),
         ],
       ),
@@ -162,7 +162,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
           key: _formKey,
           child: Column(
             children: <Widget>[
-              CuadroDeTexto(controlador: controladorNombre, titulo: 'Nombre'),
+              CuadroDeTexto(controlador: controladorNombre, titulo: 'Nombre', focusTecaldo: true,),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {

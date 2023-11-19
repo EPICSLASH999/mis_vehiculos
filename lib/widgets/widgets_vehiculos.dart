@@ -118,10 +118,10 @@ class TileVehiculo extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Dato(titulo: 'Matricula', valor: vehiculo.matricula),
-              Dato(titulo: 'Marca', valor: vehiculo.marca),
-              Dato(titulo: 'Color', valor: vehiculo.color),
-              Dato(titulo: 'Año', valor: vehiculo.ano.toString()),
+              DatoVehiculo(titulo: 'Matricula', valor: vehiculo.matricula),
+              DatoVehiculo(titulo: 'Marca', valor: vehiculo.marca),
+              DatoVehiculo(titulo: 'Color', valor: vehiculo.color),
+              DatoVehiculo(titulo: 'Año', valor: vehiculo.ano.toString()),
             ],
           ),
         ),
@@ -129,9 +129,7 @@ class TileVehiculo extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context
-                  .read<VehiculoBloc>()
-                  .add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
+              context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
             },
             child: const Text('Editar')),
           TextButton(
@@ -170,8 +168,8 @@ class TileVehiculo extends StatelessWidget {
   }
 }
 
-class Dato extends StatelessWidget {
-  const Dato({
+class DatoVehiculo extends StatelessWidget {
+  const DatoVehiculo({
     super.key,
     required this.titulo,
     required this.valor,
@@ -297,7 +295,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
         child: Column(
           children: <Widget>[
             // Add TextFormFields and ElevatedButton here.
-            CuadroDeTextoMatricula(matriculasVehiculos: widget.matriculasVehiculos, controladorMatricula: controladorMatricula, titulo: 'Matricula'),
+            CuadroDeTextoMatricula(matriculasVehiculos: widget.matriculasVehiculos, controladorMatricula: controladorMatricula, titulo: 'Matricula', focusTecaldo: true,),
             CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
             CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
             CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15,),
@@ -341,11 +339,13 @@ class CuadroDeTextoMatricula extends StatelessWidget {
     required this.matriculasVehiculos,
     required this.controladorMatricula,
     required this.titulo,
+    this.focusTecaldo = false,
   });
 
   final Future<List<String>>? matriculasVehiculos;
   final TextEditingController controladorMatricula;
   final String titulo;
+  final bool focusTecaldo;
 
   final bool campoRequerido = true;
   final int maxCaracteres = 7;
@@ -385,6 +385,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                   controller: controladorMatricula,
                   decoration: decoracionParaCampoObligatorio,
                   keyboardType: TextInputType.text,
+                  autofocus: focusTecaldo,
                 ),
               ],
             ),

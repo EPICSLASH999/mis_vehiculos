@@ -30,6 +30,7 @@ class CuadroDeTexto extends StatelessWidget {
     this.campoRequerido = true,
     this.maxCaracteres = 20, 
     this.minCaracteres,
+    this.focusTecaldo = false,
   });
 
   final TextEditingController controlador;
@@ -41,6 +42,7 @@ class CuadroDeTexto extends StatelessWidget {
   final bool campoRequerido;
   final int maxCaracteres;
   final int? minCaracteres;
+  final bool focusTecaldo;
 
   bool esNumerico(String? s) {
     if(s == null) return false;    
@@ -96,6 +98,7 @@ class CuadroDeTexto extends StatelessWidget {
             decoration: obtenerDecoracion(),
             onTap: funcionAlPresionar,
             keyboardType: obtenerTipoTeclado(),
+            autofocus: focusTecaldo,
           ),
         ],
       ),
