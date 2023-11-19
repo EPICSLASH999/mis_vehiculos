@@ -147,13 +147,13 @@ class SeleccionadorDeFecha extends StatelessWidget {
 
 /* ---------------------------------- MENSAJES --------------------------------- */
 //Función de AlertDialog
-VoidCallback dialogoAlerta ({required BuildContext context, required String texto, required Function funcionAlProceder}) {
+VoidCallback dialogoAlerta ({required BuildContext context, required String texto, required Function funcionAlProceder, String? titulo}) {
     return (){
       showDialog(
         context: context,
         builder: (BuildContext ctx) {
           return AlertDialog(
-            title: const Text('¿Desea continuar?'),
+            title: Text(titulo??'¿Desea continuar?'),
             content: Text(texto),
             actions: [
               TextButton(

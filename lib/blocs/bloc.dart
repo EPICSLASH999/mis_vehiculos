@@ -313,6 +313,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       reiniciarFiltrosGastos();
       _misVehiculos = vehiculos.fetchAll();
       _misEtiquetas = etiquetas.fetchAll();
+      _misGastos = obtenerGastos();
       emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
     });
     
@@ -484,14 +485,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // Bottom Bar
     on<CambiadoDePantalla>((event, emit) async {
-      _misVehiculos = vehiculos.fetchAll();
-      _misEtiquetas = etiquetas.fetchAll();
-
       if(event.pantalla == OpcionesBottomBar.misVehiculos){
+        _misVehiculos = vehiculos.fetchAll();
         emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
         return;
       }
       if(event.pantalla == OpcionesBottomBar.misEtiquetas){
+        _misEtiquetas = etiquetas.fetchAll();
         emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
         return;
       }
