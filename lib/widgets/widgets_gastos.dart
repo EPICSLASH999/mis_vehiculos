@@ -110,7 +110,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
-      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisGastos),
+      bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: FutureBuilder<String>(
         future: Vehiculos().obtenerNombreVehiculoDeId(int.parse(controladorVehiculo.text)),
         builder: (context, snapshot) {
@@ -339,7 +339,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
-      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisGastos),
+      bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(
         children: [
           FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
@@ -588,13 +588,13 @@ class BotonesTileGasto extends StatelessWidget {
         children: [
           IconButton(
             onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context)), 
-            icon: Icon(Icons.delete, color: colorIcono)
+            icon: const Icon(Icons.delete, color: colorIcono)
           ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoEditarGasto(gasto: gasto));
             }, 
-            icon: Icon(Icons.edit, color: colorIcono)
+            icon: const Icon(Icons.edit, color: colorIcono)
           ),
         ],
       ),

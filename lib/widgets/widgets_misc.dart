@@ -162,6 +162,9 @@ VoidCallback dialogoAlerta ({required BuildContext context, required String text
                   // Cerrar cuadro de diálogo
                   Navigator.of(context).pop();
                 },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
                 child: const Text('Si') // Botón de "Si" 
               ),
               TextButton(

@@ -15,7 +15,7 @@ const int idSinEtiqueta = 1; // NO CAMBIAR ESTE VALOR.
 const int valorNoHayEtiquetasCreadas = 998;
 
 //Gastos
-const String valorSinMecanico = 'Sin mecánico';
+const String valorSinMecanico = 'Sin mecanico';
 const String valorSinLugar = 'Sin lugar';
 
 // Tablas

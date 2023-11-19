@@ -38,7 +38,7 @@ class WidgetMisVehiculos extends StatelessWidget {
               ),
             ],
           ),
-          bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisVehiculos),
+          bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
           body: Column(
             children: [
               Expanded(
@@ -99,51 +99,51 @@ class TileVehiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Future openDialog() => showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Row(
-              children: [
-                const Icon(Icons.car_repair_outlined),
-                const SizedBox(
-                  width: 12,
-                ),
-                Text(
-                  vehiculo.modelo,
-                  style: const TextStyle(fontSize: 25),
-                ),
-              ],
+    Future mostrarVehiculo() => showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.car_repair_outlined),
+            const SizedBox(
+              width: 12,
             ),
-            content: SizedBox(
-              height: 200,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Dato(titulo: 'Matricula', valor: vehiculo.matricula),
-                  Dato(titulo: 'Marca', valor: vehiculo.marca),
-                  Dato(titulo: 'Color', valor: vehiculo.color),
-                  Dato(titulo: 'Año', valor: vehiculo.ano.toString()),
-                ],
-              ),
+            Text(
+              vehiculo.modelo,
+              style: const TextStyle(fontSize: 25),
             ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    context
-                        .read<VehiculoBloc>()
-                        .add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
-                  },
-                  child: const Text('Editar')),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Aceptar'))
+          ],
+        ),
+        content: SizedBox(
+          height: 200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Dato(titulo: 'Matricula', valor: vehiculo.matricula),
+              Dato(titulo: 'Marca', valor: vehiculo.marca),
+              Dato(titulo: 'Color', valor: vehiculo.color),
+              Dato(titulo: 'Año', valor: vehiculo.ano.toString()),
             ],
           ),
-        );
-
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context
+                    .read<VehiculoBloc>()
+                    .add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
+              },
+              child: const Text('Editar')),
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Aceptar'))
+        ],
+      ),
+    );
+    
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Material(
@@ -158,7 +158,7 @@ class TileVehiculo extends StatelessWidget {
           subtitle: Text(vehiculo.matricula),
           trailing: BotonesTileVehiculo(vehiculo: vehiculo),
           onTap: () {
-            openDialog();
+            mostrarVehiculo();
           },
         ),
       ),
@@ -216,31 +216,30 @@ class BotonesTileVehiculo extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-              onPressed: dialogoAlerta(
-                  context: context,
-                  texto: '¿Seguro de eliminar este vehículo?',
-                  funcionAlProceder: eliminarVehiculo(context)),
-              icon: Icon(Icons.delete, color: colorIcono)),
+            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este vehículo?', funcionAlProceder: eliminarVehiculo(context)),
+            icon: const Icon(Icons.delete, color: colorIcono)
+          ),
           IconButton(
-              onPressed: () async {
-                var etiquetas = await etiquetasGlobales ?? [];
-                etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
+            onPressed: () async {
+              var etiquetas = await etiquetasGlobales ?? [];
+              etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
 
-                if (etiquetas.isEmpty) {
-                  // ignore: use_build_context_synchronously
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  // ignore: use_build_context_synchronously
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Primero cree etiquetas!"),
-                    duration: Duration(seconds: 1),
-                    //backgroundColor: Colors.blueGrey,
-                  ));
-                  return;
-                }
+              if (etiquetas.isEmpty) {
                 // ignore: use_build_context_synchronously
-                context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
-              },
-              icon: Icon(Icons.monetization_on, color: colorIcono)),
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Primero cree una etiqueta!"),
+                  duration: Duration(seconds: 1),
+                  //backgroundColor: Colors.blueGrey,
+                ));
+                return;
+              }
+              // ignore: use_build_context_synchronously
+              context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+            },
+            icon: const Icon(Icons.monetization_on, color: colorIcono)
+          ),
         ],
       ),
     );
@@ -308,7 +307,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
             icon: const Icon(Icons.arrow_back_ios_new_outlined)),
       ),
       bottomNavigationBar:
-          BarraInferior(indiceSeleccionado: indiceMisVehiculos),
+          const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
       //resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
           child: Form(

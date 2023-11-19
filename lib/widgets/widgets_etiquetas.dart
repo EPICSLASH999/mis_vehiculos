@@ -24,7 +24,7 @@ class WidgetMisEtiquetas extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
-      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
+      bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
       body: FutureBuilder<List<Etiqueta>>(
         future: misEtiquetas,
         builder: (context, snapshot) {
@@ -109,13 +109,13 @@ class BotonesTileEtiqueta extends StatelessWidget {
         children: [
           IconButton(
             onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context)), 
-            icon: Icon(Icons.delete, color: colorIcono)
+            icon: const Icon(Icons.delete, color: colorIcono)
           ),
           IconButton(
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
             }, 
-            icon: Icon(Icons.edit, color: colorIcono)
+            icon: const Icon(Icons.edit, color: colorIcono)
           ),
         ],
       ),
@@ -157,7 +157,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
       ),
-      bottomNavigationBar: BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
+      bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
       body: SingleChildScrollView(
         child: Form(
           key: _formKey,
