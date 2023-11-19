@@ -306,7 +306,23 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     await gastosArchivados.deleteWhereVehicle(event.matricula);
   }
 
-  
+  // Métodos IA
+  int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> ocurrencias) {
+    if(ocurrencias.isEmpty) return 0;
+    int idEtiquetaConMayorOcurrencias = (ocurrencias.first["etiqueta"] as int);
+    return idEtiquetaConMayorOcurrencias;
+  }
+  String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> ocurrencias, int idEtiqueta) {
+    if(ocurrencias.isEmpty) return "";
+    for (var element in ocurrencias) {
+      if((element["etiqueta"] as int) == idEtiqueta){
+        String mecanico = (element["mecanico"]??'') as String;
+        return mecanico;
+      }
+    }
+    return "";
+  }
+
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
       reiniciarFiltrosGastos();
@@ -358,6 +374,18 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
    
     // Gastos
     on<ClickeadoAgregarGasto>((event, emit) async {
+      var ocurrencias = await gastos.fetchMostOccurencesMecanics(event.idVehiculo);
+      /*for (var element in ocurrencias) {
+        print('Etiqueta: ${element["etiqueta"]}');
+        print('Count: ${element["count_etiqueta"]}');
+        print('Mecánico: ${element["mecanico"]}');
+        print('----------------');
+      }*/
+      int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(ocurrencias);
+      print('Etiqueta con mayor ocurencias: ${obtenerEtiquetaConMayorOcurrencias(ocurrencias)}');
+      print('Mecánico: ${obtenerMecanicoConMayorOcurrenciasDeEtiqueta(ocurrencias, idEtiquetaConMayorOcurrencias)}');
+
+
       _misEtiquetas = etiquetas.fetchAll();
       emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas));
     });
@@ -483,7 +511,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
 
     // Bottom Bar
-    on<CambiadoDePantalla>((event, emit) async {
+    on<CambiadoDePantalla>((event, emit) {
       if(event.pantalla == OpcionesBottomBar.misVehiculos){
         _misVehiculos = vehiculos.fetchAll();
         emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
