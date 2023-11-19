@@ -10,7 +10,7 @@ class Etiquetas {
     await crearTabla(database);
     await database.rawInsert('''INSERT INTO $tableName(id_etiqueta,nombre) 
       SELECT $idSinEtiqueta, '$nombreSinEtiqueta' 
-      WHERE NOT EXISTS(SELECT 1 FROM $tableName WHERE id_etiqueta = $idSinEtiqueta AND nombre = '$nombreSinEtiqueta');'''); // Inserta la Etiqueta Desconocida (en caso de eliminar su etiqueta)   
+      WHERE NOT EXISTS(SELECT 1 FROM $tableName WHERE id_etiqueta = $idSinEtiqueta AND nombre = '$nombreSinEtiqueta');'''); // Inserta la Etiqueta 'Sin etiqueta' (se asigna por omisión en caso de eliminar su etiqueta)   
   }
 
   Future<void> crearTabla(Database database) async {
@@ -32,7 +32,9 @@ class Etiquetas {
   Future<List<Etiqueta>> fetchAll() async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
-      ''' SELECT * from $tableName ORDER BY id_etiqueta'''
+      ''' SELECT * from $tableName 
+      WHERE id_etiqueta != $idSinEtiqueta 
+      ORDER BY id_etiqueta'''
     );
     return registros.map((etiqueta) => Etiqueta.fromSQfliteDatabase(etiqueta)).toList();
   }

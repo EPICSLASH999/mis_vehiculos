@@ -47,7 +47,7 @@ class Gastos {
 
   Future<List<Gasto>> fetchAllWithFilters(DateTime fechaInicial, DateTime fechaFinal, int? idVehiculo) async{
     final database = await DatabaseService().database;
-    String filtroVehiculo = idVehiculo == null?'':'AND vehiculo = $idVehiculo ';
+    String filtroVehiculo = (idVehiculo == null)?'':'AND vehiculo = $idVehiculo ';
     //String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
     String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula, nombre from $tableName 
       INNER JOIN $tablaVehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 

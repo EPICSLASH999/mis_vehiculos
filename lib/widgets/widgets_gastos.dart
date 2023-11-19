@@ -198,7 +198,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 return const WidgetCargando();
               } else{
                 final etiquetas = snapshot.data?? [];
-                etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
                 
                 return DropdownButtonFormField(
                   validator: (value) {
@@ -228,22 +227,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 
 }
-
-/*class BotonAdministrarEtiquetas extends StatelessWidget {
-  const BotonAdministrarEtiquetas({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        context.read<VehiculoBloc>().add(ClickeadoAdministrarEtiquetas());
-      }, 
-      child: const Text('Administrar Etiquetas')
-    );
-  }
-}*/
 
 class WidgetMisGastos extends StatefulWidget {
   final Future <List<Gasto>>? misGastos;
@@ -585,6 +568,7 @@ class BotonesTileGasto extends StatelessWidget {
     return SizedBox(
       width: 100,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context)), 
@@ -628,7 +612,6 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
                 return const WidgetCargando();
               } else{
                 final etiquetas = snapshot.data?? [];
-                etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
                 
                 return DropdownButtonFormField(
                   validator: (value) {

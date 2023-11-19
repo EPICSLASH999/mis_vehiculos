@@ -32,7 +32,6 @@ class WidgetMisEtiquetas extends StatelessWidget {
             return const WidgetCargando();
           } else{
             final etiquetas = snapshot.data?? [];
-            etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
 
             return etiquetas.isEmpty
                 ? const Center(

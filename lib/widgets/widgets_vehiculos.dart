@@ -9,7 +9,7 @@ import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- VEHICULOS --------------------------------- */
 Future<List<Etiqueta>>? etiquetasGlobales;
-
+ 
 // Widget Principal (Menu Principal)
 class WidgetMisVehiculos extends StatelessWidget {
   final Future<List<Vehiculo>>? misVehiculos;
@@ -61,10 +61,6 @@ class WidgetMisVehiculos extends StatelessWidget {
                               ),
                             )
                           : ListView.builder(
-                              /*separatorBuilder: (context, index) =>
-                                  const SizedBox(
-                                height: 12,
-                              ),*/
                               itemCount: vehiculos.length,
                               itemBuilder: (context, index) {
                                 final vehiculo = vehiculos[index];
@@ -222,17 +218,12 @@ class BotonesTileVehiculo extends StatelessWidget {
           IconButton(
             onPressed: () async {
               var etiquetas = await etiquetasGlobales ?? [];
-              etiquetas.removeWhere((element) => (element.id == idSinEtiqueta)); // Remueve la etiqueta 'Desconocida' de la lista.
 
               if (etiquetas.isEmpty) {
                 // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 // ignore: use_build_context_synchronously
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text("Primero cree una etiqueta!"),
-                  duration: Duration(seconds: 1),
-                  //backgroundColor: Colors.blueGrey,
-                ));
+                mostrarToast(context, "Primero cree una etiqueta!");
                 return;
               }
               // ignore: use_build_context_synchronously
@@ -244,6 +235,8 @@ class BotonesTileVehiculo extends StatelessWidget {
       ),
     );
   }
+
+  
 }
 
 

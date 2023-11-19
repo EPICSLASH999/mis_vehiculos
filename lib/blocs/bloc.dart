@@ -483,7 +483,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
 
     // Bottom Bar
-    on<CambiadoDePantalla>((event, emit) {
+    on<CambiadoDePantalla>((event, emit) async {
       _misVehiculos = vehiculos.fetchAll();
       _misEtiquetas = etiquetas.fetchAll();
 

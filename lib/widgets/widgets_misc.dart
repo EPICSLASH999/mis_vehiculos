@@ -145,7 +145,7 @@ class SeleccionadorDeFecha extends StatelessWidget {
 /* ----------------------------------------------------------------------------- */
 
 
-/* -------------------------------- ALERT DIALOG -------------------------------- */
+/* ---------------------------------- MENSAJES --------------------------------- */
 //Función de AlertDialog
 VoidCallback dialogoAlerta ({required BuildContext context, required String texto, required Function funcionAlProceder}) {
     return (){
@@ -180,6 +180,15 @@ VoidCallback dialogoAlerta ({required BuildContext context, required String text
       );
     };
   }
+
+// Toast!
+ void mostrarToast(BuildContext context, String mensaje) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(mensaje),
+    duration: const Duration(seconds: 1),
+    //backgroundColor: Colors.blueGrey,
+  ));
+}
 /* ------------------------------------------------------------------------------ */
 
 /* --------------------------------- BOTTOM BAR --------------------------------- */
