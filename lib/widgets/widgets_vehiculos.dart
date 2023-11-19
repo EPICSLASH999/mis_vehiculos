@@ -22,6 +22,12 @@ class WidgetMisVehiculos extends StatelessWidget {
     etiquetasGlobales = misEtiquetas;
 
     return BlocConsumer<VehiculoBloc, VehiculoEstado>(
+      listenWhen: (previous, current) { 
+        // Esto lo hice para no ocultar el toast (snackBar) cuando se recargue el Estado
+        // Para asi poder mostrar el toast de 'Gastos archivados'.
+        if ((previous is! MisVehiculos) || (current is! MisVehiculos)) return true;
+        return false;
+      },
       listener: (context, state) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       },
@@ -96,6 +102,7 @@ class TileVehiculo extends StatelessWidget {
   Function eliminarVehiculo(BuildContext context, int idVehiculo) {
     return () {
       context.read<VehiculoBloc>().add(EliminadoVehiculo(id: idVehiculo));
+      mostrarToast(context, 'Gastos archivados');
     };
   }
   Future mostrarVehiculo(BuildContext context) => showDialog(
