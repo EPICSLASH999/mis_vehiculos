@@ -26,60 +26,68 @@ class WidgetMisVehiculos extends StatelessWidget {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       },
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Mis Vehículos'),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
-                },
-                icon: const Icon(Icons.folder),
-              ),
-            ],
-          ),
-          bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
-          body: Column(
-            children: [
-              Expanded(
-                child: FutureBuilder<List<Vehiculo>>(
-                  future: misVehiculos,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const WidgetCargando();
-                    } else {
-                      final vehiculos = snapshot.data ?? [];
-
-                      return vehiculos.isEmpty
-                          ? const Center(
-                              child: Text(
-                                'Sin vehiculos...',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 28,
-                                ),
-                              ),
-                            )
-                          : ListView.builder(
-                              itemCount: vehiculos.length,
-                              itemBuilder: (context, index) {
-                                final vehiculo = vehiculos[index];
-                                return TileVehiculo(vehiculo: vehiculo);
-                              },
-                            );
-                    }
+        return WillPopScope(
+          onWillPop: () {
+            print('Popped!');
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+            return Future(() => false);
+          }, 
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Mis Vehículos'),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
                   },
+                  icon: const Icon(Icons.folder),
                 ),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
-            },
-          ),
+              ],
+            ),
+            bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
+            body: Column(
+              children: [
+                Expanded(
+                  child: FutureBuilder<List<Vehiculo>>(
+                    future: misVehiculos,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const WidgetCargando();
+                      } else {
+                        final vehiculos = snapshot.data ?? [];
+
+                        return vehiculos.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'Sin vehiculos...',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 28,
+                                  ),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: vehiculos.length,
+                                itemBuilder: (context, index) {
+                                  final vehiculo = vehiculos[index];
+                                  return TileVehiculo(vehiculo: vehiculo);
+                                },
+                              );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () {
+                context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
+              },
+            ),
+          ), 
         );
+        
       },
     );
   }
