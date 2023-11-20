@@ -20,7 +20,7 @@ Future<List<Map<String, Object?>>>? listaMecanicoPorEtiquetaGlobal;
 int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
   if(listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
   int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
-  if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return 0;
+  if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return valorNoTieneEtiquetaConMayorOcurrencias;
   return idEtiquetaConMayorOcurrencias;
 }
 String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> listaMecanicoPorEtiqueta, int idEtiqueta) {
