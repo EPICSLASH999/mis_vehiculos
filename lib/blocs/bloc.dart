@@ -358,15 +358,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
    
     // Gastos
-    on<ClickeadoAgregarGasto>((event, emit) async{
+    on<ClickeadoAgregarGasto>((event, emit) {
       listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.idVehiculo);
-      var mapa = await listaMecanicoPorEtiqueta??[]; // para test
-      for (var element in mapa) {
-        print(element["etiqueta"]);
-        print(element["mecanico"]);
-        print('----------------');
-      }
-
       _misEtiquetas = etiquetas.fetchAll();
       emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta));
     });

@@ -12,7 +12,27 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* ----------------------------------- GASTOS ----------------------------------- */
+// Variables Globales
+// IA
 Future<List<Map<String, Object?>>>? listaMecanicoPorEtiquetaGlobal;
+
+// Métodos IA
+int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
+  if(listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
+  int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
+  if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return 0;
+  return idEtiquetaConMayorOcurrencias;
+}
+String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> listaMecanicoPorEtiqueta, int idEtiqueta) {
+    if(listaMecanicoPorEtiqueta.isEmpty) return "";
+    for (var element in listaMecanicoPorEtiqueta) {
+      if((element["etiqueta"] as int) == idEtiqueta){
+        String mecanico = (element["mecanico"]??'') as String;
+        return mecanico;
+      }
+    }
+    return "";
+  }
 
 class WidgetPlantillaGasto extends StatefulWidget {
   final Gasto? gasto;
@@ -58,7 +78,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
       id: (widget.gasto?.id)??0, 
       vehiculo: int.parse(idVehiculo),
       etiqueta: int.parse(controladorEtiqueta.text),
-      mecanico: controladorMecanico.text,
+      mecanico: controladorMecanico.text.trim(),
       lugar: controladorLugar.text,
       costo: double.parse(controladorCosto.text),
       fecha: fechaSeleccionada.millisecondsSinceEpoch.toString()
@@ -83,25 +103,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         //controladorFecha.text = DateFormat.yMMMd().format(fechaSeleccionada);
       }
     };
-  }
-
-  
-  // Métodos IA
-  int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
-    if(listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
-    int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
-    if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return 0;
-    return idEtiquetaConMayorOcurrencias;
-  }
-  String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> listaMecanicoPorEtiqueta, int idEtiqueta) {
-    if(listaMecanicoPorEtiqueta.isEmpty) return "";
-    for (var element in listaMecanicoPorEtiqueta) {
-      if((element["etiqueta"] as int) == idEtiqueta){
-        String mecanico = (element["mecanico"]??'') as String;
-        return mecanico;
-      }
-    }
-    return "";
   }
 
 
@@ -153,10 +154,12 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   return const WidgetCargando();
                 } else{
                   final listaMecanicoPorEtiqueta = snapshot.data?? [];
+                  
+                  // Procedimiento para IA de obtener mecánico por etiqueta.
                   int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
                   if(!esEditarGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
-                  //if(!esEditarGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString();
+                  if(!esEditarGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
                   return SingleChildScrollView(
                     child: Form(
@@ -189,7 +192,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                 }
               },
             );
-            
           }
         },
       ),
@@ -221,31 +223,12 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
  
   int? get idEtiquetaSeleccionada => int.tryParse(widget.etiquetaSeleccionada.text); 
 
-  // Métodos IA
-  int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
-    if(listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
-    int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
-    if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return 0;
-    return idEtiquetaConMayorOcurrencias;
-  }
-  String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> listaMecanicoPorEtiqueta, int idEtiqueta) {
-    if(listaMecanicoPorEtiqueta.isEmpty) return "";
-    for (var element in listaMecanicoPorEtiqueta) {
-      if((element["etiqueta"] as int) == idEtiqueta){
-        String mecanico = (element["mecanico"]??'') as String;
-        return mecanico;
-      }
-    }
-    return "";
-  }
-
-
   @override
   Widget build(BuildContext context)  {
     bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
       if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
-      if(idEtiquetaSeleccionada != null) return idEtiquetaSeleccionada!;
+      if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
       return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
     }
 
@@ -269,7 +252,6 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                       return const WidgetCargando();
                     } else{
                       final listaMecanicoPorEtiqueta = snapshot.data?? [];
-                      int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
 
                       return DropdownButtonFormField(
                         validator: (value) {
@@ -279,7 +261,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                           widget.etiquetaSeleccionada.text = value.toString();
                           return null;
                         },
-                        value: (idEtiquetaConMayorOcurrencias == valorNoTieneEtiquetaConMayorOcurrencias)?valorIdEtiquetaInicial(etiquetas):idEtiquetaConMayorOcurrencias,
+                        value: valorIdEtiquetaInicial(etiquetas),
                         items: [
                           if(idEtiquetaSeleccionada == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
                           for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)

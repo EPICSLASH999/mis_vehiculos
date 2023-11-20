@@ -76,30 +76,6 @@ class Gastos {
 
   Future<List<Map<String, Object?>>> fetchMostOccurringMechanics(int idVehiculo) async{
     final database = await DatabaseService().database;
-    /*String query = ''' 
-      WITH CTE AS (
-        SELECT
-          etiqueta, 
-          mecanico,
-          ROW_NUMBER() OVER (PARTITION BY etiqueta ORDER BY COUNT(*) DESC) AS rn
-        FROM $tableName
-        WHERE vehiculo = $idVehiculo 
-        AND etiqueta != $idSinEtiqueta
-        GROUP BY etiqueta, mecanico
-      )
-      SELECT etiqueta, mecanico
-      FROM CTE
-      WHERE rn = 1
-        AND (
-            mecanico <> '' 
-            OR NOT EXISTS (
-              SELECT 1
-              FROM CTE c2
-              WHERE c2.etiqueta = CTE.etiqueta AND c2.mecanico <> ''
-            )
-      )
-      ORDER BY (SELECT COUNT(*) FROM $tableName WHERE etiqueta = CTE.etiqueta) DESC; -- Ordenar por la cuenta de etiquetas de forma descendente
-    ''';*/
     String query = ''' WITH CTE AS (
         SELECT
           etiqueta, 
