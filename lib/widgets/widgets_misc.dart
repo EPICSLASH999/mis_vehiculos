@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
+import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 
 /* -------------------------------- COMPONENTES -------------------------------- */
@@ -70,6 +71,7 @@ class CuadroDeTexto extends StatelessWidget {
       "'" 
       ']'
     );
+    bool esPrimerClic = true;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -96,6 +98,12 @@ class CuadroDeTexto extends StatelessWidget {
             decoration: obtenerDecoracion(),
             keyboardType: obtenerTipoTeclado(),
             autofocus: focusTecaldo,
+            onTap: () { 
+              if(esSoloLectura) return;
+              if(!esPrimerClic) return;
+              controlador.selectAll(); // Seleccionar todo el texto.
+              esPrimerClic = !esPrimerClic;
+            },
           ),
         ],
       ),
