@@ -122,35 +122,24 @@ class BotonesTileEtiqueta extends StatelessWidget {
   }
 }
 
-class WidgetPlantillaEtiqueta extends StatefulWidget {
+class WidgetPlantillaEtiqueta extends StatelessWidget {
   final Etiqueta? etiqueta;
-  const WidgetPlantillaEtiqueta({super.key, this.etiqueta});
+  WidgetPlantillaEtiqueta({super.key, this.etiqueta});
 
-  @override
-  State<WidgetPlantillaEtiqueta> createState() => _WidgetPlantillaEtiquetaState();
-}
-
-class _WidgetPlantillaEtiquetaState extends State<WidgetPlantillaEtiqueta> {
   final _formKey = GlobalKey<FormState>();
-
+  
   final TextEditingController controladorNombre = TextEditingController();
 
   Etiqueta obtenerEtiqueta(){
     return Etiqueta(
-      id: (widget.etiqueta?.id)??0, 
+      id: (etiqueta?.id)??0, 
       nombre: controladorNombre.text, 
     );
   }
-  String obtenerTexto() => "${(widget.etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
+  String obtenerTexto() => "${(etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
   void inicializarValoresDeControladores(){
-    if (widget.etiqueta == null) return;
-    controladorNombre.text = widget.etiqueta?.nombre??'';
-  }
-
-  @override
-  void dispose() {
-    controladorNombre.dispose();
-    super.dispose();
+    if (etiqueta == null) return;
+    controladorNombre.text = etiqueta?.nombre??'';
   }
 
   @override
@@ -177,7 +166,7 @@ class _WidgetPlantillaEtiquetaState extends State<WidgetPlantillaEtiqueta> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    if (widget.etiqueta == null) {
+                    if (etiqueta == null) {
                       context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
                       return;
                     }

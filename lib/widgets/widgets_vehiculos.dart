@@ -340,8 +340,8 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   }
 }
 
-class CuadroDeTextoMatricula extends StatefulWidget {
-  const CuadroDeTextoMatricula({
+class CuadroDeTextoMatricula extends StatelessWidget {
+  CuadroDeTextoMatricula({
     super.key,
     required this.matriculasVehiculos,
     required this.controladorMatricula,
@@ -354,28 +354,18 @@ class CuadroDeTextoMatricula extends StatefulWidget {
   final String titulo;
   final bool focusTecaldo;
 
-  @override
-  State<CuadroDeTextoMatricula> createState() => _CuadroDeTextoMatriculaState();
-}
-
-class _CuadroDeTextoMatriculaState extends State<CuadroDeTextoMatricula> {
   final bool campoRequerido = true;
   final int maxCaracteres = 7;
   final int minCaracteres = 4;
+
   final caracteresEspeciales = RegExp(r'[\^$*\[\]{}()?\"!@%&/\><:,;_~`+='
       "'"
       ']');
 
   @override
-  void dispose() {
-    widget.controladorMatricula.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: widget.matriculasVehiculos,
+      future: matriculasVehiculos,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const WidgetCargando();
@@ -387,7 +377,7 @@ class _CuadroDeTextoMatriculaState extends State<CuadroDeTextoMatricula> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                TituloComponente(titulo: widget.titulo),
+                TituloComponente(titulo: titulo),
                 TextFormField(
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
@@ -399,10 +389,10 @@ class _CuadroDeTextoMatriculaState extends State<CuadroDeTextoMatricula> {
                     return null;
                   },
                   maxLength: maxCaracteres,
-                  controller: widget.controladorMatricula,
+                  controller: controladorMatricula,
                   decoration: decoracionParaCampoObligatorio,
                   keyboardType: TextInputType.text,
-                  autofocus: widget.focusTecaldo,
+                  autofocus: focusTecaldo,
                 ),
               ],
             ),
