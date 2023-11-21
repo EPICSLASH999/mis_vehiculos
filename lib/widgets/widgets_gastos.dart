@@ -453,48 +453,54 @@ class TotalGastos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-            future: listaGastos, 
-            builder: (context, snapshot) {
-              if (snapshot.hasData){
-                final gastos = snapshot.data?? [];
-                double gastosTotales = sumarGastos(gastos);
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Total: \$${gastosTotales.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold),),
-                );
-              }
-              return const CircularProgressIndicator();
-            },
+      future: listaGastos, 
+      builder: (context, snapshot) {
+        if (snapshot.hasData){
+          final gastos = snapshot.data?? [];
+          double gastosTotales = sumarGastos(gastos);
+          
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('Total: \$${gastosTotales.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold),),
           );
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
 
 // ignore: must_be_immutable
-class FiltroParaFecha extends StatelessWidget {
+class FiltroParaFecha extends StatefulWidget {
   FiltroParaFecha({
     super.key, 
     required this.fechaSeleccionadaInicial,
     required this.fechaSeleccionadaFinal, 
   });
 
-  final TextEditingController controladorFechaInicial = TextEditingController();
-  final TextEditingController controladorFechaFinal = TextEditingController();
-  
   DateTime fechaSeleccionadaInicial;
   DateTime fechaSeleccionadaFinal;
+
+  @override
+  State<FiltroParaFecha> createState() => _FiltroParaFechaState();
+}
+
+class _FiltroParaFechaState extends State<FiltroParaFecha> {
+  final TextEditingController controladorFechaInicial = TextEditingController();
+  final TextEditingController controladorFechaFinal = TextEditingController();
 
   VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
     return () async {
       DateTime? nuevaFecha = await showDatePicker(
         context: context, 
-        initialDate: fechaSeleccionadaInicial,
+        initialDate: widget.fechaSeleccionadaInicial,
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
       );
       if (nuevaFecha != null) {
-        fechaSeleccionadaInicial = nuevaFecha;
+        widget.fechaSeleccionadaInicial = nuevaFecha;
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
+        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: widget.fechaSeleccionadaInicial, fechaFinal: widget.fechaSeleccionadaFinal));
       }
     };
   }
@@ -502,16 +508,16 @@ class FiltroParaFecha extends StatelessWidget {
     return () async {
       DateTime? nuevaFecha = await showDatePicker(
         context: context, 
-        initialDate: fechaSeleccionadaFinal,
+        initialDate: widget.fechaSeleccionadaFinal,
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
       );
       if (nuevaFecha != null) {
         //2023-01-01 00:00:00.000
         DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
-        fechaSeleccionadaFinal = fechaNormalizada;
+        widget.fechaSeleccionadaFinal = fechaNormalizada;
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
+        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: widget.fechaSeleccionadaInicial, fechaFinal: widget.fechaSeleccionadaFinal));    
       }
     };
   }
@@ -520,10 +526,16 @@ class FiltroParaFecha extends StatelessWidget {
     if (numero.toString().length == 1) numeroRecibido += '0';
     return numeroRecibido += numero.toString();
   }
-
   void inicializarTextBoxesConFechas() {
-    controladorFechaInicial.text = DateFormat.yMMMd().format(fechaSeleccionadaInicial);
-    controladorFechaFinal.text = DateFormat.yMMMd().format(fechaSeleccionadaFinal);
+    controladorFechaInicial.text = DateFormat.yMMMd().format(widget.fechaSeleccionadaInicial);
+    controladorFechaFinal.text = DateFormat.yMMMd().format(widget.fechaSeleccionadaFinal);
+  }
+
+  @override
+  void dispose() {
+    controladorFechaInicial.dispose();
+    controladorFechaFinal.dispose();
+    super.dispose();
   }
 
   @override
@@ -566,7 +578,7 @@ class FiltroParaEtiqueta extends StatelessWidget {
   }
 }
 
-class FiltroParaMecanico extends StatelessWidget {
+class FiltroParaMecanico extends StatefulWidget {
   const FiltroParaMecanico({super.key, required this.controladorMecanico, required this.titulo, required this.campoRequerido});
 
   final TextEditingController controladorMecanico;
@@ -574,8 +586,20 @@ class FiltroParaMecanico extends StatelessWidget {
   final bool campoRequerido;
 
   @override
+  State<FiltroParaMecanico> createState() => _FiltroParaMecanicoState();
+}
+
+class _FiltroParaMecanicoState extends State<FiltroParaMecanico> {
+
+  @override
+  void dispose() {
+    widget.controladorMecanico.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false);
+    return CuadroDeTexto(controlador: widget.controladorMecanico, titulo: widget.titulo, campoRequerido: false);
   }
 }
 

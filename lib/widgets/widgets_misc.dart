@@ -19,7 +19,7 @@ class TituloComponente extends StatelessWidget {
   }
 }
 
-class CuadroDeTexto extends StatelessWidget {
+class CuadroDeTexto extends StatefulWidget {
   const CuadroDeTexto({
     super.key,
     required this.controlador,
@@ -43,14 +43,19 @@ class CuadroDeTexto extends StatelessWidget {
   final int? minCaracteres;
   final bool focusTecaldo;
 
+  @override
+  State<CuadroDeTexto> createState() => _CuadroDeTextoState();
+}
+
+class _CuadroDeTextoState extends State<CuadroDeTexto> {
   bool esNumerico(String? s) {
     if(s == null) return false;    
-    if (esInt) return int.tryParse(s) != null;
+    if (widget.esInt) return int.tryParse(s) != null;
     return double.tryParse(s) != null;
   }
   InputDecoration obtenerDecoracion(){
 
-    if (campoRequerido && !esSoloLectura){
+    if (widget.campoRequerido && !widget.esSoloLectura){
       return decoracionParaCampoObligatorio;
     }
 
@@ -60,10 +65,17 @@ class CuadroDeTexto extends StatelessWidget {
     );
   }
   TextInputType obtenerTipoTeclado(){
-    if(esInt || esDouble) return TextInputType.number;
+    if(widget.esInt || widget.esDouble) return TextInputType.number;
     return TextInputType.text;
   }
 
+  @override
+  void dispose() {
+    widget.controlador.dispose();
+    super.dispose();
+  }
+
+  
   @override
   Widget build(BuildContext context) {
     final caracteresEspeciales = RegExp(
@@ -78,30 +90,30 @@ class CuadroDeTexto extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          TituloComponente(titulo: titulo),
+          TituloComponente(titulo: widget.titulo),
           TextFormField(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
               String valorNormalizado = (value??'').trim();
-              if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
-              if (esInt && !esNumerico(valorNormalizado)) return 'Debe ser número entero';  
-              if (esDouble && !esNumerico(valorNormalizado)) return 'Debe ser numerico';  
-              if((!esInt && !esDouble) && esNumerico(valorNormalizado)) return 'Campo inválido';
+              if (valorNormalizado.isEmpty && widget.campoRequerido) return 'Campo requerido';
+              if (widget.esInt && !esNumerico(valorNormalizado)) return 'Debe ser número entero';  
+              if (widget.esDouble && !esNumerico(valorNormalizado)) return 'Debe ser numerico';  
+              if((!widget.esInt && !widget.esDouble) && esNumerico(valorNormalizado)) return 'Campo inválido';
               if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
-              if(minCaracteres != null && valorNormalizado.length < minCaracteres!) return 'Debe tener al menos $minCaracteres caracteres';
+              if(widget.minCaracteres != null && valorNormalizado.length < widget.minCaracteres!) return 'Debe tener al menos ${widget.minCaracteres} caracteres';
               return null;
             },
             textCapitalization: TextCapitalization.sentences,
-            maxLength: maxCaracteres,
-            readOnly: esSoloLectura,
-            controller: controlador,
+            maxLength: widget.maxCaracteres,
+            readOnly: widget.esSoloLectura,
+            controller: widget.controlador,
             decoration: obtenerDecoracion(),
             keyboardType: obtenerTipoTeclado(),
-            autofocus: focusTecaldo,
+            autofocus: widget.focusTecaldo,
             onTap: () { 
-              if(esSoloLectura) return;
+              if(widget.esSoloLectura) return;
               if(!esPrimerClic) return;
-              controlador.selectAll(); // Seleccionar todo el texto.
+              widget.controlador.selectAll(); // Seleccionar todo el texto.
               esPrimerClic = !esPrimerClic;
             },
           ),
@@ -111,7 +123,7 @@ class CuadroDeTexto extends StatelessWidget {
   }
 }
 
-class SeleccionadorDeFecha extends StatelessWidget {
+class SeleccionadorDeFecha extends StatefulWidget {
   const SeleccionadorDeFecha({
     super.key,
     required this.controlador,
@@ -124,6 +136,18 @@ class SeleccionadorDeFecha extends StatelessWidget {
   final VoidCallback funcionAlPresionar;
 
   @override
+  State<SeleccionadorDeFecha> createState() => _SeleccionadorDeFechaState();
+}
+
+class _SeleccionadorDeFechaState extends State<SeleccionadorDeFecha> {
+
+  @override
+  void dispose() {
+    widget.controlador.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 150,
@@ -131,18 +155,18 @@ class SeleccionadorDeFecha extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            TituloComponente(titulo: titulo),
+            TituloComponente(titulo: widget.titulo),
             TextFormField(
               validator: (value) {
                 if (value != null && value.isEmpty) return 'Valor requerido';
                 return null;
               },
               readOnly: true,
-              controller: controlador,
+              controller: widget.controlador,
               decoration: const InputDecoration(
                 suffixIcon: Icon(Icons.date_range)
               ),
-              onTap: funcionAlPresionar
+              onTap: widget.funcionAlPresionar
             ),
           ],
         ),
