@@ -30,7 +30,8 @@ class CuadroDeTexto extends StatelessWidget {
     this.campoRequerido = true,
     this.maxCaracteres = 20, 
     this.minCaracteres,
-    this.focusTecaldo = false,
+    this.focusTecaldo = false, 
+    this.icono,
   });
 
   final TextEditingController controlador;
@@ -42,6 +43,7 @@ class CuadroDeTexto extends StatelessWidget {
   final int maxCaracteres;
   final int? minCaracteres;
   final bool focusTecaldo;
+  final Icon? icono;
 
   bool esNumerico(String? s) {
     if(s == null) return false;    
@@ -49,16 +51,12 @@ class CuadroDeTexto extends StatelessWidget {
     return double.tryParse(s) != null;
   }
   InputDecoration obtenerDecoracion(){
-
     if (campoRequerido && !esSoloLectura){
-      return obtenerDecoracionCampoObligatorio();
+      return obtenerDecoracionCampoObligatorio(icono: icono);
     }
-
-    return const InputDecoration(
-      hintText: "", 
-      suffixIcon: Icon(Icons.car_rental)
-    );
+    return obtenerDecoracionCampoOpcional(icono: icono);
   }
+
   TextInputType obtenerTipoTeclado(){
     if(esInt || esDouble) return TextInputType.number;
     return TextInputType.text;

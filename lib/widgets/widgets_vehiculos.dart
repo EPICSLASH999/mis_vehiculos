@@ -302,11 +302,11 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
         child: Column(
           children: <Widget>[
             // Add TextFormFields and ElevatedButton here.
-            CuadroDeTextoMatricula(matriculasVehiculos: widget.matriculasVehiculos, controladorMatricula: controladorMatricula, titulo: 'Matricula', focusTecaldo: true,),
-            CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca'),
+            CuadroDeTextoMatricula(matriculasVehiculos: widget.matriculasVehiculos, controladorMatricula: controladorMatricula, titulo: 'Matricula', focusTecaldo: true, icono: const Icon(Icons.abc_outlined),),
+            CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca', icono: const Icon(Icons.factory)),
             CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
-            CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15,),
-            CuadroDeTexto(controlador: controladorAno, titulo: 'Año',esInt: true,maxCaracteres: 4,minCaracteres: 4,),
+            CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15, icono: const Icon(Icons.colorize),),
+            CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month),),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -342,13 +342,15 @@ class CuadroDeTextoMatricula extends StatelessWidget {
     required this.matriculasVehiculos,
     required this.controladorMatricula,
     required this.titulo,
-    this.focusTecaldo = false,
+    this.focusTecaldo = false, 
+    this.icono,
   });
 
   final Future<List<String>>? matriculasVehiculos;
   final TextEditingController controladorMatricula;
   final String titulo;
   final bool focusTecaldo;
+  final Icon? icono;
 
   final bool campoRequerido = true;
   final int maxCaracteres = 7;
@@ -387,7 +389,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                   textCapitalization: TextCapitalization.characters,
                   maxLength: maxCaracteres,
                   controller: controladorMatricula,
-                  decoration: obtenerDecoracionCampoObligatorio(),
+                  decoration: obtenerDecoracionCampoObligatorio(icono: icono),
                   keyboardType: TextInputType.text,
                   autofocus: focusTecaldo,
                 ),

@@ -168,7 +168,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
           key: _formKey,
           child: Column(
             children: <Widget>[
-              CuadroDeTextoEtiqueta(controlador: controladorNombre, titulo: 'Nombre', focusTecaldo: true,),
+              CuadroDeTextoEtiqueta(controlador: controladorNombre, titulo: 'Nombre', focusTecaldo: true, icono: const Icon(Icons.label),),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -197,7 +197,8 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     this.campoRequerido = true,
     this.maxCaracteres = 20, 
     this.minCaracteres,
-    this.focusTecaldo = false,
+    this.focusTecaldo = false, 
+    this.icono,
   });
 
   final TextEditingController controlador;
@@ -206,18 +207,15 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
   final int maxCaracteres;
   final int? minCaracteres;
   final bool focusTecaldo;
+  final Icon? icono;
 
   bool esNumerico(String? s) {
     if(s == null) return false;    
     return double.tryParse(s) != null;
   }
-  InputDecoration obtenerDecoracion(){
-    if (campoRequerido) return obtenerDecoracionCampoObligatorio(hintText: 'Gasolina');
-    
-    return const InputDecoration(
-      hintText: "", 
-      suffixIcon: Icon(Icons.car_rental)
-    );
+  InputDecoration obtenerDecoracion({Icon? icono}){
+    if (campoRequerido) return obtenerDecoracionCampoObligatorio(hintText: 'Gasolina', icono: icono);
+    return obtenerDecoracionCampoOpcional(icono: icono);
   }
   bool existeEtiqueta(List<String> etiquetas, String etiquetaRecibida){
     for (var etiqueta in etiquetas) {
@@ -263,7 +261,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
                   textCapitalization: TextCapitalization.sentences,
                   maxLength: maxCaracteres,
                   controller: controlador,
-                  decoration: obtenerDecoracion(),
+                  decoration: obtenerDecoracion(icono: icono),
                   keyboardType: TextInputType.text,
                   autofocus: focusTecaldo,
                   onTap: () { 

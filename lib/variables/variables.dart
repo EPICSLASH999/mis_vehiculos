@@ -37,9 +37,16 @@ const Color colorIcono = Color.fromARGB(255, 158, 190, 42);
 const Color colorTileSeleccionado = Color.fromARGB(104, 201, 255, 7);
 
 //Decoración
-InputDecoration obtenerDecoracionCampoObligatorio({String? hintText}) => InputDecoration(
+InputDecoration obtenerDecoracionCampoObligatorio({String? hintText, Icon? icono}) => InputDecoration(
         hintText: (hintText??''), 
         prefixIcon: const Icon(Icons.label_important),
         prefixIconColor: Colors.red,
-        suffixIcon: const Icon(Icons.car_rental)
+        suffixIcon: icono??const Icon(Icons.car_rental)
       );
+
+InputDecoration obtenerDecoracionCampoOpcional({Icon? icono}) {
+  return InputDecoration(
+    hintText: "", 
+    suffixIcon: icono??const Icon(Icons.car_rental)
+  );
+}

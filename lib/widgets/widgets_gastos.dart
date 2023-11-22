@@ -168,9 +168,9 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                         children: <Widget>[
                           CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
                           SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),controladorMecanico: controladorMecanico),
-                          CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false,),
-                          CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40,),
-                          CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7,),
+                          CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
+                          CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40, icono: const Icon(Icons.place),),
+                          CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7, icono: const Icon(Icons.attach_money),),
                           SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
                         
                           ElevatedButton(
