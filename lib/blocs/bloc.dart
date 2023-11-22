@@ -283,8 +283,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   }
 
   // Métodos para gastos archivados.
-  Future<void> archivarGastosDeIdVehiculo(int id) async {
-    List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(id);
+  Future<void> archivarGastosDeIdVehiculo(int idVehiculo) async {
+    List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(idVehiculo);
     for (var gasto in misGastosPorVehiculo) {
       DateTime fechaNormalizada = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(gasto.fecha).millisecondsSinceEpoch);
       Map<String,dynamic> datos = {
@@ -297,6 +297,19 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await gastosArchivados.create(datos: datos);
     }
+  }
+  Future<void> archivarGastoIndividual(int idGasto) async {
+    Gasto gasto = await Gastos().fetchById(idGasto);
+    DateTime fechaNormalizada = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(gasto.fecha).millisecondsSinceEpoch);
+    Map<String,dynamic> datos = {
+      "vehiculo": gasto.nombreVehiculo,
+      "etiqueta": gasto.nombreEtiqueta,
+      "mecanico": gasto.mecanico,
+      "lugar": gasto.lugar,
+      "costo": gasto.costo,
+      "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
+    };
+    await gastosArchivados.create(datos: datos);
   }
   Future<List<GastoArchivado>> obtenerGastosArchivados(String matricula) {
     if(matricula == valorOpcionTodas.toString()) {
@@ -386,6 +399,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
     on<EliminadoGasto>((event, emit) async {
+      await archivarGastoIndividual(event.id);
       await gastos.delete(event.id);
       _misGastos = obtenerGastos();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));

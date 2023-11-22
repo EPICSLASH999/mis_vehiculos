@@ -109,7 +109,9 @@ class Gastos {
   Future<Gasto> fetchById(int id) async {
     final database = await DatabaseService().database;
     final todo = await database
-        .rawQuery('''SELECT * from $tableName 
+        .rawQuery('''SELECT mecanico,lugar,costo,fecha,matricula,nombre from $tableName 
+          INNER JOIN $tablaVehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 
+          INNER JOIN $tablaEtiquetas ON $tablaEtiquetas.id_etiqueta = $tableName.etiqueta 
           WHERE id_gasto = ?''', [id]);
     return Gasto.fromSQfliteDatabase(todo.first);
   }
