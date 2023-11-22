@@ -91,6 +91,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         initialDate: fechaSeleccionada,
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
+        initialEntryMode: DatePickerEntryMode.calendarOnly
       );
       if (nuevaFecha != null) {
         fechaSeleccionada = nuevaFecha;
@@ -491,6 +492,7 @@ class FiltroParaFecha extends StatelessWidget {
         initialDate: fechaSeleccionadaInicial,
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
+        initialEntryMode: DatePickerEntryMode.calendarOnly
       );
       if (nuevaFecha != null) {
         fechaSeleccionadaInicial = nuevaFecha;
@@ -506,6 +508,7 @@ class FiltroParaFecha extends StatelessWidget {
         initialDate: fechaSeleccionadaFinal,
         firstDate: DateTime(1970), 
         lastDate: DateTime.now(),
+        initialEntryMode: DatePickerEntryMode.calendarOnly
       );
       if (nuevaFecha != null) {
         //2023-01-01 00:00:00.000

@@ -140,7 +140,7 @@ class SeleccionadorDeFecha extends StatelessWidget {
               decoration: const InputDecoration(
                 suffixIcon: Icon(Icons.date_range)
               ),
-              onTap: funcionAlPresionar
+              onTap: funcionAlPresionar,
             ),
           ],
         ),
