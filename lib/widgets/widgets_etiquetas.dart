@@ -36,7 +36,7 @@ class WidgetMisEtiquetas extends StatelessWidget {
             return const WidgetCargando();
           } else{
             final etiquetas = snapshot.data?? [];
-
+      
             return etiquetas.isEmpty
                 ? const Center(
                   child: Text(
@@ -77,6 +77,37 @@ class TileEtiqueta extends StatelessWidget {
 
   final Etiqueta etiqueta;
 
+  Function eliminarEtiqueta(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: etiqueta.id));
+    };
+  }
+  Future mostrarEtiqueta(BuildContext context) => showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Etiqueta',
+          style: TextStyle(fontSize: 20),
+        ),
+        content: Text(etiqueta.nombre),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
+            },
+            child: const Text('Editar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Aceptar')
+          ),
+        ],
+      ),
+    );
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -84,44 +115,10 @@ class TileEtiqueta extends StatelessWidget {
         etiqueta.nombre,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      trailing: BotonesTileEtiqueta(etiqueta: etiqueta),
-      onTap: null,
-    );
-  }
-}
-
-class BotonesTileEtiqueta extends StatelessWidget {
-  const BotonesTileEtiqueta({
-    super.key,
-    required this.etiqueta,
-  });
-
-  final Etiqueta etiqueta;
-
-  Function eliminarEtiqueta(BuildContext context){
-    return () {
-      context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: etiqueta.id));
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context), titulo: 'Eliminar'), 
-            icon: const Icon(Icons.delete, color: colorIcono),
-          ),
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
-            }, 
-            icon: const Icon(Icons.edit, color: colorIcono),
-          ),
-        ],
-      ),
+      onTap: () {
+        mostrarEtiqueta(context);
+      },
+      onLongPress: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context), titulo: 'Eliminar'),
     );
   }
 }

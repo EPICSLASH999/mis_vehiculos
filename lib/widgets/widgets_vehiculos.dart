@@ -77,6 +77,7 @@ class WidgetMisVehiculos extends StatelessWidget {
                   },
                 ),
               ),
+              const SizedBox(height: 73,)
             ],
           ),
           floatingActionButton: FloatingActionButton(
