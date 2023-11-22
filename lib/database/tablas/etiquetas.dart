@@ -46,6 +46,16 @@ class Etiquetas {
     return Etiqueta.fromSQfliteDatabase(etiqueta.first);
   }
 
+  Future<List<String>> fetchAllTagsExcept(String etiqueta) async{
+    final database = await DatabaseService().database;
+    final registros = await database.rawQuery(
+      ''' SELECT nombre from $tableName 
+      WHERE nombre NOT IN ('$etiqueta') 
+      ORDER BY id_etiqueta'''
+    );
+    return registros.map((etiqueta) => etiqueta["nombre"] as String).toList();
+  }
+
   Future<int> update({required int id, required String? nombre}) async {
     final database = await DatabaseService().database;
     return await database.update(

@@ -7,6 +7,7 @@ extension MiLista<T> on List<T>{
 extension StringExtensions on String {
   bool containsIgnoreCase(String secondString) => toLowerCase().contains(secondString.toLowerCase());
   //bool isNotBlank() => this != null && this.isNotEmpty;
+  bool equalsIgnoreCase(String secondString) => (toLowerCase() == (secondString.toLowerCase()));
 }
 
 extension TextEditingControllerText on TextEditingController {

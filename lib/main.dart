@@ -53,7 +53,7 @@ class MainApp extends StatelessWidget {
             if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo, matriculasVehiculos: state.matriculasVehiculos,);
             if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto, listaMecanicoPorEtiqueta: state.listaMecanicoPorEtiqueta,);
             if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas,);
-            if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta);
+            if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta, nombresEtiquetas: state.nombresEtiquetas,);
             if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta, idVehiculoSeleccionado: state.filtroIdVehiculo, misVehiculos: state.misVehiculos,);
             if (state is MisGastosArchivados) return WidgetMisGastosArchivados(misGastosArchivados: state.misGastosArchivados, vehiculoSeleccionado: state.vehiculoSeleccionado, misVehiculosArchivados: state.misVehiculosArchivados,);
             return const WidgetCargando();

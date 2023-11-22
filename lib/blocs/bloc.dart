@@ -85,11 +85,12 @@ class MisEtiquetas extends VehiculoEstado {
 }
 class PlantillaEtiqueta extends VehiculoEstado {
   final Etiqueta? etiqueta;
+  final Future<List<String>>? nombresEtiquetas;
 
-  PlantillaEtiqueta({this.etiqueta});
+  PlantillaEtiqueta({this.etiqueta, this.nombresEtiquetas, });
 
   @override
-  List<Object?> get props => [etiqueta];
+  List<Object?> get props => [etiqueta, nombresEtiquetas];
 }
 
 // GASTOS ARCHIVADOS
@@ -248,6 +249,9 @@ final gastosArchivados = GastosArchivados();
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Vehiculos
   Future<List<String>>? matriculasVehiculos;
+
+  // Etiquetas
+  Future<List<String>>? nombresEtiquetas;
 
   // Gastos
   DateTime filtroFechaInicial = DateTime.now();
@@ -427,7 +431,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
     });
     on<ClickeadoAgregarEtiqueta>((event, emit) {
-      emit(PlantillaEtiqueta());
+      nombresEtiquetas = etiquetas.fetchAllTagsExcept('0');
+      emit(PlantillaEtiqueta(nombresEtiquetas: nombresEtiquetas));
     });
     on<AgregadoEtiqueta>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
@@ -440,7 +445,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
     });
     on<ClickeadoEditarEtiqueta>((event, emit) {
-      emit(PlantillaEtiqueta(etiqueta: event.etiqueta));
+      nombresEtiquetas = etiquetas.fetchAllTagsExcept(event.etiqueta.nombre);
+      emit(PlantillaEtiqueta(etiqueta: event.etiqueta, nombresEtiquetas: nombresEtiquetas));
     });
     on<EditadoEtiqueta>((event, emit) async {
       await etiquetas.update(id: event.etiqueta.id, nombre: event.etiqueta.nombre);

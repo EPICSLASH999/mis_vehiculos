@@ -311,14 +311,10 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   if (!esEditar) {
-                    context
-                        .read<VehiculoBloc>()
-                        .add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
+                    context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
                     return;
                   }
-                  context
-                      .read<VehiculoBloc>()
-                      .add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
+                  context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
                 }
               },
               child: Text(obtenerTexto()),
@@ -358,7 +354,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
   final int maxCaracteres = 7;
   final int minCaracteres = 4;
 
-  final caracteresEspeciales = RegExp(r'[\^$*\[\]{}()?\"!@%&/\><:,;_~`+='
+  final caracteresEspeciales = RegExp(r'[\^$*\[\]{}()?\"!@%&$#/\><:,.;_~`+='
       "'"
       ']');
 
@@ -388,9 +384,10 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                     if (matriculasVehiculos.contains(valorNormalizado)) return 'Matricula ya existente';
                     return null;
                   },
+                  textCapitalization: TextCapitalization.characters,
                   maxLength: maxCaracteres,
                   controller: controladorMatricula,
-                  decoration: decoracionParaCampoObligatorio,
+                  decoration: obtenerDecoracionCampoObligatorio(),
                   keyboardType: TextInputType.text,
                   autofocus: focusTecaldo,
                 ),
