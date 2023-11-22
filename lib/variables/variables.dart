@@ -44,9 +44,9 @@ InputDecoration obtenerDecoracionCampoObligatorio({String? hintText, Icon? icono
         suffixIcon: icono??const Icon(Icons.car_rental)
       );
 
-InputDecoration obtenerDecoracionCampoOpcional({Icon? icono}) {
+InputDecoration obtenerDecoracionCampoOpcional({String? hintText, Icon? icono}) {
   return InputDecoration(
-    hintText: "", 
+    hintText: (hintText??''), 
     suffixIcon: icono??const Icon(Icons.car_rental)
   );
 }

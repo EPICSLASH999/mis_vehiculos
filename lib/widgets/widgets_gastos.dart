@@ -13,12 +13,17 @@ import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* ----------------------------------- GASTOS ----------------------------------- */
 // Variables Globales
+int idVehiculoGlobal = 0;
+Future <List<Etiqueta>>? misEtiquetasGlobal;
+Gasto? gastoGlobal;
+bool agregadaEtiquetaDesdeGastoGlobal = false;
 // IA
 Future<List<Map<String, Object?>>>? listaMecanicoPorEtiquetaGlobal;
 
 // Métodos IA
 int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
-  if(listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
+  if (agregadaEtiquetaDesdeGastoGlobal) return valorNoTieneEtiquetaConMayorOcurrencias;
+  if (listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
   int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
   if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return valorNoTieneEtiquetaConMayorOcurrencias;
   return idEtiquetaConMayorOcurrencias;
@@ -34,13 +39,16 @@ String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> l
     return "";
   }
 
+
+/* -------------------------------- PLANTILLA GASTO -------------------------------- */
 class WidgetPlantillaGasto extends StatefulWidget {
   final Gasto? gasto;
   final int idVehiculo;
   final Future <List<Etiqueta>>? misEtiquetas;
   final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
+  final bool agregadaEtiquetaDesdeGasto;
 
-  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, required this.misEtiquetas, this.listaMecanicoPorEtiqueta});
+  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, required this.misEtiquetas, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false});
 
   @override
   State<WidgetPlantillaGasto> createState() => _WidgetPlantillaGastoState();
@@ -55,16 +63,16 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   final TextEditingController controladorLugar = TextEditingController();
   final TextEditingController controladorCosto = TextEditingController();
   final TextEditingController controladorFecha = TextEditingController();
-  
+
   DateTime fechaSeleccionada = DateTime.now();
-  String idVehiculo = "";
+  String idVehiculoString = "";
 
   String obtenerTexto() => '${(!esEditarGasto)? 'Agregar':'Editar'} Gasto';
   bool get esEditarGasto => widget.gasto != null;
 
   void inicializarValoresDeControladores(){
-    idVehiculo = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
-    controladorVehiculo.text = idVehiculo;
+    idVehiculoString = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
+    controladorVehiculo.text = idVehiculoString;
     controladorEtiqueta.text = (widget.gasto?.etiqueta??'').toString();
     controladorMecanico.text = widget.gasto?.mecanico??'';
     controladorLugar.text = widget.gasto?.lugar??'';
@@ -76,7 +84,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Gasto obtenerGasto(){
     return Gasto(
       id: (widget.gasto?.id)??0, 
-      vehiculo: int.parse(idVehiculo),
+      vehiculo: int.parse(idVehiculoString),
       etiqueta: int.parse(controladorEtiqueta.text),
       mecanico: controladorMecanico.text.trim(),
       lugar: controladorLugar.text,
@@ -106,6 +114,12 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     };
   }
 
+  void establecerValoresGlobales() {
+    idVehiculoGlobal = widget.idVehiculo;
+    misEtiquetasGlobal = widget.misEtiquetas;
+    gastoGlobal = widget.gasto;
+    agregadaEtiquetaDesdeGastoGlobal = widget.agregadaEtiquetaDesdeGasto;
+  }
 
   @override
   void dispose() {
@@ -123,6 +137,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     inicializarValoresDeControladores();
     var pressedFecha = funcionAlPresionarFecha();
     listaMecanicoPorEtiquetaGlobal = widget.listaMecanicoPorEtiqueta;
+    establecerValoresGlobales();
     
     return Scaffold(
       appBar: AppBar(
@@ -169,6 +184,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                         children: <Widget>[
                           CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
                           SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),controladorMecanico: controladorMecanico),
+                          BotonCrearEtiqueta(),
                           CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
                           CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40, icono: const Icon(Icons.place),),
                           CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7, icono: const Icon(Icons.attach_money),),
@@ -229,6 +245,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   Widget build(BuildContext context)  {
     bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
+      if(agregadaEtiquetaDesdeGastoGlobal && etiquetas.isNotEmpty) return etiquetas.last.id;
       if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
       if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
       return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
@@ -289,6 +306,138 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   }
 
 }
+
+class BotonCrearEtiqueta extends StatelessWidget {
+  BotonCrearEtiqueta({
+    super.key,
+  });
+
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController controladorNuevaEtiqueta = TextEditingController();
+
+  Future<String?> cuadroDeDialogo(BuildContext context) => showDialog<String>(
+    context: context, 
+    builder: (context) => AlertDialog(
+      title: const Text('Nueva etiqueta'),
+      content: Form(
+        key: _formKey,
+        child: SizedBox(height: 70, child: CuadroDeTextoEtiqueta(controlador: controladorNuevaEtiqueta, campoRequerido: true, focusTecaldo: true,)),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              Navigator.of(context).pop(controladorNuevaEtiqueta.text);
+            }
+          }, 
+          child: const Text('Agregar')
+        ),
+      ],
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () async {
+        controladorNuevaEtiqueta.clear();
+        final nuevaEtiqueta = await cuadroDeDialogo(context);
+        if (nuevaEtiqueta == null || nuevaEtiqueta.isEmpty) return;
+        // ignore: use_build_context_synchronously
+        context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculoGlobal, gasto: gastoGlobal));
+      }, 
+      child: const Text('Agregar Etiqueta'));
+  }
+}
+
+class CuadroDeTextoEtiqueta extends StatelessWidget {
+  const CuadroDeTextoEtiqueta({
+    super.key,
+    required this.controlador,
+    this.titulo, 
+    this.campoRequerido = true,
+    this.maxCaracteres = 20, 
+    this.minCaracteres,
+    this.focusTecaldo = false, 
+    this.icono,
+  });
+
+  final TextEditingController controlador;
+  final String? titulo;
+  final bool campoRequerido;
+  final int maxCaracteres;
+  final int? minCaracteres;
+  final bool focusTecaldo;
+  final Icon? icono;
+
+  bool esNumerico(String? s) {
+    if(s == null) return false;    
+    return double.tryParse(s) != null;
+  }
+  InputDecoration obtenerDecoracion({Icon? icono}){
+    if (campoRequerido) return obtenerDecoracionCampoObligatorio(hintText: 'Gasolina', icono: icono);
+    return obtenerDecoracionCampoOpcional(hintText: 'Gasolina', icono: icono);
+  }
+  bool existeEtiqueta(List<Etiqueta> etiquetas, String etiquetaRecibida){
+    for (var etiqueta in etiquetas) {
+      if(etiqueta.nombre.equalsIgnoreCase(etiquetaRecibida)) return true;
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final caracteresEspeciales = RegExp(
+      r'[\^$*\[\]{}()?\"!@#%&/\><:,.;_~`+=' 
+      "'" 
+      ']'
+    );
+    bool esPrimerClic = true;
+
+    return FutureBuilder<List<Etiqueta>>(
+      future: misEtiquetasGlobal, 
+      builder: (context, snapshot) {
+         if (snapshot.connectionState == ConnectionState.waiting) {
+          return const WidgetCargando();
+        } else {
+          final nombresEtiquetas = snapshot.data ?? [];
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if(titulo != null) TituloComponente(titulo: titulo!),
+              TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) {
+                  String valorNormalizado = (value??'').trim();
+                  if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
+                  if(esNumerico(valorNormalizado)) return 'Campo inválido';
+                  if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
+                  if(minCaracteres != null && (valorNormalizado.length < minCaracteres!)) return 'Debe tener al menos $minCaracteres caracteres';
+                  if (existeEtiqueta(nombresEtiquetas, valorNormalizado)) return 'Etiqueta ya existente';
+                  return null;
+                },
+                textCapitalization: TextCapitalization.sentences,
+                maxLength: maxCaracteres,
+                controller: controlador,
+                decoration: obtenerDecoracion(icono: icono),
+                keyboardType: TextInputType.text,
+                autofocus: focusTecaldo,
+                onTap: () { 
+                  if(!esPrimerClic) return;
+                  controlador.selectAll(); // Seleccionar todo el texto.
+                  esPrimerClic = !esPrimerClic;
+                },
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+}
+
+/* --------------------------------------------------------------------------------- */
 
 class WidgetMisGastos extends StatefulWidget {
   final Future <List<Gasto>>? misGastos;

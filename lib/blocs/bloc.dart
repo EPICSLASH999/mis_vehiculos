@@ -45,11 +45,12 @@ class PlantillaGasto extends VehiculoEstado {
   final Future<List<Etiqueta>>? misEtiquetas;
   final Gasto? gasto;
   final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
+  final bool agregadaEtiquetaDesdeGasto;
 
-  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto, this.listaMecanicoPorEtiqueta});
+  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false});
 
   @override
-  List<Object?> get props => [idVehiculo, misEtiquetas, gasto];
+  List<Object?> get props => [idVehiculo, misEtiquetas, gasto, listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto];
 }
 class MisGastos extends VehiculoEstado {
   final Future <List<Gasto>>? misGastos;
@@ -154,6 +155,13 @@ class AgregadoEtiqueta extends VehiculoEvento {
   final String nombreEtiqueta;
 
   AgregadoEtiqueta({required this.nombreEtiqueta});
+}
+class AgregadoEtiquetaDesdeGasto extends VehiculoEvento {
+  final String nombreEtiqueta;
+  final int idVehiculo;
+  final Gasto? gasto;
+
+  AgregadoEtiquetaDesdeGasto({required this.nombreEtiqueta, required this.idVehiculo, this.gasto});
 }
 
 // GASTOS
@@ -405,8 +413,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
     });
     on<ClickeadoEditarGasto>((event, emit) {
+      listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.gasto.vehiculo);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: _misEtiquetas, gasto: event.gasto));
+      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta));
     });
     on<EditadoGasto>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -466,6 +475,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await etiquetas.update(id: event.etiqueta.id, nombre: event.etiqueta.nombre);
       _misEtiquetas = etiquetas.fetchAll();
       emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+    });
+    on<AgregadoEtiquetaDesdeGasto>((event, emit) async {
+      await etiquetas.create(nombre: event.nombreEtiqueta);
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true));
     });
 
     // Gastos Archivados
