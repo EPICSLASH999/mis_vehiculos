@@ -222,6 +222,7 @@ class SeleccionadorEtiqueta extends StatefulWidget {
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
  
   int? get idEtiquetaSeleccionada => int.tryParse(widget.etiquetaSeleccionada.text); 
+  final double anchura = 170;
 
   @override
   Widget build(BuildContext context)  {
@@ -236,7 +237,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
       children: [
         TituloComponente(titulo: widget.titulo),
         SizedBox(
-          width: 160,
+          width: anchura,
           child: FutureBuilder<List<Etiqueta>>(
             future: widget.misEtiquetas,
             builder: (context, snapshot) {
@@ -264,12 +265,12 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                         value: valorIdEtiquetaInicial(etiquetas),
                         items: [
                           if(idEtiquetaSeleccionada == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
-                          for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
+                          for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: SizedBox(width: (anchura-30), child: Text(etiqueta.nombre, overflow: TextOverflow.ellipsis)),)
                         ],
                         onChanged: (value) {
                           setState(() {
                             widget.etiquetaSeleccionada.text = value.toString();
-
+                      
                             widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, value!);
                           });
                         },
@@ -663,13 +664,15 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
   final String titulo;
   final Future <List<Etiqueta>>? misEtiquetas;
 
+  final double anchura = 160;
+
   @override
   Widget build(BuildContext context)  {
     return Column(
       children: [
         TituloComponente(titulo: titulo),
         SizedBox(
-          width: 160,
+          width: anchura,
           child: FutureBuilder<List<Etiqueta>>(
             future: misEtiquetas,
             builder: (context, snapshot) {
@@ -687,7 +690,7 @@ class FiltroSeleccionadorEtiqueta extends StatelessWidget{
                   items: [
                     const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todas')),
                     const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
-                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: Text(etiqueta.nombre),)
+                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: SizedBox(width: (anchura-30), child: Text(etiqueta.nombre, overflow: TextOverflow.ellipsis,)),)
                   ],
                   onChanged: (value) {
                     context.read<VehiculoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value!));
