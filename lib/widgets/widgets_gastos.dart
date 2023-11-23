@@ -185,6 +185,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   // Procedimiento para IA de obtener mecánico por etiqueta.
                   int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
+                  // Solo se actualiza el mecanico si es en 'Agregar Gasto' y no acaba de agregar una etiqueta por medio de esta Plantilla.
                   if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
                   if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
@@ -252,15 +253,20 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   int? get idEtiquetaSeleccionada => int.tryParse(widget.etiquetaSeleccionada.text); 
   final double anchura = 170;
 
+  bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
+  int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
+    if(agregadaEtiquetaDesdeGastoGlobal && etiquetas.isNotEmpty) {
+      agregadaEtiquetaDesdeGastoGlobal = false;
+      return etiquetas.last.id;
+    }
+    if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
+    if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
+    return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
+  }
+
   @override
   Widget build(BuildContext context)  {
-    bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
-    int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
-      if(agregadaEtiquetaDesdeGastoGlobal && etiquetas.isNotEmpty) {return etiquetas.last.id;}
-      if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
-      if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
-      return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
-    }
+    int etiquetaSeleccionada;
 
     return Column(
       children: [
@@ -274,6 +280,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 return const WidgetCargando();
               } else{
                 final etiquetas = snapshot.data?? [];
+                etiquetaSeleccionada = valorIdEtiquetaInicial(etiquetas);
                 
                 return FutureBuilder(
                   future: listaMecanicoPorEtiquetaGlobal, 
@@ -291,7 +298,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                           widget.etiquetaSeleccionada.text = value.toString();
                           return null;
                         },
-                        value: valorIdEtiquetaInicial(etiquetas),
+                        value: etiquetaSeleccionada,
                         items: [
                           if(idEtiquetaSeleccionada == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
                           for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: SizedBox(width: (anchura-30), child: Text(etiqueta.nombre, overflow: TextOverflow.ellipsis)),)
@@ -371,7 +378,6 @@ class BotonCrearEtiqueta extends StatelessWidget {
         controladorNuevaEtiqueta.clear();
         final nuevaEtiqueta = await cuadroDeDialogoAgregarEtiqueta(context);
         if (nuevaEtiqueta == null || nuevaEtiqueta.isEmpty) return;
-        // TODO- Comprobar que al agregar etiqueta desde gasto y querer cambiar esa etiqueta en el seleccionador.
         Gasto gastoSinGuardar = obtenerGastoSinGuardar();
         // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculoGlobal, gasto: gastoSinGuardar, esEditarGasto: esEditarGastoGlobal));
