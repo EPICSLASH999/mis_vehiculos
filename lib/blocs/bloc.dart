@@ -46,11 +46,12 @@ class PlantillaGasto extends VehiculoEstado {
   final Gasto? gasto;
   final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
   final bool agregadaEtiquetaDesdeGasto;
+  final bool esEditarGasto;
 
-  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false});
+  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false, this.esEditarGasto = false});
 
   @override
-  List<Object?> get props => [idVehiculo, misEtiquetas, gasto, listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto];
+  List<Object?> get props => [idVehiculo, misEtiquetas, gasto, listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto, esEditarGasto];
 }
 class MisGastos extends VehiculoEstado {
   final Future <List<Gasto>>? misGastos;
@@ -160,8 +161,9 @@ class AgregadoEtiquetaDesdeGasto extends VehiculoEvento {
   final String nombreEtiqueta;
   final int idVehiculo;
   final Gasto? gasto;
+  final bool esEditarGasto;
 
-  AgregadoEtiquetaDesdeGasto({required this.nombreEtiqueta, required this.idVehiculo, this.gasto});
+  AgregadoEtiquetaDesdeGasto({required this.nombreEtiqueta, required this.idVehiculo, this.gasto, this.esEditarGasto = false});
 }
 
 // GASTOS
@@ -415,7 +417,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoEditarGasto>((event, emit) {
       listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.gasto.vehiculo);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta));
+      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, esEditarGasto: true));
     });
     on<EditadoGasto>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -479,7 +481,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<AgregadoEtiquetaDesdeGasto>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true));
+      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true, esEditarGasto: event.esEditarGasto));
     });
 
     // Gastos Archivados

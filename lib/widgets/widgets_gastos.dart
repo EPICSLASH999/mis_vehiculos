@@ -17,6 +17,7 @@ int idVehiculoGlobal = 0;
 Future <List<Etiqueta>>? misEtiquetasGlobal;
 Gasto? gastoGlobal;
 bool agregadaEtiquetaDesdeGastoGlobal = false;
+bool esEditarGastoGlobal = false;
 // IA
 Future<List<Map<String, Object?>>>? listaMecanicoPorEtiquetaGlobal;
 
@@ -47,8 +48,17 @@ class WidgetPlantillaGasto extends StatefulWidget {
   final Future <List<Etiqueta>>? misEtiquetas;
   final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
   final bool agregadaEtiquetaDesdeGasto;
+  final bool esEditarGasto;
 
-  const WidgetPlantillaGasto({super.key, required this.idVehiculo, this.gasto, required this.misEtiquetas, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false});
+  const WidgetPlantillaGasto({
+    super.key, 
+    required this.idVehiculo, 
+    this.gasto, 
+    required this.misEtiquetas, 
+    this.listaMecanicoPorEtiqueta, 
+    this.agregadaEtiquetaDesdeGasto = false,
+    required this.esEditarGasto
+  });
 
   @override
   State<WidgetPlantillaGasto> createState() => _WidgetPlantillaGastoState();
@@ -67,8 +77,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   DateTime fechaSeleccionada = DateTime.now();
   String idVehiculoString = "";
 
+  bool get esEditarGasto => widget.esEditarGasto;
   String obtenerTexto() => '${(!esEditarGasto)? 'Agregar':'Editar'} Gasto';
-  bool get esEditarGasto => widget.gasto != null;
 
   void inicializarValoresDeControladores(){
     idVehiculoString = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
@@ -88,7 +98,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
       etiqueta: int.parse(controladorEtiqueta.text),
       mecanico: controladorMecanico.text.trim(),
       lugar: controladorLugar.text,
-      costo: double.parse(controladorCosto.text),
+      costo: double.tryParse(controladorCosto.text)??0,
       fecha: fechaSeleccionada.millisecondsSinceEpoch.toString()
     );
   }
@@ -119,6 +129,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     misEtiquetasGlobal = widget.misEtiquetas;
     gastoGlobal = widget.gasto;
     agregadaEtiquetaDesdeGastoGlobal = widget.agregadaEtiquetaDesdeGasto;
+    esEditarGastoGlobal = esEditarGasto;
   }
 
   @override
@@ -144,7 +155,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
         title: Text(obtenerTexto()),
         leading: IconButton(
           onPressed: () {
-            if (widget.gasto == null) {
+            if (!esEditarGasto) {
               context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
               return;
             }
@@ -174,8 +185,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   // Procedimiento para IA de obtener mecánico por etiqueta.
                   int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
-                  if(!esEditarGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
-                  if(!esEditarGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
+                  if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
+                  if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
                   return SingleChildScrollView(
                     child: Form(
@@ -183,8 +194,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                       child: Column(
                         children: <Widget>[
                           CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
-                          SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.gasto != null),controladorMecanico: controladorMecanico),
-                          BotonCrearEtiqueta(),
+                          SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.esEditarGasto),controladorMecanico: controladorMecanico),
+                          BotonCrearEtiqueta(funcionObtenerGasto: obtenerGasto),
                           CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
                           CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40, icono: const Icon(Icons.place),),
                           CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7, icono: const Icon(Icons.attach_money),),
@@ -193,7 +204,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                           ElevatedButton(
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
-                                if (widget.gasto == null) {
+                                if (!widget.esEditarGasto) {
                                   context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
                                   return;
                                 }
@@ -222,7 +233,7 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     required this.etiquetaSeleccionada,
     required this.titulo, 
     required this.misEtiquetas,
-    this.esEditarGasto = false, 
+    required this.esEditarGasto, 
     required this.controladorMecanico,
   });
 
@@ -245,7 +256,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   Widget build(BuildContext context)  {
     bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
-      if(agregadaEtiquetaDesdeGastoGlobal && etiquetas.isNotEmpty) return etiquetas.last.id;
+      if(agregadaEtiquetaDesdeGastoGlobal && etiquetas.isNotEmpty) {return etiquetas.last.id;}
       if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
       if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
       return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
@@ -288,15 +299,15 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                         onChanged: (value) {
                           setState(() {
                             widget.etiquetaSeleccionada.text = value.toString();
-                      
-                            widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, value!);
+
+                            // Si se encuentra editando, no cambia al Mecnánico.
+                            if(!esEditarGastoGlobal) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, value!);
                           });
                         },
                       );
                     }
                   },
                 );
-                
               }
             },
           ),
@@ -309,13 +320,15 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
 
 class BotonCrearEtiqueta extends StatelessWidget {
   BotonCrearEtiqueta({
-    super.key,
+    super.key, 
+    required this.funcionObtenerGasto,
   });
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController controladorNuevaEtiqueta = TextEditingController();
+  final Function funcionObtenerGasto;
 
-  Future<String?> cuadroDeDialogo(BuildContext context) => showDialog<String>(
+  Future<String?> cuadroDeDialogoAgregarEtiqueta(BuildContext context) => showDialog<String>(
     context: context, 
     builder: (context) => AlertDialog(
       title: const Text('Nueva etiqueta'),
@@ -335,16 +348,33 @@ class BotonCrearEtiqueta extends StatelessWidget {
       ],
     ),
   );
+  
+
+  Gasto obtenerGastoSinGuardar() {
+    Gasto gastoCrudo = funcionObtenerGasto();
+    Gasto gastoNormalizado = Gasto(
+      id: gastoCrudo.id, 
+      vehiculo: gastoCrudo.vehiculo, 
+      etiqueta: gastoCrudo.etiqueta, 
+      mecanico: gastoCrudo.mecanico, 
+      lugar: gastoCrudo.lugar, 
+      costo: gastoCrudo.costo, 
+      fecha: DateTime.fromMillisecondsSinceEpoch(int.parse(gastoCrudo.fecha)).toIso8601String()
+    );
+    return gastoNormalizado;
+  }
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () async {
         controladorNuevaEtiqueta.clear();
-        final nuevaEtiqueta = await cuadroDeDialogo(context);
+        final nuevaEtiqueta = await cuadroDeDialogoAgregarEtiqueta(context);
         if (nuevaEtiqueta == null || nuevaEtiqueta.isEmpty) return;
+        // TODO- Comprobar que al agregar etiqueta desde gasto y querer cambiar esa etiqueta en el seleccionador.
+        Gasto gastoSinGuardar = obtenerGastoSinGuardar();
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculoGlobal, gasto: gastoGlobal));
+        context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculoGlobal, gasto: gastoSinGuardar, esEditarGasto: esEditarGastoGlobal));
       }, 
       child: const Text('Agregar Etiqueta'));
   }
