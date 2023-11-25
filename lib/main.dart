@@ -58,6 +58,10 @@ class MainApp extends StatelessWidget {
             context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
             return Future(() => false);
           }
+          if (state is MisEtiquetas && state.modoSeleccion){
+            context.read<VehiculoBloc>().add(DeseleccionadasEtiquetas());
+          return Future(() => false);
+          }
           context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
           return Future(() => false);
         }, 
@@ -66,7 +70,7 @@ class MainApp extends StatelessWidget {
             if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos, misEtiquetas: state.misEtiquetas);
             if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo, matriculasVehiculos: state.matriculasVehiculos,);
             if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto, listaMecanicoPorEtiqueta: state.listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: state.agregadaEtiquetaDesdeGasto, esEditarGasto: state.esEditarGasto,);
-            if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas,);
+            if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas, etiquetasSeleccionadas: state.etiquetasSeleccionadas,);
             if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta, nombresEtiquetas: state.nombresEtiquetas,);
             if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta, idVehiculoSeleccionado: state.filtroIdVehiculo, misVehiculos: state.misVehiculos,);
             if (state is MisGastosArchivados) return WidgetMisGastosArchivados(misGastosArchivados: state.misGastosArchivados, vehiculoSeleccionado: state.vehiculoSeleccionado, misVehiculosArchivados: state.misVehiculosArchivados,);

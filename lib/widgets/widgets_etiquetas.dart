@@ -8,16 +8,21 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- ETIQUETAS --------------------------------- */
-// Variables globales
-Future<List<String>>? nombresEtiquetasGlobal;
 
 class WidgetMisEtiquetas extends StatelessWidget {
-  const WidgetMisEtiquetas({super.key, required this.misEtiquetas});
+  const WidgetMisEtiquetas({super.key, required this.misEtiquetas, required this.etiquetasSeleccionadas});
 
   final Future <List<Etiqueta>>? misEtiquetas;
+  final List<int> etiquetasSeleccionadas;
 
   @override
   Widget build(BuildContext context) {
+    var state = context.watch<VehiculoBloc>().state;
+    bool modoSeleccion = false;
+    if (state is MisEtiquetas){
+      modoSeleccion = state.modoSeleccion;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Etiquetas'),
@@ -27,6 +32,14 @@ class WidgetMisEtiquetas extends StatelessWidget {
           }, 
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
+        actions: [
+          IconButton(
+            onPressed: !modoSeleccion?null:() {
+              context.read<VehiculoBloc>().add(DeseleccionadasEtiquetas());
+            }, 
+            icon: const Icon(Icons.cancel)
+          )
+        ],
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
       body: FutureBuilder<List<Etiqueta>>(
@@ -53,7 +66,7 @@ class WidgetMisEtiquetas extends StatelessWidget {
                 itemCount: etiquetas.length,
                 itemBuilder: (context, index) {
                   final etiqueta = etiquetas[index];
-                  return TileEtiqueta(etiqueta: etiqueta);
+                  return TileEtiqueta(etiqueta: etiqueta, indice: index, estaSeleccionada: etiquetasSeleccionadas.contains(index), modoSeleccion: modoSeleccion,);
                 }, 
               );
           }
@@ -72,10 +85,16 @@ class WidgetMisEtiquetas extends StatelessWidget {
 class TileEtiqueta extends StatelessWidget {
   const TileEtiqueta({
     super.key,
-    required this.etiqueta,
+    required this.etiqueta, 
+    required this.indice, 
+    required this.estaSeleccionada, 
+    required this.modoSeleccion,
   });
 
   final Etiqueta etiqueta;
+  final int indice;
+  final bool estaSeleccionada;
+  final bool modoSeleccion;
 
   Function eliminarEtiqueta(BuildContext context){
     return () {
@@ -115,10 +134,23 @@ class TileEtiqueta extends StatelessWidget {
         etiqueta.nombre,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      onTap: () {
-        mostrarEtiqueta(context);
+      trailing: modoSeleccion?null: IconButton(
+        onPressed: () {
+          context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
+        }, 
+        icon: const Icon(Icons.edit, color: colorIcono,)
+      ),
+      onTap: !modoSeleccion?null:() {
+        //mostrarEtiqueta(context);
+        context.read<VehiculoBloc>().add(SeleccionadaEtiqueta(etiquetaSeleccionada: indice));
       },
-      onLongPress: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context), titulo: 'Eliminar'),
+      //onLongPress: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context), titulo: 'Eliminar'),
+      onLongPress: modoSeleccion?null:() {
+        context.read<VehiculoBloc>().add(SeleccionadaEtiqueta(etiquetaSeleccionada: indice));
+      },
+      selected: estaSeleccionada,
+      selectedColor: Colors.black,
+      selectedTileColor: colorTileSeleccionado,
     );
   }
 }
@@ -147,7 +179,6 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
-    nombresEtiquetasGlobal = nombresEtiquetas;
 
     return Scaffold(
       appBar: AppBar(
@@ -230,8 +261,14 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     );
     bool esPrimerClic = true;
 
+    Future<List<String>>? nombresEtiquetas;
+    var state = context.watch<VehiculoBloc>().state;
+    if (state is PlantillaEtiqueta){
+      nombresEtiquetas = state.nombresEtiquetas;
+    }
+
     return FutureBuilder(
-      future: nombresEtiquetasGlobal, 
+      future: nombresEtiquetas, 
       builder: (context, snapshot) {
          if (snapshot.connectionState == ConnectionState.waiting) {
           return const WidgetCargando();

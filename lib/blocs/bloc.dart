@@ -5,6 +5,7 @@ import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 import 'package:mis_vehiculos/database/tablas/gastos_archivados.dart';
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
+import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
@@ -79,11 +80,13 @@ class MisGastos extends VehiculoEstado {
 // ETIQUETAS
 class MisEtiquetas extends VehiculoEstado {
   final Future<List<Etiqueta>>? misEtiquetas;
+  final List<int> etiquetasSeleccionadas;
+  final bool modoSeleccion;
 
-  MisEtiquetas({required this.misEtiquetas});
+  MisEtiquetas({required this.misEtiquetas, required this.etiquetasSeleccionadas, required this.modoSeleccion, });
   
   @override
-  List<Object?> get props => [misEtiquetas];
+  List<Object?> get props => [misEtiquetas, etiquetasSeleccionadas, modoSeleccion];
 }
 class PlantillaEtiqueta extends VehiculoEstado {
   final Etiqueta? etiqueta;
@@ -165,6 +168,12 @@ class AgregadoEtiquetaDesdeGasto extends VehiculoEvento {
 
   AgregadoEtiquetaDesdeGasto({required this.nombreEtiqueta, required this.idVehiculo, this.gasto, this.esEditarGasto = false});
 }
+class SeleccionadaEtiqueta extends VehiculoEvento {
+  final int etiquetaSeleccionada;
+
+  SeleccionadaEtiqueta({required this.etiquetaSeleccionada});
+}
+class DeseleccionadasEtiquetas extends VehiculoEvento {}
 
 // GASTOS
 class ClickeadoAgregarGasto extends VehiculoEvento {
@@ -267,6 +276,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   // Etiquetas
   Future<List<String>>? nombresEtiquetas;
+  List<int> etiquetasSeleccionadas = [];
+  bool modoSeleccion = false;
 
   // Gastos
   DateTime filtroFechaInicial = DateTime.now();
@@ -345,12 +356,22 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     await gastosArchivados.deleteWhereVehicle(event.matricula);
   }
 
+  // Métodos para etiquetas
+  void administrarEtiquetaSeleccionada(int etiquetaSeleccionada) {
+    if (etiquetasSeleccionadas.contains(etiquetaSeleccionada)){
+      etiquetasSeleccionadas..copiar()..remove(etiquetaSeleccionada);
+      return;
+    }
+    etiquetasSeleccionadas..copiar()..add(etiquetaSeleccionada);
+  }
+
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
       reiniciarFiltrosGastos();
       _misVehiculos = vehiculos.fetchAll();
       _misEtiquetas = etiquetas.fetchAll();
       _misGastos = obtenerGastos();
+      etiquetasSeleccionadas = [];
       emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
     });
     
@@ -467,7 +488,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // Etiquetas
     on<ClickeadoAdministrarEtiquetas>((event, emit) {
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
     on<ClickeadoAgregarEtiqueta>((event, emit) {
       nombresEtiquetas = etiquetas.fetchAllTagsExcept('0');
@@ -476,12 +497,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<AgregadoEtiqueta>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
     on<EliminadaEtiqueta>((event, emit) async {
       await etiquetas.delete(event.id);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
     on<ClickeadoEditarEtiqueta>((event, emit) {
       nombresEtiquetas = etiquetas.fetchAllTagsExcept(event.etiqueta.nombre);
@@ -490,12 +511,24 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<EditadoEtiqueta>((event, emit) async {
       await etiquetas.update(id: event.etiqueta.id, nombre: event.etiqueta.nombre);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
     on<AgregadoEtiquetaDesdeGasto>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
       _misEtiquetas = etiquetas.fetchAll();
       emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true, esEditarGasto: event.esEditarGasto));
+    });
+    on<SeleccionadaEtiqueta>((event, emit) {
+      modoSeleccion = true;
+      administrarEtiquetaSeleccionada(event.etiquetaSeleccionada);
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
+    });
+    on<DeseleccionadasEtiquetas>((event, emit) {
+      etiquetasSeleccionadas = [];
+      modoSeleccion = false;
+      _misEtiquetas = etiquetas.fetchAll();
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
 
     // Gastos Archivados
@@ -527,7 +560,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
     on<ClickeadoregresarAConsultarGastos>((event, emit) {
       _misGastos = obtenerGastos();
@@ -543,7 +576,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       }
       if(event.pantalla == OpcionesBottomBar.misEtiquetas){
         _misEtiquetas = etiquetas.fetchAll();
-        emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
+        emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: etiquetasSeleccionadas, modoSeleccion: modoSeleccion));
         return;
       }
       //reiniciarFiltrosGastos();
@@ -553,6 +586,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
 
   }
+
+  
 }
 
 
