@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
+import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
@@ -8,18 +9,54 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- VEHICULOS --------------------------------- */
-Future<List<Etiqueta>>? etiquetasGlobales;
  
 // Widget Principal (Menu Principal)
-class WidgetMisVehiculos extends StatelessWidget {
+class WidgetMisVehiculos extends StatefulWidget {
   final Future<List<Vehiculo>>? misVehiculos;
   final Future<List<Etiqueta>>? misEtiquetas;
 
   const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.misEtiquetas});
 
   @override
+  State<WidgetMisVehiculos> createState() => _WidgetMisVehiculosState();
+}
+
+class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
+  SearchController controladorDeBusqueda = SearchController();
+  void escuchador(){
+    setState(() {
+    });
+  }
+
+  @override
+  void dispose() {
+    controladorDeBusqueda.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    etiquetasGlobales = misEtiquetas;
+    controladorDeBusqueda.addListener(escuchador);
+    
+    List<Vehiculo> filtrarListaVehiculos(List<Vehiculo> vehiculos) {
+      List<Vehiculo> vehiculosRecibidos = vehiculos.copiar();
+      String filtroVehiculo = controladorDeBusqueda.text.trim();
+
+      if (filtroVehiculo.isNotEmpty) { 
+          vehiculosRecibidos.removeWhere((element) {
+          String matricula = element.matricula;
+          String modelo = element.modelo;
+          return (!matricula.containsIgnoreCase(filtroVehiculo) && !modelo.containsIgnoreCase(filtroVehiculo));
+        }); 
+      }
+      return vehiculosRecibidos;
+    }
+    Future<List<Vehiculo>>? obtenerListaVehiculos() async{
+      List<Vehiculo> lista = await widget.misVehiculos??[];
+      lista = filtrarListaVehiculos(lista);
+      return Future(() => lista);
+    }
+
 
     return BlocConsumer<VehiculoBloc, VehiculoEstado>(
       listenWhen: (previous, current) { 
@@ -47,9 +84,10 @@ class WidgetMisVehiculos extends StatelessWidget {
           bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
           body: Column(
             children: [
+              SearchBarApp(controladorDeBusqueda: controladorDeBusqueda,),
               Expanded(
                 child: FutureBuilder<List<Vehiculo>>(
-                  future: misVehiculos,
+                  future: obtenerListaVehiculos(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const WidgetCargando();
@@ -213,9 +251,16 @@ class BotonesTileVehiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    var state = context.watch<VehiculoBloc>().state;
+    Future<List<Etiqueta>>? misEtiquetas;
+    if (state is MisVehiculos){
+      misEtiquetas = state.misEtiquetas;
+    }
+
     return IconButton(
       onPressed: () async {
-        var etiquetas = await etiquetasGlobales ?? [];
+        var etiquetas = await misEtiquetas ?? [];
 
         if (etiquetas.isEmpty) {
           // ignore: use_build_context_synchronously
