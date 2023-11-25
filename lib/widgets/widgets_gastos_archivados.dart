@@ -32,7 +32,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
         title: const Text('Mis Gastos Archivados'),
         leading: IconButton(
           onPressed: () {
-            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+            context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
           }, 
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),

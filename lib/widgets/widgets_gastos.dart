@@ -513,6 +513,7 @@ class WidgetMisGastos extends StatefulWidget {
 
 class _WidgetMisGastosState extends State<WidgetMisGastos> {
   TextEditingController controladorMecanico = TextEditingController();
+  bool filtrosVisibles = true;
 
   String normalizarNumeroA2DigitosFecha(int numeroRecibido){
     String numeroNormalizado = '';
@@ -570,6 +571,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   @override
   Widget build(BuildContext context) {
     controladorMecanico.addListener(escuchador);
+    filtrosVisibles = context.watch<VehiculoBloc>().filtrosVisibles;
 
     return Scaffold(
       appBar: AppBar(
@@ -587,20 +589,27 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
             },
             icon: const Icon(Icons.folder),
           ),
+          IconButton(
+            onPressed: () {
+              filtrosVisibles = !filtrosVisibles;
+              context.read<VehiculoBloc>().add((VisibilitadoFiltros(estanVisibles: filtrosVisibles)));
+            },
+            icon: const Icon(Icons.filter_alt),
+          ),
         ],
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(
         children: [
-          FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
-          Row(
+          if (filtrosVisibles) FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
+          if (filtrosVisibles) Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada),
               FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
             ],
           ),
-          FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
+          if (filtrosVisibles) FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(

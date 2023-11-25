@@ -209,6 +209,11 @@ class FiltradoGastosPorVehiculo extends VehiculoEvento {
 
   FiltradoGastosPorVehiculo({required this.idVehiculo});
 }
+class VisibilitadoFiltros extends VehiculoEvento {
+  final bool estanVisibles;
+
+  VisibilitadoFiltros({required this.estanVisibles});
+}
 
 // GASTOS ARCHIVADOS
 class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}
@@ -269,6 +274,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   int filtroIdEtiqueta = valorOpcionTodas;
   int filtroIdVehiculo = valorOpcionTodas;
   Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta; // IA para rellenar automáticamente campo mecánico.
+  bool filtrosVisibles = true;
 
   // Gastos Archivados
   String filtroVehiculo = valorOpcionTodas.toString();
@@ -450,8 +456,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<FiltradoGastosPorVehiculo>((event, emit) {
       filtroIdVehiculo = event.idVehiculo;
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
-    
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));    
+    });
+    on<VisibilitadoFiltros>((event, emit) {
+      filtrosVisibles = event.estanVisibles;
+      _misGastos = obtenerGastos();
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));   
     });
 
     // Etiquetas
