@@ -76,7 +76,7 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
           bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
           body: Column(
             children: [
-              SearchBarApp(controladorDeBusqueda: controladorDeBusqueda,),
+              CuadroDeBusqueda(controladorDeBusqueda: controladorDeBusqueda,),
               Expanded(
                 child: FutureBuilder<List<Vehiculo>>(
                   future: obtenerListaVehiculos(),

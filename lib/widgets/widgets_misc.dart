@@ -141,7 +141,7 @@ class SeleccionadorDeFecha extends StatelessWidget {
               readOnly: true,
               controller: controlador,
               decoration: const InputDecoration(
-                suffixIcon: Icon(Icons.date_range)
+                suffixIcon: Icon(Icons.date_range),
               ),
               onTap: funcionAlPresionar,
             ),
@@ -151,6 +151,69 @@ class SeleccionadorDeFecha extends StatelessWidget {
     );
   }
 }
+
+//Buscador
+class CuadroDeBusqueda extends StatefulWidget {
+  const CuadroDeBusqueda({super.key, required this.controladorDeBusqueda});
+  final SearchController controladorDeBusqueda;
+
+  @override
+  State<CuadroDeBusqueda> createState() => _CuadroDeBusquedaState();
+}
+class _CuadroDeBusquedaState extends State<CuadroDeBusqueda> {
+
+  @override
+  Widget build(BuildContext context) {
+    SearchController controladorDeBusqueda = widget.controladorDeBusqueda;
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SearchAnchor(
+          builder: (BuildContext context, SearchController controller) {
+            return SearchBar(
+              hintText: 'Buscar...',
+              controller: controladorDeBusqueda,
+              padding: const MaterialStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0)),
+              onTap: () {
+                //controladorDeBusqueda.openView();
+              },
+              onChanged: (_) {
+                //controladorDeBusqueda.openView();
+              },
+              leading: const Icon(Icons.search),
+              trailing: <Widget>[
+                Tooltip(
+                  message: 'Borrar busqueda',
+                  child: IconButton(
+                    onPressed: () {
+                      controladorDeBusqueda.clear();
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                )
+              ],
+            );
+          }, 
+          // Esto genera una lista de opciones en caso de abrir la línea "controladorDeBusqueda.openView();"
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return List<ListTile>.generate(5, (int index) {
+              final String item = 'item $index';
+              return ListTile(
+                title: Text(item),
+                onTap: () {
+                  setState(() {
+                    controladorDeBusqueda.closeView(item);
+                  });
+                },
+              );
+            });
+          }
+      ),
+    );
+  }
+}
+
 /* ----------------------------------------------------------------------------- */
 
 
@@ -246,68 +309,5 @@ class BarraInferior extends StatelessWidget {
 }
 /* ------------------------------------------------------------------------------- */
 
-/* ----------------------------------- BUSCADOR---------------------------------- */
-class SearchBarApp extends StatefulWidget {
-  const SearchBarApp({super.key, required this.controladorDeBusqueda});
-  final SearchController controladorDeBusqueda;
-
-  @override
-  State<SearchBarApp> createState() => _SearchBarAppState();
-}
-
-class _SearchBarAppState extends State<SearchBarApp> {
-
-  @override
-  Widget build(BuildContext context) {
-    SearchController controladorDeBusqueda = widget.controladorDeBusqueda;
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SearchAnchor(
-          builder: (BuildContext context, SearchController controller) {
-            return SearchBar(
-              hintText: 'Buscar...',
-              controller: controladorDeBusqueda,
-              padding: const MaterialStatePropertyAll<EdgeInsets>(
-                  EdgeInsets.symmetric(horizontal: 16.0)),
-              onTap: () {
-                //controladorDeBusqueda.openView();
-              },
-              onChanged: (_) {
-                //controladorDeBusqueda.openView();
-              },
-              leading: const Icon(Icons.search),
-              trailing: <Widget>[
-                Tooltip(
-                  message: 'Borrar busqueda',
-                  child: IconButton(
-                    onPressed: () {
-                      controladorDeBusqueda.clear();
-                    },
-                    icon: const Icon(Icons.close),
-                  ),
-                )
-              ],
-            );
-          }, 
-          // Esto genera una lista de opciones en caso de abrir la línea "controladorDeBusqueda.openView();"
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
-            return List<ListTile>.generate(5, (int index) {
-              final String item = 'item $index';
-              return ListTile(
-                title: Text(item),
-                onTap: () {
-                  setState(() {
-                    controladorDeBusqueda.closeView(item);
-                  });
-                },
-              );
-            });
-          }
-      ),
-    );
-  }
-}
-/* ------------------------------------------------------------------------------- */
 
 
