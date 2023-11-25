@@ -578,6 +578,14 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
           }, 
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
+            },
+            icon: const Icon(Icons.folder),
+          ),
+        ],
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(

@@ -72,14 +72,6 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Mis Vehículos'),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
-                },
-                icon: const Icon(Icons.folder),
-              ),
-            ],
           ),
           bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
           body: Column(
