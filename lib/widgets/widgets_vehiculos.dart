@@ -115,14 +115,17 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
                   },
                 ),
               ),
-              const SizedBox(height: 73,)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
+                  }, 
+                  icon: const Icon(Icons.add), 
+                  label: const Text('Agregar Vehículo'),
+                ),
+              )
             ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
-            },
           ),
         );
       },
