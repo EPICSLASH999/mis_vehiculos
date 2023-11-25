@@ -13,17 +13,9 @@ import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* ----------------------------------- GASTOS ----------------------------------- */
 // Variables Globales
-int idVehiculoGlobal = 0;
-Future <List<Etiqueta>>? misEtiquetasGlobal;
-Gasto? gastoGlobal;
-bool agregadaEtiquetaDesdeGastoGlobal = false;
-bool esEditarGastoGlobal = false;
-// IA
-Future<List<Map<String, Object?>>>? listaMecanicoPorEtiquetaGlobal;
-
 // Métodos IA
-int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta) {
-  if (agregadaEtiquetaDesdeGastoGlobal) return valorNoTieneEtiquetaConMayorOcurrencias;
+int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta, bool agregadaEtiquetaDesdeGasto) {
+  if (agregadaEtiquetaDesdeGasto) return valorNoTieneEtiquetaConMayorOcurrencias;
   if (listaMecanicoPorEtiqueta.isEmpty) return valorNoTieneEtiquetaConMayorOcurrencias;
   int idEtiquetaConMayorOcurrencias = (listaMecanicoPorEtiqueta.first["etiqueta"] as int);
   if (idEtiquetaConMayorOcurrencias == idSinEtiqueta) return valorNoTieneEtiquetaConMayorOcurrencias;
@@ -124,14 +116,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     };
   }
 
-  void establecerValoresGlobales() {
-    listaMecanicoPorEtiquetaGlobal = widget.listaMecanicoPorEtiqueta;
-    idVehiculoGlobal = widget.idVehiculo;
-    misEtiquetasGlobal = widget.misEtiquetas;
-    gastoGlobal = widget.gasto;
-    agregadaEtiquetaDesdeGastoGlobal = widget.agregadaEtiquetaDesdeGasto;
-    esEditarGastoGlobal = esEditarGasto;
-  }
 
   @override
   void dispose() {
@@ -148,7 +132,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
     var pressedFecha = funcionAlPresionarFecha();
-    establecerValoresGlobales();
     
     return Scaffold(
       appBar: AppBar(
@@ -175,7 +158,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
             controladorVehiculo.text = nombreVehiculo;
             
             return FutureBuilder(
-              future: listaMecanicoPorEtiquetaGlobal, 
+              future: widget.listaMecanicoPorEtiqueta, 
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting){
                   return const WidgetCargando();
@@ -183,11 +166,11 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   final listaMecanicoPorEtiqueta = snapshot.data?? [];
                   
                   // Procedimiento para IA de obtener mecánico por etiqueta.
-                  int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
+                  int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta, widget.agregadaEtiquetaDesdeGasto);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
                   // Solo se actualiza el mecanico si es en 'Agregar Gasto' y NO acaba de agregar una etiqueta por medio de esta Plantilla.
-                  if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
-                  if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
+                  if(!esEditarGasto && !widget.agregadaEtiquetaDesdeGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
+                  if(!esEditarGasto && !widget.agregadaEtiquetaDesdeGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
                   return SingleChildScrollView(
                     child: Form(
@@ -254,19 +237,31 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   final double anchura = 170;
 
   bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
-  int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
-    if(agregadaEtiquetaDesdeGastoGlobal && etiquetas.isNotEmpty) {
-      agregadaEtiquetaDesdeGastoGlobal = false;
-      return etiquetas.last.id;
-    }
-    if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
-    if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
-    return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
-  }
+  
 
   @override
   Widget build(BuildContext context)  {
     int etiquetaSeleccionada;
+
+    bool esEditarGasto = false;
+    bool agregadaEtiquetaDesdeGasto = false;
+    Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
+    var state = context.watch<VehiculoBloc>().state;
+    if(state is PlantillaGasto) {
+      esEditarGasto = state.esEditarGasto;
+      agregadaEtiquetaDesdeGasto = state.agregadaEtiquetaDesdeGasto;
+      listaMecanicoPorEtiqueta = state.listaMecanicoPorEtiqueta;
+    }
+
+    int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
+      if(agregadaEtiquetaDesdeGasto && etiquetas.isNotEmpty) {
+        agregadaEtiquetaDesdeGasto = false;
+        return etiquetas.last.id;
+      }
+      if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
+      if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
+      return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
+    }
 
     return Column(
       children: [
@@ -283,7 +278,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 etiquetaSeleccionada = valorIdEtiquetaInicial(etiquetas);
                 
                 return FutureBuilder(
-                  future: listaMecanicoPorEtiquetaGlobal, 
+                  future: listaMecanicoPorEtiqueta, 
                   builder: (context, snapshot) {
                      if (snapshot.connectionState == ConnectionState.waiting){
                       return const WidgetCargando();
@@ -308,7 +303,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                             widget.etiquetaSeleccionada.text = value.toString();
 
                             // Si se encuentra editando, no cambia al Mecnánico.
-                            if(!esEditarGastoGlobal) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, value!);
+                            if(!esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, value!);
                           });
                         },
                       );
@@ -373,6 +368,15 @@ class BotonCrearEtiqueta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    var state = context.watch<VehiculoBloc>().state;
+    int idVehiculo = 0;
+    bool esEditarGasto = false;
+    if (state is PlantillaGasto){
+      idVehiculo = state.idVehiculo;
+      esEditarGasto = state.esEditarGasto;
+    }
+
     return TextButton(
       onPressed: () async {
         controladorNuevaEtiqueta.clear();
@@ -380,7 +384,7 @@ class BotonCrearEtiqueta extends StatelessWidget {
         if (nuevaEtiqueta == null || nuevaEtiqueta.isEmpty) return;
         Gasto gastoSinGuardar = obtenerGastoSinGuardar();
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculoGlobal, gasto: gastoSinGuardar, esEditarGasto: esEditarGastoGlobal));
+        context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculo, gasto: gastoSinGuardar, esEditarGasto: esEditarGasto));
       }, 
       child: const Text('Agregar Etiqueta'));
   }
@@ -430,8 +434,14 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     );
     bool esPrimerClic = true;
 
+    Future <List<Etiqueta>>? misEtiquetas;
+    var state = context.watch<VehiculoBloc>().state;
+    if (state is PlantillaGasto) {
+      misEtiquetas = state.misEtiquetas;
+    }
+
     return FutureBuilder<List<Etiqueta>>(
-      future: misEtiquetasGlobal, 
+      future: misEtiquetas, 
       builder: (context, snapshot) {
          if (snapshot.connectionState == ConnectionState.waiting) {
           return const WidgetCargando();
