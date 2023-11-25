@@ -144,7 +144,10 @@ class TileVehiculo extends StatelessWidget {
       mostrarToast(context, 'Gastos archivados');
     };
   }
-  Future mostrarVehiculo(BuildContext context) => showDialog(
+  Future mostrarVehiculo(BuildContext context) {
+    double altura = 225;
+
+    return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
@@ -153,14 +156,18 @@ class TileVehiculo extends StatelessWidget {
             const SizedBox(
               width: 12,
             ),
-            Text(
-              vehiculo.modelo,
-              style: const TextStyle(fontSize: 25),
+            SizedBox(
+              width: 220,
+              child: Text(
+                vehiculo.modelo,
+                style: const TextStyle(fontSize: 25),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
         content: SizedBox(
-          height: 200,
+          height: altura,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -187,6 +194,7 @@ class TileVehiculo extends StatelessWidget {
         ],
       ),
     );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +241,7 @@ class DatoVehiculo extends StatelessWidget {
           Text(
             titulo,
             style: const TextStyle(fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
           ),
           Text(valor),
         ],
