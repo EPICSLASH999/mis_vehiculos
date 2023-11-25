@@ -34,6 +34,8 @@ class MainApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    var state = context.watch<VehiculoBloc>().state;
+
     return  MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -42,8 +44,20 @@ class MainApp extends StatelessWidget {
         primarySwatch: Colors.green,
       ).copyWith(),      
     ),
-      home: WillPopScope(
+      home: WillPopScope( // Esto se encarga del botón "Return" del celular.
         onWillPop: () {
+          if (state is MisGastosArchivados) {
+            context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
+            return Future(() => false);
+          }
+          if (state is PlantillaEtiqueta) {
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAAdministradorEtiquetas());
+            return Future(() => false);
+          }
+          if(state is PlantillaGasto && state.esEditarGasto){
+            context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
+            return Future(() => false);
+          }
           context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
           return Future(() => false);
         }, 
