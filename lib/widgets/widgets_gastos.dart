@@ -79,6 +79,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     controladorMecanico.text = widget.gasto?.mecanico??'';
     controladorLugar.text = widget.gasto?.lugar??'';
     controladorCosto.text = (widget.gasto?.costo??'').toString();
+    //controladorCosto.text.replaceAll(".0", "");
+
     DateTime fechaRecibida = DateTime.parse(widget.gasto?.fecha??fechaSeleccionada.toIso8601String());
     controladorFecha.text = DateFormat.yMMMd().format(fechaRecibida); // Esto es solo para mostrar la fecha en el TextBox
     fechaSeleccionada = fechaRecibida; // Esta es la fecha que se guardará en la BaseDeDatos

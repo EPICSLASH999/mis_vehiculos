@@ -281,8 +281,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     if (numero.toString().length == 1) numeroRecibido += '0';
     return numeroRecibido += numero.toString();
   }
+  DateTime obtenerMaximaFechaDeHoy(){
+    return DateTime.parse('${DateTime.now().year}-${normalizarNumeroA2DigitosFecha(DateTime.now().month)}-${normalizarNumeroA2DigitosFecha(DateTime.now().day)} 23:58:99.999');
+  }
   void reiniciarFiltrosGastos() {
-    filtroFechaFinal  = DateTime.now();
+    //yyyy-MM-dd HH:mm:ss
+    filtroFechaFinal = obtenerMaximaFechaDeHoy();
     filtroFechaInicial = DateTime.parse('${filtroFechaFinal.year}-${normalizarNumeroA2DigitosFecha(filtroFechaFinal.month)}-01');
     filtroIdEtiqueta = valorOpcionTodas;
     filtroIdVehiculo = valorOpcionTodas;
@@ -521,7 +525,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
 
     // Bottom Bar
-    on<CambiadoDePantalla>((event, emit) {
+    on<CambiadoDePantalla>((event, emit) async {
       if(event.pantalla == OpcionesBottomBar.misVehiculos){
         _misVehiculos = vehiculos.fetchAll();
         emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
