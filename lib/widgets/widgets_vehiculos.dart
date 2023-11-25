@@ -145,8 +145,6 @@ class TileVehiculo extends StatelessWidget {
     };
   }
   Future mostrarVehiculo(BuildContext context) {
-    double altura = 225;
-
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -166,17 +164,15 @@ class TileVehiculo extends StatelessWidget {
             ),
           ],
         ),
-        content: SizedBox(
-          height: altura,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              DatoVehiculo(titulo: 'Matricula', valor: vehiculo.matricula),
-              DatoVehiculo(titulo: 'Marca', valor: vehiculo.marca),
-              DatoVehiculo(titulo: 'Color', valor: vehiculo.color),
-              DatoVehiculo(titulo: 'Año', valor: vehiculo.ano.toString()),
-            ],
-          ),
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisSize: MainAxisSize.min, // Esto autoajusta el 'height' del AlertDialog dependiendo de la altura del total de los widgets hijos.
+          children: [
+            DatoVehiculo(titulo: 'Matricula', valor: vehiculo.matricula),
+            DatoVehiculo(titulo: 'Marca', valor: vehiculo.marca),
+            DatoVehiculo(titulo: 'Color', valor: vehiculo.color),
+            DatoVehiculo(titulo: 'Año', valor: vehiculo.ano.toString()),
+          ],
         ),
         actions: [
           TextButton(
