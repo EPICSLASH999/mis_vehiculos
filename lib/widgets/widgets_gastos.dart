@@ -594,7 +594,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
               filtrosVisibles = !filtrosVisibles;
               context.read<VehiculoBloc>().add((VisibilitadoFiltros(estanVisibles: filtrosVisibles)));
             },
-            icon: const Icon(Icons.filter_alt),
+            icon: !filtrosVisibles?const Icon(Icons.filter_alt_outlined):const Icon(Icons.filter_alt_off_outlined),
           ),
         ],
       ),
