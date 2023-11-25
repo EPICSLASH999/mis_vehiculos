@@ -125,6 +125,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   }
 
   void establecerValoresGlobales() {
+    listaMecanicoPorEtiquetaGlobal = widget.listaMecanicoPorEtiqueta;
     idVehiculoGlobal = widget.idVehiculo;
     misEtiquetasGlobal = widget.misEtiquetas;
     gastoGlobal = widget.gasto;
@@ -147,7 +148,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
     var pressedFecha = funcionAlPresionarFecha();
-    listaMecanicoPorEtiquetaGlobal = widget.listaMecanicoPorEtiqueta;
     establecerValoresGlobales();
     
     return Scaffold(
@@ -185,7 +185,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   // Procedimiento para IA de obtener mecánico por etiqueta.
                   int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
-                  // Solo se actualiza el mecanico si es en 'Agregar Gasto' y no acaba de agregar una etiqueta por medio de esta Plantilla.
+                  // Solo se actualiza el mecanico si es en 'Agregar Gasto' y NO acaba de agregar una etiqueta por medio de esta Plantilla.
                   if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
                   if(!esEditarGasto && !agregadaEtiquetaDesdeGastoGlobal) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
@@ -199,7 +199,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                           BotonCrearEtiqueta(funcionObtenerGasto: obtenerGasto),
                           CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
                           CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40, icono: const Icon(Icons.place),),
-                          CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7, icono: const Icon(Icons.attach_money),),
+                          CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7, icono: const Icon(Icons.attach_money), minValor: 0,),
                           SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
                         
                           ElevatedButton(

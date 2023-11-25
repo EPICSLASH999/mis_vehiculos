@@ -403,7 +403,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
-      reiniciarFiltrosGastos();
+      //reiniciarFiltrosGastos();
       _misGastos = obtenerGastos();
       _misEtiquetas = etiquetas.fetchAll();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
@@ -508,7 +508,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
-      reiniciarFiltrosGastos();
+      //reiniciarFiltrosGastos();
       _misVehiculos = vehiculos.fetchAll();
       emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
     });
@@ -532,7 +532,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         emit(MisEtiquetas(misEtiquetas: _misEtiquetas));
         return;
       }
-      reiniciarFiltrosGastos();
+      //reiniciarFiltrosGastos();
       _misGastos = obtenerGastos();
       _misEtiquetas = etiquetas.fetchAll();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));    

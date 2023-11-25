@@ -31,7 +31,8 @@ class CuadroDeTexto extends StatelessWidget {
     this.maxCaracteres = 20, 
     this.minCaracteres,
     this.focusTecaldo = false, 
-    this.icono,
+    this.icono, 
+    this.minValor,
   });
 
   final TextEditingController controlador;
@@ -44,11 +45,12 @@ class CuadroDeTexto extends StatelessWidget {
   final int? minCaracteres;
   final bool focusTecaldo;
   final Icon? icono;
+  final int? minValor;
 
-  bool esNumerico(String? s) {
-    if(s == null) return false;    
-    if (esInt) return int.tryParse(s) != null;
-    return double.tryParse(s) != null;
+  bool esNumerico(String? valor) {
+    if(valor == null) return false;    
+    if (esInt) return int.tryParse(valor) != null;
+    return double.tryParse(valor) != null;
   }
   InputDecoration obtenerDecoracion(){
     if (campoRequerido && !esSoloLectura){
@@ -87,6 +89,7 @@ class CuadroDeTexto extends StatelessWidget {
               if((!esInt && !esDouble) && esNumerico(valorNormalizado)) return 'Campo inválido';
               if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
               if(minCaracteres != null && valorNormalizado.length < minCaracteres!) return 'Debe tener al menos $minCaracteres caracteres';
+              if (minValor != null && esNumerico(valorNormalizado) && double.parse(valorNormalizado) < double.parse(minValor.toString())) return 'Valor inválido';
               return null;
             },
             textCapitalization: TextCapitalization.sentences,

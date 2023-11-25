@@ -307,7 +307,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
             CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca', icono: const Icon(Icons.factory)),
             CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo'),
             CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15, icono: const Icon(Icons.colorize),),
-            CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month),),
+            CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month), minValor: 1000,),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
