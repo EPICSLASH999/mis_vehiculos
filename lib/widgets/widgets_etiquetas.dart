@@ -8,28 +8,51 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* --------------------------------- ETIQUETAS --------------------------------- */
+// Pantalla Principal de Mis Etiquetas. Aqui se muestran todas.
+class WidgetMisEtiquetas extends StatefulWidget {
+  const WidgetMisEtiquetas({super.key, required this.misEtiquetas});
 
-class WidgetMisEtiquetas extends StatelessWidget {
-  const WidgetMisEtiquetas({super.key, required this.misEtiquetas, required this.etiquetasSeleccionadas});
+  final Future <List<Etiqueta>>? misEtiquetas; // Recibe las etiquetas futuras desde el bloc.
 
-  final Future <List<Etiqueta>>? misEtiquetas;
-  final List<int> etiquetasSeleccionadas;
+  @override
+  State<WidgetMisEtiquetas> createState() => _WidgetMisEtiquetasState();
+}
+class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
+  List<int> idsEtiquetasSeleccionadas = [];
+  bool estaModoSeleccionActivo = false;
 
-  Function eliminarEtiquetas(BuildContext context){
+  Function eliminarEtiquetasSeleccionadas(BuildContext context){
     return () {
-      context.read<VehiculoBloc>().add(EliminadasEtiquetasSeleccionadas());
+      context.read<VehiculoBloc>().add(EliminadasEtiquetasSeleccionadas(idsEtiquetasSeleccionadas: idsEtiquetasSeleccionadas));
+      abortarSeleccionEtiquetas();
     };
+  }
+  void alSeleccionarEtiqueta(int idEtiqueta){
+    setState(() {
+      if (idsEtiquetasSeleccionadas.contains(idEtiqueta)){
+        idsEtiquetasSeleccionadas..copiar()..remove(idEtiqueta);
+        return;
+      }
+      idsEtiquetasSeleccionadas..copiar()..add(idEtiqueta);
+    });
+  }
+  void alDejarPresionadaEtiqueta(int idEtiquetaPresionada){
+    setState(() {
+      estaModoSeleccionActivo = true;
+      idsEtiquetasSeleccionadas..copiar()..add(idEtiquetaPresionada); // Selecciona la etiqueta que se dejó presionada.
+    });
+  }
+  void abortarSeleccionEtiquetas(){
+    setState(() {
+      idsEtiquetasSeleccionadas = [];
+      estaModoSeleccionActivo = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<VehiculoBloc>().state;
-    bool modoSeleccion = false;
-    List<int> etiquetasSeleccionadas = [];
-    if (state is MisEtiquetas){
-      modoSeleccion = state.modoSeleccion;
-      etiquetasSeleccionadas = state.etiquetasSeleccionadas;
-    }
+    estaModoSeleccionActivo = context.watch<VehiculoBloc>().modoSeleccion;
+    if (!estaModoSeleccionActivo) idsEtiquetasSeleccionadas = [];
 
     return Scaffold(
       appBar: AppBar(
@@ -41,14 +64,15 @@ class WidgetMisEtiquetas extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
         actions: [
-          IconButton(
-            onPressed: !(modoSeleccion && etiquetasSeleccionadas.isNotEmpty)?null:
-              dialogoAlerta(context: context, texto: '¿Seguro de eliminar las etiquetas seleccionadas?', funcionAlProceder: eliminarEtiquetas(context), titulo: 'Eliminar'),
+          IconButton( // Botón de Borrar.
+            onPressed: !(estaModoSeleccionActivo && idsEtiquetasSeleccionadas.isNotEmpty)?null:
+              dialogoAlerta(context: context, texto: '¿Seguro de eliminar las etiquetas seleccionadas?', funcionAlProceder: eliminarEtiquetasSeleccionadas(context), titulo: 'Eliminar'),
             icon: const Icon(Icons.delete_forever))
           ,
-          IconButton(
-            onPressed: !modoSeleccion?null:() {
-              context.read<VehiculoBloc>().add(DeseleccionadasEtiquetas());
+          IconButton( // Botón Cancelar Modo Selección de Etiquetas.
+            onPressed: !estaModoSeleccionActivo?null:() {
+              abortarSeleccionEtiquetas();
+              context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(modoSeleccion: false));
             }, 
             icon: const Icon(Icons.close)
           ),
@@ -59,12 +83,12 @@ class WidgetMisEtiquetas extends StatelessWidget {
         children: [
           Expanded(
             child: FutureBuilder<List<Etiqueta>>(
-              future: misEtiquetas,
+              future: widget.misEtiquetas,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting){
                   return const WidgetCargando();
                 } else{
-                  final etiquetas = snapshot.data?? [];
+                  final etiquetas = snapshot.data?? []; // Lista de Etiquetas recibida.
             
                   return etiquetas.isEmpty
                       ? const Center(
@@ -82,17 +106,23 @@ class WidgetMisEtiquetas extends StatelessWidget {
                       itemCount: etiquetas.length,
                       itemBuilder: (context, index) {
                         final etiqueta = etiquetas[index];
-                        return TileEtiqueta(etiqueta: etiqueta, indice: etiqueta.id, estaSeleccionada: etiquetasSeleccionadas.contains(etiqueta.id), modoSeleccion: modoSeleccion,);
+                        return TileEtiqueta(
+                          etiqueta: etiqueta, 
+                          estaSeleccionada: idsEtiquetasSeleccionadas.contains(etiqueta.id), 
+                          estaModoSeleccionActivo: estaModoSeleccionActivo, 
+                          funcionAlSeleccionar: alSeleccionarEtiqueta,
+                          funcionAlDejarPresionado: alDejarPresionadaEtiqueta,
+                        );
                       }, 
                     );
                 }
               },
             ),
           ),
-          if(!modoSeleccion) Padding(
+          Padding( // Botón para Agregar Etiqueta.
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton.icon(
-              onPressed: () {
+              onPressed: estaModoSeleccionActivo?null: () {
                 context.read<VehiculoBloc>().add(ClickeadoAgregarEtiqueta());
               }, 
               icon: const Icon(Icons.add), 
@@ -104,20 +134,21 @@ class WidgetMisEtiquetas extends StatelessWidget {
     );
   }
 }
-
 class TileEtiqueta extends StatelessWidget {
   const TileEtiqueta({
     super.key,
     required this.etiqueta, 
-    required this.indice, 
     required this.estaSeleccionada, 
-    required this.modoSeleccion,
+    required this.estaModoSeleccionActivo, 
+    required this.funcionAlSeleccionar, 
+    required this.funcionAlDejarPresionado,
   });
 
   final Etiqueta etiqueta;
-  final int indice;
   final bool estaSeleccionada;
-  final bool modoSeleccion;
+  final bool estaModoSeleccionActivo;
+  final Function(int) funcionAlSeleccionar;
+  final Function(int) funcionAlDejarPresionado;
 
   @override
   Widget build(BuildContext context) {
@@ -126,17 +157,18 @@ class TileEtiqueta extends StatelessWidget {
         etiqueta.nombre,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      trailing: modoSeleccion?null: IconButton(
+      trailing: estaModoSeleccionActivo?null: IconButton( // Botón Editar Etiqueta.
         onPressed: () {
           context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
         }, 
         icon: const Icon(Icons.edit, color: colorIcono,)
       ),
-      onTap: !modoSeleccion?null:() {
-        context.read<VehiculoBloc>().add(SeleccionadaEtiqueta(etiquetaSeleccionada: indice));
+      onTap: !estaModoSeleccionActivo?null:() {
+        funcionAlSeleccionar(etiqueta.id);
       },
-      onLongPress: modoSeleccion?null:() {
-        context.read<VehiculoBloc>().add(SeleccionadaEtiqueta(etiquetaSeleccionada: indice));
+      onLongPress: estaModoSeleccionActivo?null:() {
+        funcionAlDejarPresionado(etiqueta.id);
+        context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(modoSeleccion: true));
       },
       selected: estaSeleccionada,
       selectedColor: Colors.black,
@@ -145,13 +177,12 @@ class TileEtiqueta extends StatelessWidget {
   }
 }
 
+// Plantilla Etiqueta - Sirve tanto para Agregar como para Editar.
 class WidgetPlantillaEtiqueta extends StatelessWidget {
-  final Etiqueta? etiqueta;
-  final Future<List<String>>? nombresEtiquetas;
-  WidgetPlantillaEtiqueta({super.key, this.etiqueta, this.nombresEtiquetas});
+  final Etiqueta? etiqueta; // En caso de editar no es nula. Al agregar si lo es.
+  WidgetPlantillaEtiqueta({super.key, this.etiqueta});
 
-  final _formKey = GlobalKey<FormState>();
-  
+  final _formKey = GlobalKey<FormState>(); // Llave necesaria para el Form. Sirve para validar los campos.
   final TextEditingController controladorNombre = TextEditingController();
 
   Etiqueta obtenerEtiqueta(){
@@ -160,9 +191,8 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
       nombre: controladorNombre.text, 
     );
   }
-  String obtenerTexto() => "${(etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
+  String obtenerTextoDePlantilla() => "${(etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
   void inicializarValoresDeControladores(){
-    if (etiqueta == null) return;
     controladorNombre.text = etiqueta?.nombre??'';
   }
 
@@ -172,8 +202,8 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(obtenerTexto()),
-        leading: IconButton(
+        title: Text(obtenerTextoDePlantilla()),
+        leading: IconButton( // Botón Volver.
           onPressed: () {
             context.read<VehiculoBloc>().add(ClickeadoRegresarAAdministradorEtiquetas());
           }, 
@@ -181,7 +211,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
-      body: SingleChildScrollView(
+      body: SingleChildScrollView( // Esto evita algun tipo de overflow al aparecer el teclado en el celular.
         child: Form(
           key: _formKey,
           child: Column(
@@ -191,13 +221,13 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     if (etiqueta == null) {
-                      context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text));
+                      context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text)); // Agrega nueva Etiqueta.
                       return;
                     }
-                    context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta()));
+                    context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta())); // Edita la etiqueta.
                   }
                 },
-                child: Text(obtenerTexto()),
+                child: Text(obtenerTextoDePlantilla()),
               ),
             ],
           ),
@@ -236,9 +266,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     return obtenerDecoracionCampoOpcional(icono: icono);
   }
   bool existeEtiqueta(List<String> etiquetas, String etiquetaRecibida){
-    for (var etiqueta in etiquetas) {
-      if(etiqueta.equalsIgnoreCase(etiquetaRecibida)) return true;
-    }
+    if (etiquetas.contains(etiquetaRecibida)) return true;
     return false;
   }
 
@@ -251,12 +279,9 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     );
     bool esPrimerClic = true;
 
-    Future<List<String>>? nombresEtiquetas;
     var state = context.watch<VehiculoBloc>().state;
-    if (state is PlantillaEtiqueta){
-      nombresEtiquetas = state.nombresEtiquetas;
-    }
-
+    Future<List<String>>? nombresEtiquetas = (state as PlantillaEtiqueta).nombresEtiquetas; // Lista para evitar repetir etiquetas.
+    
     return FutureBuilder(
       future: nombresEtiquetas, 
       builder: (context, snapshot) {
@@ -290,7 +315,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
                   autofocus: focusTecaldo,
                   onTap: () { 
                     if(!esPrimerClic) return;
-                    controlador.selectAll(); // Seleccionar todo el texto.
+                    controlador.selectAll(); // Selecciona todo el texto.
                     esPrimerClic = !esPrimerClic;
                   },
                 ),
