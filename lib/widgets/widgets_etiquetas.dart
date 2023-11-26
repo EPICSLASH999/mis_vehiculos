@@ -55,41 +55,51 @@ class WidgetMisEtiquetas extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
-      body: FutureBuilder<List<Etiqueta>>(
-        future: misEtiquetas,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting){
-            return const WidgetCargando();
-          } else{
-            final etiquetas = snapshot.data?? [];
-      
-            return etiquetas.isEmpty
-                ? const Center(
-                  child: Text(
-                    'Sin etiquetas...',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 28,
-                    ),
-                  ),
-                )
-              : ListView.separated(
-                separatorBuilder: (context, index) => 
-                    const SizedBox(height: 12,), 
-                itemCount: etiquetas.length,
-                itemBuilder: (context, index) {
-                  final etiqueta = etiquetas[index];
-                  return TileEtiqueta(etiqueta: etiqueta, indice: etiqueta.id, estaSeleccionada: etiquetasSeleccionadas.contains(etiqueta.id), modoSeleccion: modoSeleccion,);
-                }, 
-              );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          context.read<VehiculoBloc>().add(ClickeadoAgregarEtiqueta());
-        },
+      body: Column(
+        children: [
+          Expanded(
+            child: FutureBuilder<List<Etiqueta>>(
+              future: misEtiquetas,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final etiquetas = snapshot.data?? [];
+            
+                  return etiquetas.isEmpty
+                      ? const Center(
+                        child: Text(
+                          'Sin etiquetas...',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 28,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                      separatorBuilder: (context, index) => 
+                          const SizedBox(height: 12,), 
+                      itemCount: etiquetas.length,
+                      itemBuilder: (context, index) {
+                        final etiqueta = etiquetas[index];
+                        return TileEtiqueta(etiqueta: etiqueta, indice: etiqueta.id, estaSeleccionada: etiquetasSeleccionadas.contains(etiqueta.id), modoSeleccion: modoSeleccion,);
+                      }, 
+                    );
+                }
+              },
+            ),
+          ),
+          if(!modoSeleccion) Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                context.read<VehiculoBloc>().add(ClickeadoAgregarEtiqueta());
+              }, 
+              icon: const Icon(Icons.add), 
+              label: const Text('Agregar Etiqueta'),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -109,37 +119,6 @@ class TileEtiqueta extends StatelessWidget {
   final bool estaSeleccionada;
   final bool modoSeleccion;
 
-  Function eliminarEtiqueta(BuildContext context){
-    return () {
-      context.read<VehiculoBloc>().add(EliminadaEtiqueta(id: etiqueta.id));
-    };
-  }
-  Future mostrarEtiqueta(BuildContext context) => showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          'Etiqueta',
-          style: TextStyle(fontSize: 20),
-        ),
-        content: Text(etiqueta.nombre),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<VehiculoBloc>().add(ClickeadoEditarEtiqueta(etiqueta: etiqueta));
-            },
-            child: const Text('Editar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Aceptar')
-          ),
-        ],
-      ),
-    );
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -154,10 +133,8 @@ class TileEtiqueta extends StatelessWidget {
         icon: const Icon(Icons.edit, color: colorIcono,)
       ),
       onTap: !modoSeleccion?null:() {
-        //mostrarEtiqueta(context);
         context.read<VehiculoBloc>().add(SeleccionadaEtiqueta(etiquetaSeleccionada: indice));
       },
-      //onLongPress: dialogoAlerta(context: context, texto: '¿Seguro de eliminar esta etiqueta?', funcionAlProceder: eliminarEtiqueta(context), titulo: 'Eliminar'),
       onLongPress: modoSeleccion?null:() {
         context.read<VehiculoBloc>().add(SeleccionadaEtiqueta(etiquetaSeleccionada: indice));
       },

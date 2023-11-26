@@ -372,8 +372,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     idsEtiquetasSeleccionadas = [];
     modoSeleccion = false;
   }
+  void abortarSeleccionEtiquetas() {
+    idsEtiquetasSeleccionadas = [];
+    modoSeleccion = false;
+  }
 
-  
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
       reiniciarFiltrosGastos();
@@ -534,8 +537,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: idsEtiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
     on<DeseleccionadasEtiquetas>((event, emit) {
-      idsEtiquetasSeleccionadas = [];
-      modoSeleccion = false;
+      abortarSeleccionEtiquetas();
       _misEtiquetas = etiquetas.fetchAll();
       emit(MisEtiquetas(misEtiquetas: _misEtiquetas, etiquetasSeleccionadas: idsEtiquetasSeleccionadas, modoSeleccion: modoSeleccion));
     });
@@ -583,6 +585,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // Bottom Bar
     on<CambiadoDePantalla>((event, emit) async {
+      abortarSeleccionEtiquetas();
       if(event.pantalla == OpcionesBottomBar.misVehiculos){
         _misVehiculos = vehiculos.fetchAll();
         emit(MisVehiculos(misVehiculos: _misVehiculos, misEtiquetas: _misEtiquetas));
