@@ -12,8 +12,9 @@ import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 // Widget Principal (Menu Principal) - Mis Vehículos.
 class WidgetMisVehiculos extends StatefulWidget {
   final Future<List<Vehiculo>>? misVehiculos;
+  final String buscarVehiculosQueContengan;
 
-  const WidgetMisVehiculos({super.key, required this.misVehiculos});
+  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.buscarVehiculosQueContengan});
 
   @override
   State<WidgetMisVehiculos> createState() => _WidgetMisVehiculosState();
@@ -22,8 +23,7 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
   SearchController controladorDeBusqueda = SearchController();
   
   void escuchador(){ // Event listener del controlador.
-    setState(() {
-    });
+    context.read<VehiculoBloc>().add(BuscadoVehiculos(buscarVehiculosQueContengan: controladorDeBusqueda.text));
   }
 
   @override
@@ -35,7 +35,8 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
   @override
   Widget build(BuildContext context) {
     controladorDeBusqueda.addListener(escuchador); // Se agrega el Event Listener al controlador.
-    
+    controladorDeBusqueda.text = widget.buscarVehiculosQueContengan; // Obtener el valor a buscar/filtrar de Vehiculos.
+
     List<Vehiculo> filtrarListaVehiculos(List<Vehiculo> vehiculos) {
       if (vehiculos.isEmpty) return vehiculos;
       List<Vehiculo> vehiculosFiltrados = vehiculos.copiar();

@@ -62,12 +62,16 @@ class MainApp extends StatelessWidget {
             context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: false));
             return Future(() => false);
           }
+          if (state is MisVehiculos){
+            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos(reiniciarBusquedaDeVehiculos: true));
+            return Future(() => false);
+          }
           context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
           return Future(() => false);
         }, 
         child: BlocBuilder<VehiculoBloc, VehiculoEstado>(
           builder: (context, state) {
-            if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos);
+            if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos, buscarVehiculosQueContengan: state.buscarVehiculosQueContengan,);
             if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
             if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, gasto: state.gasto, listaMecanicoPorEtiqueta: state.listaMecanicoPorEtiqueta, fueAgregadaUnaEtiquetaDesdeGasto: state.agregadaEtiquetaDesdeGasto, esEditarGasto: state.esEditarGasto,);
             if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas,);
