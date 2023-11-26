@@ -15,12 +15,20 @@ class WidgetMisEtiquetas extends StatelessWidget {
   final Future <List<Etiqueta>>? misEtiquetas;
   final List<int> etiquetasSeleccionadas;
 
+  Function eliminarEtiquetas(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadasEtiquetasSeleccionadas());
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     var state = context.watch<VehiculoBloc>().state;
     bool modoSeleccion = false;
+    List<int> etiquetasSeleccionadas = [];
     if (state is MisEtiquetas){
       modoSeleccion = state.modoSeleccion;
+      etiquetasSeleccionadas = state.etiquetasSeleccionadas;
     }
 
     return Scaffold(
@@ -34,11 +42,16 @@ class WidgetMisEtiquetas extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            onPressed: !(modoSeleccion && etiquetasSeleccionadas.isNotEmpty)?null:
+              dialogoAlerta(context: context, texto: '¿Seguro de eliminar las etiquetas seleccionadas?', funcionAlProceder: eliminarEtiquetas(context), titulo: 'Eliminar'),
+            icon: const Icon(Icons.delete_forever))
+          ,
+          IconButton(
             onPressed: !modoSeleccion?null:() {
               context.read<VehiculoBloc>().add(DeseleccionadasEtiquetas());
             }, 
-            icon: const Icon(Icons.cancel)
-          )
+            icon: const Icon(Icons.close)
+          ),
         ],
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
@@ -66,7 +79,7 @@ class WidgetMisEtiquetas extends StatelessWidget {
                 itemCount: etiquetas.length,
                 itemBuilder: (context, index) {
                   final etiqueta = etiquetas[index];
-                  return TileEtiqueta(etiqueta: etiqueta, indice: index, estaSeleccionada: etiquetasSeleccionadas.contains(index), modoSeleccion: modoSeleccion,);
+                  return TileEtiqueta(etiqueta: etiqueta, indice: etiqueta.id, estaSeleccionada: etiquetasSeleccionadas.contains(etiqueta.id), modoSeleccion: modoSeleccion,);
                 }, 
               );
           }
