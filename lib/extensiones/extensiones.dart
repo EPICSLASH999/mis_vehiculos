@@ -12,7 +12,6 @@ extension StringExtensions on String {
 
 extension TextEditingControllerText on TextEditingController {
   // Extension para seleccionar todo en el CuadroDeTexto 'controlador.selectAll()'.
-  // Pero es algo molesto tratar de deseleccionarlo con el dedo.
   void selectAll() {
     if (text.isEmpty) return;
     selection = TextSelection(baseOffset: 0, extentOffset: text.length);

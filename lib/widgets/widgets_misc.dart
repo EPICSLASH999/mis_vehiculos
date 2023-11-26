@@ -214,6 +214,28 @@ class _CuadroDeBusquedaState extends State<CuadroDeBusqueda> {
   }
 }
 
+class BotonAgregar extends StatelessWidget {
+  const BotonAgregar({
+    super.key, 
+    required this.texto, 
+    required this.funcionAlPresionar,
+  });
+
+  final String texto;
+  final VoidCallback funcionAlPresionar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton.icon(
+        onPressed: funcionAlPresionar, 
+        icon: const Icon(Icons.add), 
+        label: Text(texto),
+      ),
+    );
+  }
+}
 /* ----------------------------------------------------------------------------- */
 
 
@@ -277,7 +299,7 @@ class BarraInferior extends StatelessWidget {
       currentIndex: indiceSeleccionado,
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.car_repair),
+          icon: Icon(Icons.directions_car),
           label: 'Vehículos',
         ),
         BottomNavigationBarItem(

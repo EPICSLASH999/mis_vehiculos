@@ -58,7 +58,7 @@ class MainApp extends StatelessWidget {
             context.read<VehiculoBloc>().add(ClickeadoregresarAConsultarGastos());
             return Future(() => false);
           }
-          if (state is MisEtiquetas && state.modoSeleccion){
+          if (state is MisEtiquetas && state.estaModoSeleccionActivo){
             context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: false));
             return Future(() => false);
           }
@@ -67,8 +67,8 @@ class MainApp extends StatelessWidget {
         }, 
         child: BlocBuilder<VehiculoBloc, VehiculoEstado>(
           builder: (context, state) {
-            if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos, misEtiquetas: state.misEtiquetas);
-            if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo, matriculasVehiculos: state.matriculasVehiculos,);
+            if (state is MisVehiculos) return WidgetMisVehiculos(misVehiculos: state.misVehiculos);
+            if (state is PlantillaVehiculo) return WidgetPlantillaVehiculo(vehiculo: state.vehiculo,);
             if (state is PlantillaGasto) return WidgetPlantillaGasto(idVehiculo: state.idVehiculo, misEtiquetas: state.misEtiquetas, gasto: state.gasto, listaMecanicoPorEtiqueta: state.listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: state.agregadaEtiquetaDesdeGasto, esEditarGasto: state.esEditarGasto,);
             if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas,);
             if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta,);

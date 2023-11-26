@@ -51,7 +51,7 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
 
   @override
   Widget build(BuildContext context) {
-    estaModoSeleccionActivo = context.watch<VehiculoBloc>().modoSeleccion;
+    estaModoSeleccionActivo = context.watch<VehiculoBloc>().estaModoSeleccionActivo;
     if (!estaModoSeleccionActivo) idsEtiquetasSeleccionadas = [];
 
     return Scaffold(
@@ -69,13 +69,13 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
               dialogoAlerta(context: context, texto: '¿Seguro de eliminar las etiquetas seleccionadas?', funcionAlProceder: eliminarEtiquetasSeleccionadas(context), titulo: 'Eliminar'),
             icon: const Icon(Icons.delete_forever))
           ,
-          IconButton( // Botón Cancelar Modo Selección de Etiquetas.
+          /*IconButton( // Botón Cancelar Modo Selección de Etiquetas.
             onPressed: !estaModoSeleccionActivo?null:() {
               abortarSeleccionEtiquetas();
               context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: false));
             }, 
             icon: const Icon(Icons.close)
-          ),
+          ),*/
         ],
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
@@ -153,6 +153,7 @@ class TileEtiqueta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      leading: const Icon(Icons.label),
       title: Text(
         etiqueta.nombre,
         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -171,7 +172,8 @@ class TileEtiqueta extends StatelessWidget {
         context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: true));
       },
       selected: estaSeleccionada,
-      selectedColor: Colors.black,
+      selectedColor: Colors.green,
+      textColor: Colors.black,
       selectedTileColor: colorTileSeleccionado,
     );
   }
@@ -236,7 +238,6 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
     );
   }
 }
-
 class CuadroDeTextoEtiqueta extends StatelessWidget {
   const CuadroDeTextoEtiqueta({
     super.key,
@@ -266,7 +267,9 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     return obtenerDecoracionCampoOpcional(icono: icono);
   }
   bool existeEtiqueta(List<String> etiquetas, String etiquetaRecibida){
-    if (etiquetas.contains(etiquetaRecibida)) return true;
+    for (var etiqueta in etiquetas) {
+      if (etiqueta.equalsIgnoreCase(etiquetaRecibida)) return true;
+    }
     return false;
   }
 
@@ -327,5 +330,4 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     );
   }
 }
-
 /* ----------------------------------------------------------------------------- */
