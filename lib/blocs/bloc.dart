@@ -172,9 +172,9 @@ class EliminadasEtiquetasSeleccionadas extends VehiculoEvento {
   EliminadasEtiquetasSeleccionadas({required this.idsEtiquetasSeleccionadas});
 }
 class CambiadaModalidadSeleccion extends VehiculoEvento {
-  final bool modoSeleccion;
+  final bool estModoSeleccionActivo;
 
-  CambiadaModalidadSeleccion({required this.modoSeleccion});
+  CambiadaModalidadSeleccion({required this.estModoSeleccionActivo});
 }
 
 // GASTOS
@@ -274,10 +274,10 @@ final gastosArchivados = GastosArchivados();
 
 class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Vehiculos
-  Future<List<String>>? matriculasVehiculos;
+  Future<List<String>>? matriculasVehiculos; // Para no ingresar vehiculos duplicados.
 
   // Etiquetas
-  Future<List<String>>? nombresEtiquetas;
+  Future<List<String>>? nombresEtiquetas; // Para no ingresar etiquetas duplicadas.
   bool modoSeleccion = false;
 
   // Gastos
@@ -526,7 +526,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisEtiquetas(misEtiquetas: _misEtiquetas, modoSeleccion: modoSeleccion));
     });
     on<CambiadaModalidadSeleccion>((event, emit) {
-      modoSeleccion = event.modoSeleccion;
+      modoSeleccion = event.estModoSeleccionActivo;
       emit(MisEtiquetas(misEtiquetas: _misEtiquetas, modoSeleccion: modoSeleccion));
     });
 

@@ -72,7 +72,7 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
           IconButton( // Botón Cancelar Modo Selección de Etiquetas.
             onPressed: !estaModoSeleccionActivo?null:() {
               abortarSeleccionEtiquetas();
-              context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(modoSeleccion: false));
+              context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: false));
             }, 
             icon: const Icon(Icons.close)
           ),
@@ -168,7 +168,7 @@ class TileEtiqueta extends StatelessWidget {
       },
       onLongPress: estaModoSeleccionActivo?null:() {
         funcionAlDejarPresionado(etiqueta.id);
-        context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(modoSeleccion: true));
+        context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: true));
       },
       selected: estaSeleccionada,
       selectedColor: Colors.black,
