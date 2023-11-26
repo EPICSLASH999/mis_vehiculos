@@ -299,11 +299,11 @@ class BarraInferior extends StatelessWidget {
       currentIndex: indiceSeleccionado,
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.directions_car),
+          icon: iconoVehiculo,
           label: 'Vehículos',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.card_travel),
+          icon: iconoEtiqueta,
           label: 'Etiquetas',
         ),
         BottomNavigationBarItem(

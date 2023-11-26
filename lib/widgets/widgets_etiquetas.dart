@@ -153,7 +153,7 @@ class TileEtiqueta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.label),
+      leading: iconoEtiqueta,
       title: Text(
         etiqueta.nombre,
         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -218,7 +218,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
           key: _formKey,
           child: Column(
             children: <Widget>[
-              CuadroDeTextoEtiqueta(controlador: controladorNombre, titulo: 'Nombre', focusTecaldo: true, icono: const Icon(Icons.label),),
+              CuadroDeTextoEtiqueta(controlador: controladorNombre, titulo: 'Nombre', focusTecaldo: true, icono: iconoEtiqueta,),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {

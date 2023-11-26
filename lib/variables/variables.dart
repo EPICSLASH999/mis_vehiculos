@@ -52,3 +52,7 @@ InputDecoration obtenerDecoracionCampoOpcional({String? hintText, Icon? icono}) 
     prefixIcon: icono??const Icon(Icons.car_rental)
   );
 }
+
+// Iconos
+const Icon iconoVehiculo = Icon(Icons.directions_car);
+const Icon iconoEtiqueta = Icon(Icons.card_travel);

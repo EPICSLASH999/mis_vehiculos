@@ -136,7 +136,7 @@ class TileVehiculo extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.directions_car),
+            iconoVehiculo,
             const SizedBox(width: 12,), // Para separar un poco el ícono del título.
             SizedBox(
               width: 220, // Width necesario para establecer el límite antes del overflow.
@@ -186,7 +186,7 @@ class TileVehiculo extends StatelessWidget {
         elevation: 2,
         shadowColor: Colors.green,
         child: ListTile( // ListTile de Vehículo.
-          leading: const Icon(Icons.directions_car_filled),
+          leading: iconoVehiculo,
           title: Text(
             vehiculo.modelo,
             style: const TextStyle(fontWeight: FontWeight.bold),
