@@ -54,6 +54,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
           ),
         ],
       ),      
+      bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(
         children: [
           FiltroSeleccionadorVehiculo(vehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo', misVehiculos: misVehiculosArchivados),
