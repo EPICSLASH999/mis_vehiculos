@@ -336,11 +336,11 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
             key: _formKey,
             child: Column(
               children: <Widget>[
-                CuadroDeTextoMatricula(controlador: controladorMatricula, titulo: 'Matricula', focusTecaldo: true, icono: const Icon(Icons.abc_outlined), maxCaracteres: 7,),
+                CuadroDeTextoMatricula(controlador: controladorMatricula, titulo: 'Matricula', focusTecaldo: true, icono: const Icon(Icons.abc_outlined), maxCaracteres: 7, puedeTenerEspacios: false,),
                 CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca', icono: const Icon(Icons.factory)),
                 CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo', icono: const Icon(Icons.car_rental)),
                 CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15, icono: const Icon(Icons.colorize),),
-                CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month), minValor: 1000,),
+                CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month), valorDebeSermayorA: 999,),
                 ElevatedButton(
                   onPressed: () {
                     if (!(_formKey.currentState!.validate())) return; // Si alguno de los campos no es válido, no procede.
@@ -369,6 +369,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
     this.icono, 
     required this.maxCaracteres,
     this.minCaracteres = 4,
+    this.puedeTenerEspacios = true,
   });
 
   final TextEditingController controlador;
@@ -379,6 +380,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
   final bool campoRequerido = true;
   final int maxCaracteres;
   final int minCaracteres;
+  final bool puedeTenerEspacios;
 
   final caracteresEspeciales = RegExp(r'[\^$*\[\]{}()?\"!@%&$#/\><:,.;_~`+='
       "'"
@@ -413,6 +415,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     String valorNormalizado = (value ?? '').trim();
+                    if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';
                     if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
                     if ((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
                     if (valorNormalizado.length < minCaracteres) return 'Debe tener al menos $minCaracteres caracteres';

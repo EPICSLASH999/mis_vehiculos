@@ -11,7 +11,6 @@ import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
-/* ----------------------------------- GASTOS ----------------------------------- */
 // Variables Globales
 // Métodos IA
 int obtenerEtiquetaConMayorOcurrencias(List<Map<String, Object?>> listaMecanicoPorEtiqueta, bool agregadaEtiquetaDesdeGasto) {
@@ -32,23 +31,20 @@ String obtenerMecanicoConMayorOcurrenciasDeEtiqueta(List<Map<String, Object?>> l
     return "";
   }
 
-
 /* -------------------------------- PLANTILLA GASTO -------------------------------- */
 class WidgetPlantillaGasto extends StatefulWidget {
   final Gasto? gasto;
   final int idVehiculo;
-  final Future <List<Etiqueta>>? misEtiquetas;
-  final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
-  final bool agregadaEtiquetaDesdeGasto;
+  final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta; // Lista para rellenar mecánico más frecuente dependiendo de la etiqueta seleccionada.
+  final bool fueAgregadaUnaEtiquetaDesdeGasto;
   final bool esEditarGasto;
 
   const WidgetPlantillaGasto({
     super.key, 
     required this.idVehiculo, 
     this.gasto, 
-    required this.misEtiquetas, 
     this.listaMecanicoPorEtiqueta, 
-    this.agregadaEtiquetaDesdeGasto = false,
+    this.fueAgregadaUnaEtiquetaDesdeGasto = false,
     required this.esEditarGasto
   });
 
@@ -70,7 +66,9 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   String idVehiculoString = "";
 
   bool get esEditarGasto => widget.esEditarGasto;
-  String obtenerTexto() => '${(!esEditarGasto)? 'Agregar':'Editar'} Gasto';
+  String obtenerTexto() => '${(!esEditarGasto)? 'Agregar':'Editar'} Gasto'; // Titulo de la plantilla y botón.
+
+  int? idEtiquetaSeleccionadaOriginal;
 
   void inicializarValoresDeControladores(){
     idVehiculoString = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
@@ -79,7 +77,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     controladorMecanico.text = widget.gasto?.mecanico??'';
     controladorLugar.text = widget.gasto?.lugar??'';
     controladorCosto.text = (widget.gasto?.costo??'').toString();
-    if (controladorCosto.text.endsWith(".0")) controladorCosto.text = controladorCosto.text.replaceAll(".0", "");
+    if (controladorCosto.text.endsWith(".0")) controladorCosto.text = controladorCosto.text.replaceAll(".0", ""); // Remueve el '.0' al final para evitar overflow de caracteres permitidos. En caso de que la cantidad sea el maximo de caracteres permitidos.
 
     DateTime fechaRecibida = DateTime.parse(widget.gasto?.fecha??fechaSeleccionada.toIso8601String());
     controladorFecha.text = DateFormat.yMMMd().format(fechaRecibida); // Esto es solo para mostrar la fecha en el TextBox
@@ -117,7 +115,22 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
       }
     };
   }
-
+  
+  Gasto recuperarGastoActual(){ // Función para recupera el gasto en pantalla en caso de crear una etiqueta desde aquí.
+    return Gasto(
+      id: (widget.gasto?.id)??0, 
+      vehiculo: int.parse(idVehiculoString),
+      etiqueta: obtenerIdEtiqueta(),
+      mecanico: controladorMecanico.text.trim(),
+      lugar: controladorLugar.text,
+      costo: double.tryParse(controladorCosto.text)??0,
+      fecha: DateTime.fromMillisecondsSinceEpoch(int.parse(fechaSeleccionada.millisecondsSinceEpoch.toString())).toIso8601String(),
+    );
+  }
+  int obtenerIdEtiqueta(){ // En caso de que el gasto sea 'Sin etiqueta', no perder el valor al recuperar el gasto.
+    if ((idEtiquetaSeleccionadaOriginal != null) && idEtiquetaSeleccionadaOriginal == idSinEtiqueta) return idSinEtiqueta;
+    return int.parse(controladorEtiqueta.text);
+  }
 
   @override
   void dispose() {
@@ -134,11 +147,12 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Widget build(BuildContext context) {
     inicializarValoresDeControladores();
     var pressedFecha = funcionAlPresionarFecha();
+    idEtiquetaSeleccionadaOriginal??= int.tryParse(controladorEtiqueta.text);
     
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTexto()),
-        leading: IconButton(
+        leading: IconButton( // Botón Volver.
           onPressed: () {
             if (!esEditarGasto) {
               context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
@@ -168,11 +182,12 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   final listaMecanicoPorEtiqueta = snapshot.data?? [];
                   
                   // Procedimiento para IA de obtener mecánico por etiqueta.
-                  int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta, widget.agregadaEtiquetaDesdeGasto);
+                  // Este procedimiento solamente se ejecuta 1 vez, y es en cuantro se carga este widget/estado.
+                  int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta, widget.fueAgregadaUnaEtiquetaDesdeGasto);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
                   // Solo se actualiza el mecanico si es en 'Agregar Gasto' y NO acaba de agregar una etiqueta por medio de esta Plantilla.
-                  if(!esEditarGasto && !widget.agregadaEtiquetaDesdeGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
-                  if(!esEditarGasto && !widget.agregadaEtiquetaDesdeGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
+                  if(!esEditarGasto && !widget.fueAgregadaUnaEtiquetaDesdeGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
+                  if(!esEditarGasto && !widget.fueAgregadaUnaEtiquetaDesdeGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
                   return SingleChildScrollView(
                     child: Form(
@@ -180,22 +195,21 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                       child: Column(
                         children: <Widget>[
                           CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
-                          SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', misEtiquetas: widget.misEtiquetas, esEditarGasto: (widget.esEditarGasto),controladorMecanico: controladorMecanico),
-                          BotonCrearEtiqueta(funcionObtenerGasto: obtenerGasto),
+                          SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', esEditarGasto: esEditarGasto,controladorMecanico: controladorMecanico, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta),
+                          BotonCrearEtiqueta(funcionObtenerGasto: recuperarGastoActual, esEditarGasto: esEditarGasto, idVehiculo: widget.idVehiculo,),
                           CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
                           CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40, icono: const Icon(Icons.place),),
-                          CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7, icono: const Icon(Icons.attach_money), minValor: 0,),
+                          CuadroDeTexto(controlador: controladorCosto, titulo: 'Costo', esDouble: true, maxCaracteres: 7, icono: const Icon(Icons.attach_money), valorDebeSermayorA: 0,),
                           SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
                         
-                          ElevatedButton(
+                          ElevatedButton( // Botón Agregar/Editar Gasto.
                             onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                if (!widget.esEditarGasto) {
-                                  context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto()));
-                                  return;
-                                }
-                                context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto()));
+                              if (!(_formKey.currentState!.validate())) return; // Comprueba si todos los campos son válidos.
+                              if (!widget.esEditarGasto) {
+                                context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto())); // Agrega Gasto.
+                                return;
                               }
+                              context.read<VehiculoBloc>().add(EditadoGasto(gasto: obtenerGasto())); // Edita Gasto.
                             },
                             child: Text(obtenerTexto()),
                           ),
@@ -218,42 +232,36 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     super.key,
     required this.etiquetaSeleccionada,
     required this.titulo, 
-    required this.misEtiquetas,
     required this.esEditarGasto, 
-    required this.controladorMecanico,
+    required this.controladorMecanico, 
+    required this.listaMecanicoPorEtiqueta,
   });
 
   final TextEditingController etiquetaSeleccionada;
   final String titulo;
-  final Future <List<Etiqueta>>? misEtiquetas;
   final bool esEditarGasto;
   final TextEditingController controladorMecanico;
+  final List<Map<String, Object?>> listaMecanicoPorEtiqueta;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
 }
 
 class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
- 
-  int? get idEtiquetaSeleccionada => int.tryParse(widget.etiquetaSeleccionada.text); 
-  final double anchura = 170;
-
-  bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;
   
+  int? get idEtiquetaSeleccionada => int.tryParse(widget.etiquetaSeleccionada.text); 
+  bool esSinEtiqueta() => (widget.etiquetaSeleccionada.text == idSinEtiqueta.toString()) && widget.esEditarGasto;  
+  final double anchuraDelSeleccionador = 170;
+  
+  int? etiquetaSeleccionadaOriginal;
 
   @override
   Widget build(BuildContext context)  {
+    etiquetaSeleccionadaOriginal ??= int.tryParse(widget.etiquetaSeleccionada.text);
     int etiquetaSeleccionada;
-
-    bool esEditarGasto = false;
-    bool agregadaEtiquetaDesdeGasto = false;
-    Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
     var state = context.watch<VehiculoBloc>().state;
-    if(state is PlantillaGasto) {
-      esEditarGasto = state.esEditarGasto;
-      agregadaEtiquetaDesdeGasto = state.agregadaEtiquetaDesdeGasto;
-      listaMecanicoPorEtiqueta = state.listaMecanicoPorEtiqueta;
-    }
+    bool agregadaEtiquetaDesdeGasto = (state as PlantillaGasto).agregadaEtiquetaDesdeGasto;
+    Future<List<Etiqueta>>? misEtiquetas = context.watch<VehiculoBloc>().misEtiquetas;
 
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
       if(agregadaEtiquetaDesdeGasto && etiquetas.isNotEmpty) {
@@ -265,13 +273,14 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
       return (etiquetas.isNotEmpty? etiquetas.first.id:valorNoHayEtiquetasCreadas);
     }
 
+
     return Column(
       children: [
         TituloComponente(titulo: widget.titulo),
         SizedBox(
-          width: anchura,
+          width: anchuraDelSeleccionador,
           child: FutureBuilder<List<Etiqueta>>(
-            future: widget.misEtiquetas,
+            future: misEtiquetas,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting){
                 return const WidgetCargando();
@@ -279,37 +288,26 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 final etiquetas = snapshot.data?? [];
                 etiquetaSeleccionada = valorIdEtiquetaInicial(etiquetas);
                 
-                return FutureBuilder(
-                  future: listaMecanicoPorEtiqueta, 
-                  builder: (context, snapshot) {
-                     if (snapshot.connectionState == ConnectionState.waiting){
-                      return const WidgetCargando();
-                    } else{
-                      final listaMecanicoPorEtiqueta = snapshot.data?? [];
+                return DropdownButtonFormField(
+                  validator: (value) {
+                    if (value != null && value == valorNoHayEtiquetasCreadas) return 'Valor requerido';
+                    
+                    // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
+                    widget.etiquetaSeleccionada.text = value.toString();
+                    return null;
+                  },
+                  value: etiquetaSeleccionada,
+                  items: [
+                    if(etiquetaSeleccionadaOriginal == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),), // Opción 'Sin etiqueta'. En caso de que esa sea la que ya tenga,
+                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: SizedBox(width: (anchuraDelSeleccionador-30), child: Text(etiqueta.nombre, overflow: TextOverflow.ellipsis)),)
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      widget.etiquetaSeleccionada.text = value.toString();
 
-                      return DropdownButtonFormField(
-                        validator: (value) {
-                          if (value != null && value == valorNoHayEtiquetasCreadas) return 'Valor requerido';
-                          
-                          // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
-                          widget.etiquetaSeleccionada.text = value.toString();
-                          return null;
-                        },
-                        value: etiquetaSeleccionada,
-                        items: [
-                          if(idEtiquetaSeleccionada == idSinEtiqueta) const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
-                          for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: SizedBox(width: (anchura-30), child: Text(etiqueta.nombre, overflow: TextOverflow.ellipsis)),)
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            widget.etiquetaSeleccionada.text = value.toString();
-
-                            // Si se encuentra editando, no cambia al Mecnánico.
-                            if(!esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, value!);
-                          });
-                        },
-                      );
-                    }
+                      // Si se encuentra editando el gasto, no cambia al Mecnánico.
+                      if(!widget.esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(widget.listaMecanicoPorEtiqueta, value!);
+                    });
                   },
                 );
               }
@@ -325,66 +323,50 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
 class BotonCrearEtiqueta extends StatelessWidget {
   BotonCrearEtiqueta({
     super.key, 
-    required this.funcionObtenerGasto,
+    required this.funcionObtenerGasto, 
+    required this.esEditarGasto, 
+    required this.idVehiculo,
   });
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController controladorNuevaEtiqueta = TextEditingController();
   final Function funcionObtenerGasto;
+  final bool esEditarGasto;
+  final int idVehiculo;
 
-  Future<String?> cuadroDeDialogoAgregarEtiqueta(BuildContext context) => showDialog<String>(
-    context: context, 
-    builder: (context) => AlertDialog(
-      title: const Text('Nueva etiqueta'),
-      content: Form(
-        key: _formKey,
-        child: SizedBox(height: 70, child: CuadroDeTextoEtiqueta(controlador: controladorNuevaEtiqueta, campoRequerido: true, focusTecaldo: true,)),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              Navigator.of(context).pop(controladorNuevaEtiqueta.text);
-            }
-          }, 
-          child: const Text('Agregar')
+  Future<String?> cuadroDeDialogoAgregarEtiqueta(BuildContext context) {
+    double alturaDelCuadroDeDialogo = 70;
+
+    return showDialog<String>(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: const Text('Nueva etiqueta'),
+        content: Form(
+          key: _formKey,
+          child: SizedBox(height: alturaDelCuadroDeDialogo, child: CuadroDeTextoEtiqueta(controlador: controladorNuevaEtiqueta, campoRequerido: true, focusTecaldo: true, icono: iconoEtiqueta,)),
         ),
-      ],
-    ),
-  );
-  
-
-  Gasto obtenerGastoSinGuardar() {
-    Gasto gastoCrudo = funcionObtenerGasto();
-    Gasto gastoNormalizado = Gasto(
-      id: gastoCrudo.id, 
-      vehiculo: gastoCrudo.vehiculo, 
-      etiqueta: gastoCrudo.etiqueta, 
-      mecanico: gastoCrudo.mecanico, 
-      lugar: gastoCrudo.lugar, 
-      costo: gastoCrudo.costo, 
-      fecha: DateTime.fromMillisecondsSinceEpoch(int.parse(gastoCrudo.fecha)).toIso8601String()
+        actions: [
+          TextButton( // Botón Agregar Nueva Etiqueta.
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                Navigator.of(context).pop(controladorNuevaEtiqueta.text);
+              }
+            }, 
+            child: const Text('Agregar')
+          ),
+        ],
+      ),
     );
-    return gastoNormalizado;
   }
-
+  
   @override
   Widget build(BuildContext context) {
-
-    var state = context.watch<VehiculoBloc>().state;
-    int idVehiculo = 0;
-    bool esEditarGasto = false;
-    if (state is PlantillaGasto){
-      idVehiculo = state.idVehiculo;
-      esEditarGasto = state.esEditarGasto;
-    }
-
-    return TextButton(
+    return TextButton( // Botón Agregar Etiqueta.
       onPressed: () async {
-        controladorNuevaEtiqueta.clear();
+        controladorNuevaEtiqueta.clear(); // Limpiar el texto del controlador.
         final nuevaEtiqueta = await cuadroDeDialogoAgregarEtiqueta(context);
         if (nuevaEtiqueta == null || nuevaEtiqueta.isEmpty) return;
-        Gasto gastoSinGuardar = obtenerGastoSinGuardar();
+        Gasto gastoSinGuardar = funcionObtenerGasto();
         // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculo, gasto: gastoSinGuardar, esEditarGasto: esEditarGasto));
       }, 
@@ -435,12 +417,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
       ']'
     );
     bool esPrimerClic = true;
-
-    Future <List<Etiqueta>>? misEtiquetas;
-    var state = context.watch<VehiculoBloc>().state;
-    if (state is PlantillaGasto) {
-      misEtiquetas = state.misEtiquetas;
-    }
+    Future <List<Etiqueta>>? misEtiquetas = context.watch<VehiculoBloc>().misEtiquetas;
 
     return FutureBuilder<List<Etiqueta>>(
       future: misEtiquetas, 
@@ -448,7 +425,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
          if (snapshot.connectionState == ConnectionState.waiting) {
           return const WidgetCargando();
         } else {
-          final nombresEtiquetas = snapshot.data ?? [];
+          final etiquetas = snapshot.data ?? [];
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -462,7 +439,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
                   if(esNumerico(valorNormalizado)) return 'Campo inválido';
                   if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
                   if(minCaracteres != null && (valorNormalizado.length < minCaracteres!)) return 'Debe tener al menos $minCaracteres caracteres';
-                  if (existeEtiqueta(nombresEtiquetas, valorNormalizado)) return 'Etiqueta ya existente';
+                  if (existeEtiqueta(etiquetas, valorNormalizado)) return 'Etiqueta ya existente';
                   return null;
                 },
                 textCapitalization: TextCapitalization.sentences,
@@ -487,6 +464,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
 
 /* --------------------------------------------------------------------------------- */
 
+/* ----------------------------------- MIS GASTOS ----------------------------------- */
 class WidgetMisGastos extends StatefulWidget {
   final Future <List<Gasto>>? misGastos;
   final DateTime fechaSeleccionadaFinal;
@@ -521,7 +499,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     return numeroNormalizado += numeroRecibido.toString();
   }
   bool enIntervaloFecha(String fecha) {
-    DateTime fechaFinalNormalizada = DateTime.parse('${widget.fechaSeleccionadaFinal.year}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.month)}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.day)} 23:59:59.999');
+    DateTime fechaFinalNormalizada = DateTime.parse('${widget.fechaSeleccionadaFinal.year}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.month)}-${normalizarNumeroA2DigitosFecha(widget.fechaSeleccionadaFinal.day)} 23:59:59.990');
     return ((DateTime.parse(fecha)).isAfter(widget.fechaSeleccionadaInicial) && ((DateTime.parse(fecha)).isBefore(fechaFinalNormalizada)));
   }
 
@@ -546,6 +524,15 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     return Future(() => lista);
   }
 
+  double sumarGastos(List<Gasto> gastos) {
+    double gastosAcumulados = 0.0;
+    if (gastos.isEmpty) return gastosAcumulados;
+    for (var gasto in gastos) {
+      gastosAcumulados+= gasto.costo;
+    }
+    return gastosAcumulados;
+  }
+
   void escuchador(){
     setState(() {
 
@@ -558,16 +545,6 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     super.dispose();
   }
 
-
-  double sumarGastos(List<Gasto> gastos) {
-    double gastosAcumulados = 0.0;
-    if (gastos.isEmpty) return gastosAcumulados;
-    for (var gasto in gastos) {
-      gastosAcumulados+= gasto.costo;
-    }
-    return gastosAcumulados;
-  }
-
   @override
   Widget build(BuildContext context) {
     controladorMecanico.addListener(escuchador);
@@ -576,20 +553,20 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Gastos'),
-        leading: IconButton(
+        leading: IconButton( // Botón Volver a Vehículos.
           onPressed: () {
             context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
           }, 
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
         actions: [
-          IconButton(
+          IconButton( // Botón Consultar Gastos Archivados.
             onPressed: () {
               context.read<VehiculoBloc>().add(ClickeadoConsultarGastosArchivados());
             },
             icon: const Icon(Icons.folder),
           ),
-          IconButton(
+          IconButton( // Botón 'Toggle' visibilidad de Filtros.
             onPressed: () {
               filtrosVisibles = !filtrosVisibles;
               context.read<VehiculoBloc>().add((VisibilitadoFiltros(estanVisibles: filtrosVisibles)));
@@ -601,15 +578,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(
         children: [
-          if (filtrosVisibles) FiltroParaFecha(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
-          if (filtrosVisibles) Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada),
-              FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
-            ],
-          ),
-          if (filtrosVisibles) FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
+          if (filtrosVisibles) Filtros(widget: widget, controladorMecanico: controladorMecanico), // Filtros de MisGastos.
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -643,7 +612,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
               },
             ),
           ),
-          TotalGastos(listaGastos: obtenerListaGastos())
+          TotalGastos(listaGastos: obtenerListaGastos()), // Muestra el total de gastos '$'
         ],
       ),
       
@@ -669,25 +638,54 @@ class TotalGastos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-            future: listaGastos, 
-            builder: (context, snapshot) {
-              if (snapshot.hasData){
-                final gastos = snapshot.data?? [];
-                double gastosTotales = sumarGastos(gastos);
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Total: \$${gastosTotales.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold),),
-                );
-              }
-              return const CircularProgressIndicator();
-            },
+      future: listaGastos, 
+      builder: (context, snapshot) {
+        if (snapshot.hasData){
+          final gastos = snapshot.data?? [];
+          double gastosTotales = sumarGastos(gastos);
+          
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('Total: \$${gastosTotales.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold),),
           );
+        }
+        return const CircularProgressIndicator();
+      },
+    );
+  }
+}
+
+class Filtros extends StatelessWidget {
+  const Filtros({
+    super.key,
+    required this.widget,
+    required this.controladorMecanico,
+  });
+
+  final WidgetMisGastos widget;
+  final TextEditingController controladorMecanico;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FiltroParaRangoFechas(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada, titulo: 'Etiqueta'),
+            FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
+          ],
+        ),
+        FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
+      ],
+    );
   }
 }
 
 // ignore: must_be_immutable
-class FiltroParaFecha extends StatelessWidget {
-  FiltroParaFecha({
+class FiltroParaRangoFechas extends StatelessWidget {
+  FiltroParaRangoFechas({
     super.key, 
     required this.fechaSeleccionadaInicial,
     required this.fechaSeleccionadaFinal, 
@@ -767,18 +765,49 @@ class FiltroParaEtiqueta extends StatelessWidget {
   const FiltroParaEtiqueta({
     super.key, 
     required this.misEtiquetas, 
-    required this.idEtiquetaSeleccionada
+    required this.idEtiquetaSeleccionada, 
+    required this.titulo
   });
   
   final Future<List<Etiqueta>>? misEtiquetas;
   final int idEtiquetaSeleccionada;
+  final String titulo;
+  final double anchura = 160;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
-        FiltroSeleccionadorEtiqueta(idEtiquetaSeleccionada: idEtiquetaSeleccionada, titulo: 'Etiqueta', misEtiquetas: misEtiquetas),
+        TituloComponente(titulo: titulo),
+        SizedBox(
+          width: anchura,
+          child: FutureBuilder<List<Etiqueta>>(
+            future: misEtiquetas,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return const WidgetCargando();
+              } else{
+                final etiquetas = snapshot.data?? [];
+                
+                return DropdownButtonFormField(
+                  validator: (value) {
+                    if ((value != null && (value == idSinEtiqueta || value == valorNoHayEtiquetasCreadas)) || value == valorOpcionTodas) return 'Valor requerido';
+                    return null;
+                  },
+                  value: idEtiquetaSeleccionada,
+                  items: [
+                    const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todas')),
+                    const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
+                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: SizedBox(width: (anchura-30), child: Text(etiqueta.nombre, overflow: TextOverflow.ellipsis,)),)
+                  ],
+                  onChanged: (value) {
+                    context.read<VehiculoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value!));
+                  },
+                );
+              }
+            },
+          ),
+        ),
       ],
     );
   }
@@ -794,6 +823,59 @@ class FiltroParaMecanico extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false);
+  }
+}
+
+class FiltroParaVehiculo extends StatelessWidget{
+  const FiltroParaVehiculo({
+    super.key,
+    required this.idVehiculoSeleccionado,
+    required this.titulo, 
+    required this.misVehiculos
+  });
+
+  final int idVehiculoSeleccionado;
+  final String titulo;
+  final Future <List<Vehiculo>>? misVehiculos;
+
+  @override
+  Widget build(BuildContext context)  {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          TituloComponente(titulo: titulo),
+          SizedBox(
+            width: 160,
+            child: FutureBuilder<List<Vehiculo>>(
+              future: misVehiculos,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const WidgetCargando();
+                } else{
+                  final vehiculos = snapshot.data?? [];
+                  
+                  return DropdownButtonFormField(
+                    validator: (value) {
+                      if ((value != null) && value == valorOpcionTodas) return 'Valor requerido';
+                      return null;
+                    },
+                    value: idVehiculoSeleccionado,
+                    items: [
+                      const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todos')),
+                      for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo.id, child: Text(vehiculo.matricula),)
+                    ],
+                    onChanged: (value) {
+                      context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
+                    },
+                  );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -869,127 +951,4 @@ class BotonesTileGasto extends StatelessWidget {
   }
 }
 
-class FiltroSeleccionadorEtiqueta extends StatelessWidget{
-  const FiltroSeleccionadorEtiqueta({
-    super.key,
-    required this.idEtiquetaSeleccionada,
-    required this.titulo, 
-    required this.misEtiquetas
-  });
-
-  final int idEtiquetaSeleccionada;
-  final String titulo;
-  final Future <List<Etiqueta>>? misEtiquetas;
-
-  final double anchura = 160;
-
-  @override
-  Widget build(BuildContext context)  {
-    return Column(
-      children: [
-        TituloComponente(titulo: titulo),
-        SizedBox(
-          width: anchura,
-          child: FutureBuilder<List<Etiqueta>>(
-            future: misEtiquetas,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting){
-                return const WidgetCargando();
-              } else{
-                final etiquetas = snapshot.data?? [];
-                
-                return DropdownButtonFormField(
-                  validator: (value) {
-                    if ((value != null && (value == idSinEtiqueta || value == valorNoHayEtiquetasCreadas)) || value == valorOpcionTodas) return 'Valor requerido';
-                    return null;
-                  },
-                  value: idEtiquetaSeleccionada,
-                  items: [
-                    const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todas')),
-                    const DropdownMenuItem(value: idSinEtiqueta, child: Text(nombreSinEtiqueta),),
-                    for(var etiqueta in etiquetas) DropdownMenuItem(value: etiqueta.id, child: SizedBox(width: (anchura-30), child: Text(etiqueta.nombre, overflow: TextOverflow.ellipsis,)),)
-                  ],
-                  onChanged: (value) {
-                    context.read<VehiculoBloc>().add(FiltradoGastosPorEtiqueta(idEtiqueta: value!));
-                  },
-                );
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class FiltroParaVehiculo extends StatelessWidget{
-  const FiltroParaVehiculo({
-    super.key,
-    required this.idVehiculoSeleccionado,
-    required this.titulo, 
-    required this.misVehiculos
-  });
-
-  final int idVehiculoSeleccionado;
-  final String titulo;
-  final Future <List<Vehiculo>>? misVehiculos;
-
-  @override
-  Widget build(BuildContext context)  {
-    return SeleccionadorVehiculo(titulo: titulo, misVehiculos: misVehiculos, idVehiculoSeleccionado: idVehiculoSeleccionado);
-  }
-}
-
-class SeleccionadorVehiculo extends StatelessWidget {
-  const SeleccionadorVehiculo({
-    super.key,
-    required this.titulo,
-    required this.misVehiculos,
-    required this.idVehiculoSeleccionado,
-  });
-
-  final String titulo;
-  final Future<List<Vehiculo>>? misVehiculos;
-  final int idVehiculoSeleccionado;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TituloComponente(titulo: titulo),
-          SizedBox(
-            width: 160,
-            child: FutureBuilder<List<Vehiculo>>(
-              future: misVehiculos,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const WidgetCargando();
-                } else{
-                  final vehiculos = snapshot.data?? [];
-                  
-                  return DropdownButtonFormField(
-                    validator: (value) {
-                      if ((value != null) && value == valorOpcionTodas) return 'Valor requerido';
-                      return null;
-                    },
-                    value: idVehiculoSeleccionado,
-                    items: [
-                      const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todos')),
-                      for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo.id, child: Text(vehiculo.matricula),)
-                    ],
-                    onChanged: (value) {
-                      context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
-                    },
-                  );
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-/* ------------------------------------------------------------------------------ */
+/* ---------------------------------------------------------------------------------- */

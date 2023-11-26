@@ -32,7 +32,8 @@ class CuadroDeTexto extends StatelessWidget {
     this.minCaracteres,
     this.focusTecaldo = false, 
     this.icono, 
-    this.minValor,
+    this.valorDebeSermayorA, 
+    this.puedeTenerEspacios = true,
   });
 
   final TextEditingController controlador;
@@ -45,7 +46,8 @@ class CuadroDeTexto extends StatelessWidget {
   final int? minCaracteres;
   final bool focusTecaldo;
   final Icon? icono;
-  final int? minValor;
+  final int? valorDebeSermayorA;
+  final bool puedeTenerEspacios;
 
   bool esNumerico(String? valor) {
     if(valor == null) return false;    
@@ -83,13 +85,14 @@ class CuadroDeTexto extends StatelessWidget {
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
               String valorNormalizado = (value??'').trim();
+              if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';
               if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
               if (esInt && !esNumerico(valorNormalizado)) return 'Debe ser número entero';  
               if (esDouble && !esNumerico(valorNormalizado)) return 'Debe ser numerico';  
               if((!esInt && !esDouble) && esNumerico(valorNormalizado)) return 'Campo inválido';
               if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
               if(minCaracteres != null && valorNormalizado.length < minCaracteres!) return 'Debe tener al menos $minCaracteres caracteres';
-              if (minValor != null && esNumerico(valorNormalizado) && double.parse(valorNormalizado) < double.parse(minValor.toString())) return 'Valor inválido';
+              if (valorDebeSermayorA != null && esNumerico(valorNormalizado) && double.parse(valorNormalizado) <= double.parse(valorDebeSermayorA.toString())) return 'Valor inválido';
               return null;
             },
             textCapitalization: TextCapitalization.sentences,

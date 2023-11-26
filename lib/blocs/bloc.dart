@@ -5,6 +5,7 @@ import 'package:mis_vehiculos/database/tablas/etiquetas.dart';
 import 'package:mis_vehiculos/database/tablas/gastos.dart';
 import 'package:mis_vehiculos/database/tablas/gastos_archivados.dart';
 import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
+import 'package:mis_vehiculos/funciones/funciones.dart';
 import 'package:mis_vehiculos/modelos/etiqueta.dart';
 import 'package:mis_vehiculos/modelos/gasto.dart';
 import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
@@ -40,16 +41,16 @@ class PlantillaVehiculo extends VehiculoEstado {
 // GASTOS
 class PlantillaGasto extends VehiculoEstado {
   final int idVehiculo;
-  final Future<List<Etiqueta>>? misEtiquetas;
   final Gasto? gasto;
+  final Future <List<Etiqueta>>? misEtiquetas;
   final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
   final bool agregadaEtiquetaDesdeGasto;
   final bool esEditarGasto;
 
-  PlantillaGasto({required this.idVehiculo, required this.misEtiquetas, this.gasto, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false, this.esEditarGasto = false});
+  PlantillaGasto({required this.idVehiculo, this.gasto, required this.misEtiquetas, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false, this.esEditarGasto = false, });
 
   @override
-  List<Object?> get props => [idVehiculo, misEtiquetas, gasto, listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto, esEditarGasto];
+  List<Object?> get props => [idVehiculo, gasto, misEtiquetas, listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto, esEditarGasto];
 }
 class MisGastos extends VehiculoEstado {
   final Future <List<Gasto>>? misGastos;
@@ -275,6 +276,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   Future<List<String>>? matriculasVehiculos; // Para no ingresar vehiculos duplicados.
 
   // Etiquetas
+  Future<List<Etiqueta>>? get misEtiquetas => _misEtiquetas;
   Future<List<String>>? nombresEtiquetas; // Para no ingresar etiquetas duplicadas.
   bool estaModoSeleccionActivo = false;
 
@@ -284,7 +286,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   int filtroIdEtiqueta = valorOpcionTodas;
   int filtroIdVehiculo = valorOpcionTodas;
   Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta; // IA para rellenar automáticamente campo mecánico.
-  bool filtrosVisibles = true;
+  bool filtrosVisibles = false;
 
   // Gastos Archivados
   String filtroVehiculo = valorOpcionTodas.toString();
@@ -292,17 +294,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
   // MÉTODOS
   //Métodos para gastos.
-  String normalizarNumeroA2DigitosFecha(int numero){
-    String numeroRecibido = '';
-    if (numero.toString().length == 1) numeroRecibido += '0';
-    return numeroRecibido += numero.toString();
-  }
-  DateTime obtenerMaximaFechaDeHoy(){
-    return DateTime.parse('${DateTime.now().year}-${normalizarNumeroA2DigitosFecha(DateTime.now().month)}-${normalizarNumeroA2DigitosFecha(DateTime.now().day)} 23:58:99.999');
-  }
   void reiniciarFiltrosGastos() {
     //yyyy-MM-dd HH:mm:ss
-    filtroFechaFinal = obtenerMaximaFechaDeHoy();
+    filtroFechaFinal = obtenerValorMaximoDelDiaDeFecha(DateTime.now());
     filtroFechaInicial = DateTime.parse('${filtroFechaFinal.year}-${normalizarNumeroA2DigitosFecha(filtroFechaFinal.month)}-01');
     filtroIdEtiqueta = valorOpcionTodas;
     filtroIdVehiculo = valorOpcionTodas;
@@ -424,7 +418,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // Gastos
     on<ClickeadoAgregarGasto>((event, emit) {
       listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.idVehiculo);
-      _misEtiquetas = etiquetas.fetchAll();
       emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta));
     });
     on<AgregadoGasto>((event, emit) async {
@@ -453,8 +446,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<ClickeadoEditarGasto>((event, emit) {
       listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.gasto.vehiculo);
-      _misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: 0, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, esEditarGasto: true));
+      emit(PlantillaGasto(idVehiculo: 0, gasto: event.gasto, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, esEditarGasto: true));
     });
     on<EditadoGasto>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -518,12 +510,11 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoEditarEtiqueta>((event, emit) {
       nombresEtiquetas = etiquetas.fetchAllTagsExcept(event.etiqueta.nombre);
       emit(PlantillaEtiqueta(etiqueta: event.etiqueta, nombresEtiquetas: nombresEtiquetas));
-    });
-   
+    });   
     on<AgregadoEtiquetaDesdeGasto>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, gasto: event.gasto, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true, esEditarGasto: event.esEditarGasto));
+      emit(PlantillaGasto(idVehiculo: event.idVehiculo, gasto: event.gasto, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true, esEditarGasto: event.esEditarGasto));
     });
     on<EliminadasEtiquetasSeleccionadas>((event, emit) async {
       await eliminarEtiquetasSeleccionadas(event.idsEtiquetasSeleccionadas);
@@ -586,7 +577,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       }
       //reiniciarFiltrosGastos();
       _misGastos = obtenerGastos();
-      _misEtiquetas = etiquetas.fetchAll();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));    
     });
 
