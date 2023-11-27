@@ -74,7 +74,7 @@ class MisGastos extends VehiculoEstado {
   });
 
   @override
-  List<Object?> get props => [misGastos, fechaInicial, fechaFinal, misEtiquetas, filtroIdEtiqueta];
+  List<Object?> get props => [misGastos, fechaInicial, fechaFinal, misEtiquetas, filtroIdEtiqueta, filtroIdVehiculo, misVehiculos];
 }
 
 // ETIQUETAS
@@ -322,6 +322,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   }
   Future<void> eliminarVehiculosSeleccionados(List<int> idsVehiculosSeleccionados) async {
     for (var idVehiculo in idsVehiculosSeleccionados) {
+      if (idVehiculo == filtroIdVehiculo) filtroIdVehiculo = valorOpcionTodas; // Si se elimina el vehiculo seleccionado en el filtro, se reinicia a Opcion 'Todos'.
       await archivarGastosDeIdVehiculo(idVehiculo);
       await vehiculos.delete(idVehiculo);
     }
@@ -387,6 +388,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Métodos para etiquetas
   Future<void> eliminarEtiquetasSeleccionadas(List<int> idsEtiquetasSeleccionadas) async {
     for (var idEtiqueta in idsEtiquetasSeleccionadas) {
+      if (idEtiqueta == filtroIdEtiqueta) filtroIdEtiqueta = valorOpcionTodas; // Si se elimina la etiqueta seleccionado en el filtro, se reinicia a Opcion 'Todas'.
       await etiquetas.delete(idEtiqueta);
     }
     abortarSeleccionEtiquetas();

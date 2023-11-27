@@ -30,8 +30,8 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
   Function eliminarVehiculosSeleccionados(BuildContext context){
     return () {
       context.read<VehiculoBloc>().add(EliminadosVehiculosSeleccionados(idsVehiculosSeleccionados: idsVehiculosSeleccionados));
-      mostrarToast(context, 'Gastos archivados');
       abortarSeleccionVehiculos();
+      mostrarToast(context, 'Gastos archivados');
     };
   }
   void alSeleccionarVehiculo(int idVehiculo){
