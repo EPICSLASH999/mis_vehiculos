@@ -84,6 +84,7 @@ class CuadroDeTexto extends StatelessWidget {
           TextFormField(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
+              if (esSoloLectura) return null;
               String valorNormalizado = (value??'').trim();
               if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';
               if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
@@ -96,7 +97,7 @@ class CuadroDeTexto extends StatelessWidget {
               return null;
             },
             textCapitalization: TextCapitalization.sentences,
-            maxLength: maxCaracteres,
+            maxLength: esSoloLectura?null:maxCaracteres,
             readOnly: esSoloLectura,
             controller: controlador,
             decoration: obtenerDecoracion(),

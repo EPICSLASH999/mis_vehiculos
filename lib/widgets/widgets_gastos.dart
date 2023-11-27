@@ -195,6 +195,18 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                       child: Column(
                         children: <Widget>[
                           CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
+                          /*Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                const TituloComponente(titulo: 'Vehiculo'),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(controladorVehiculo.text),
+                                ),
+                              ],
+                            ),
+                          ),*/
                           SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', esEditarGasto: esEditarGasto,controladorMecanico: controladorMecanico, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta),
                           BotonCrearEtiqueta(funcionObtenerGasto: recuperarGastoActual, esEditarGasto: esEditarGasto, idVehiculo: widget.idVehiculo,),
                           CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
