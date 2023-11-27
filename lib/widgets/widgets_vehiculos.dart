@@ -122,6 +122,13 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
                   dialogoAlerta(context: context, texto: '¿Seguro de eliminar los vehiculos seleccionados?', funcionAlProceder: eliminarVehiculosSeleccionados(context), titulo: 'Eliminar'),
                 icon: const Icon(Icons.delete_forever)
               ),
+              if (estaModoSeleccionActivo) IconButton( // Botón Cancelar Modo Selección de Vehículos.
+                onPressed: !estaModoSeleccionActivo?null:() {
+                  abortarSeleccionVehiculos();
+                  context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionVehiculo(estaModoSeleccionActivo: false));
+                }, 
+                icon: const Icon(Icons.close)
+              ),
             ],
           ),
           bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),

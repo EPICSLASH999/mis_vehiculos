@@ -69,13 +69,13 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
               dialogoAlerta(context: context, texto: '¿Seguro de eliminar las etiquetas seleccionadas?', funcionAlProceder: eliminarEtiquetasSeleccionadas(context), titulo: 'Eliminar'),
             icon: const Icon(Icons.delete_forever)
           ),
-          /*IconButton( // Botón Cancelar Modo Selección de Etiquetas.
+          if (estaModoSeleccionActivo) IconButton( // Botón Cancelar Modo Selección de Etiquetas.
             onPressed: !estaModoSeleccionActivo?null:() {
               abortarSeleccionEtiquetas();
-              context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: false));
+              context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionEtiqueta(estaModoSeleccionActivo: false));
             }, 
             icon: const Icon(Icons.close)
-          ),*/
+          ),
         ],
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisEtiquetas),
