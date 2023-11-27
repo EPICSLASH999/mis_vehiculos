@@ -70,6 +70,8 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
 
   int? idEtiquetaSeleccionadaOriginal;
 
+  bool escribioSuPropioMecanico = true;
+
   void inicializarValoresDeControladores(){
     idVehiculoString = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
     controladorVehiculo.text = idVehiculoString;
@@ -185,7 +187,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   // Este procedimiento solamente se ejecuta 1 vez, y es en cuantro se carga este widget/estado.
                   int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta, widget.fueAgregadaUnaEtiquetaDesdeGasto);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
-                  // Solo se actualiza el mecanico si es en 'Agregar Gasto' y NO acaba de agregar una etiqueta por medio de esta Plantilla.
+                  // Solo se actualiza el mecanico si es en 'Agregar Gasto' y NO acaba de agregar una etiqueta por medio de esta Plantilla. Y no ha escrito nada en mecánico.
                   if(!esEditarGasto && !widget.fueAgregadaUnaEtiquetaDesdeGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
                   if(!esEditarGasto && !widget.fueAgregadaUnaEtiquetaDesdeGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
@@ -195,18 +197,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                       child: Column(
                         children: <Widget>[
                           CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
-                          /*Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                const TituloComponente(titulo: 'Vehiculo'),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(controladorVehiculo.text),
-                                ),
-                              ],
-                            ),
-                          ),*/
                           SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', esEditarGasto: esEditarGasto,controladorMecanico: controladorMecanico, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta),
                           BotonCrearEtiqueta(funcionObtenerGasto: recuperarGastoActual, esEditarGasto: esEditarGasto, idVehiculo: widget.idVehiculo,),
                           CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
@@ -302,7 +292,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 
                 return DropdownButtonFormField(
                   validator: (value) {
-                    if (value != null && value == valorNoHayEtiquetasCreadas) return 'Valor requerido';
+                    if (value != null && value == valorNoHayEtiquetasCreadas) return 'Agregue una etiqueta';
                     
                     // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
                     widget.etiquetaSeleccionada.text = value.toString();
@@ -317,7 +307,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                     setState(() {
                       widget.etiquetaSeleccionada.text = value.toString();
 
-                      // Si se encuentra editando el gasto, no cambia al Mecnánico.
+                      // Si se encuentra editando el gasto, no cambia al Mecánico.
                       if(!widget.esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(widget.listaMecanicoPorEtiqueta, value!);
                     });
                   },
