@@ -51,7 +51,7 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
 
   @override
   Widget build(BuildContext context) {
-    estaModoSeleccionActivo = context.watch<VehiculoBloc>().estaModoSeleccionActivo;
+    estaModoSeleccionActivo = context.watch<VehiculoBloc>().estaModoSeleccionEtiquetasActivo;
     if (!estaModoSeleccionActivo) idsEtiquetasSeleccionadas = [];
 
     return Scaffold(
@@ -67,8 +67,8 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
           IconButton( // Botón de Borrar.
             onPressed: !(estaModoSeleccionActivo && idsEtiquetasSeleccionadas.isNotEmpty)?null:
               dialogoAlerta(context: context, texto: '¿Seguro de eliminar las etiquetas seleccionadas?', funcionAlProceder: eliminarEtiquetasSeleccionadas(context), titulo: 'Eliminar'),
-            icon: const Icon(Icons.delete_forever))
-          ,
+            icon: const Icon(Icons.delete_forever)
+          ),
           /*IconButton( // Botón Cancelar Modo Selección de Etiquetas.
             onPressed: !estaModoSeleccionActivo?null:() {
               abortarSeleccionEtiquetas();
@@ -89,7 +89,7 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
                   return const WidgetCargando();
                 } else{
                   final etiquetas = snapshot.data?? []; // Lista de Etiquetas recibida.
-            
+                  
                   return etiquetas.isEmpty
                       ? const Center(
                         child: Text(
@@ -169,7 +169,7 @@ class TileEtiqueta extends StatelessWidget {
       },
       onLongPress: estaModoSeleccionActivo?null:() {
         funcionAlDejarPresionado(etiqueta.id);
-        context.read<VehiculoBloc>().add(CambiadaModalidadSeleccion(estModoSeleccionActivo: true));
+        context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionEtiqueta(estaModoSeleccionActivo: true));
       },
       selected: estaSeleccionada,
       selectedColor: Colors.green,

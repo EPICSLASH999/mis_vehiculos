@@ -30,7 +30,7 @@ class Vehiculos {
   Future<List<Vehiculo>> fetchAll() async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
-      ''' SELECT * from $tableName ORDER BY id_vehiculo'''
+      ''' SELECT * from $tableName ORDER BY id_vehiculo DESC'''
     );
     return registros.map((vehiculo) => Vehiculo.fromSQfliteDatabase(vehiculo)).toList();
   }

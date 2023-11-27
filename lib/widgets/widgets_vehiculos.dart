@@ -14,16 +14,52 @@ class WidgetMisVehiculos extends StatefulWidget {
   final Future<List<Vehiculo>>? misVehiculos;
   final String buscarVehiculosQueContengan;
 
-  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.buscarVehiculosQueContengan});
+  const WidgetMisVehiculos({super.key, required this.misVehiculos, required this.buscarVehiculosQueContengan,});
 
   @override
   State<WidgetMisVehiculos> createState() => _WidgetMisVehiculosState();
 }
 class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
   SearchController controladorDeBusqueda = SearchController();
-  
+
+  /* ********************** SECCION PARA SELECCIONAR Y ELIMINAR VEHICULOS ********************** */
+  List<int> idsVehiculosSeleccionados = [];
+  bool estaModoSeleccionActivo = false; // Estado para hacer clic en los vehiculos y seleccionarlos, para su posterior eliminación.
+  Future<List<Vehiculo>> replicaDeListaVehiculosParaSeleccionar = Future(() => []); // Esta lista la uso al activar el modo selección. Para evitar recargar la pantalla al intentar refiltrar la lista de vehiculos recibida desde el bloc.
+
+  Function eliminarVehiculosSeleccionados(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadosVehiculosSeleccionados(idsVehiculosSeleccionados: idsVehiculosSeleccionados));
+      mostrarToast(context, 'Gastos archivados');
+      abortarSeleccionVehiculos();
+    };
+  }
+  void alSeleccionarVehiculo(int idVehiculo){
+    setState(() {
+      if (idsVehiculosSeleccionados.contains(idVehiculo)){
+        idsVehiculosSeleccionados..copiar()..remove(idVehiculo);
+        return;
+      }
+      idsVehiculosSeleccionados..copiar()..add(idVehiculo);
+    });
+  }
+  void alDejarPresionadoVehiculo(int idVehiculoPresionado){
+    setState(() {
+      estaModoSeleccionActivo = true;
+      idsVehiculosSeleccionados = idsVehiculosSeleccionados.copiar()..add(idVehiculoPresionado); // Selecciona el vehículo que se dejó presionado.
+    });
+  }
+  void abortarSeleccionVehiculos(){
+    setState(() {
+      idsVehiculosSeleccionados = [];
+      estaModoSeleccionActivo = false;
+    });
+  }
+  /* ******************************************************************************************* */
+
   void escuchador(){ // Event listener del controlador.
     context.read<VehiculoBloc>().add(BuscadoVehiculos(buscarVehiculosQueContengan: controladorDeBusqueda.text));
+    // Le quité el Set State, puesto que cada vez que con cada estado emitido se recarga la pantalla completa.
   }
 
   @override
@@ -34,9 +70,9 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
 
   @override
   Widget build(BuildContext context) {
-    controladorDeBusqueda.addListener(escuchador); // Se agrega el Event Listener al controlador.
-    controladorDeBusqueda.text = widget.buscarVehiculosQueContengan; // Obtener el valor a buscar/filtrar de Vehiculos.
-
+    /* ********************** SECCION PARA SELECCIONAR Y ELIMINAR VEHICULOS ********************** */
+    estaModoSeleccionActivo = context.watch<VehiculoBloc>().estaModoSeleccionVehiculosActivo;
+    if (!estaModoSeleccionActivo) idsVehiculosSeleccionados = [];
     List<Vehiculo> filtrarListaVehiculos(List<Vehiculo> vehiculos) {
       if (vehiculos.isEmpty) return vehiculos;
       List<Vehiculo> vehiculosFiltrados = vehiculos.copiar();
@@ -52,8 +88,14 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
     Future<List<Vehiculo>>? obtenerListaVehiculos() async{
       List<Vehiculo> lista = await widget.misVehiculos??[];
       lista = filtrarListaVehiculos(lista);
+      if (!estaModoSeleccionActivo) replicaDeListaVehiculosParaSeleccionar = Future(() => lista);
       return Future(() => lista);
     }
+    /* ******************************************************************************************* */
+
+    controladorDeBusqueda.addListener(escuchador); // Se agrega el Event Listener al controlador.
+    controladorDeBusqueda.text = widget.buscarVehiculosQueContengan; // Obtener el valor a buscar/filtrar de Vehiculos.
+
     VoidCallback funcionAgregarVehiculo(){
       return () {
         context.read<VehiculoBloc>().add(ClickeadoAgregarVehiculo());
@@ -74,19 +116,26 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Mis Vehículos'),
+            actions: [
+              IconButton( // Botón de Borrar.
+                onPressed: !(estaModoSeleccionActivo && idsVehiculosSeleccionados.isNotEmpty)?null:
+                  dialogoAlerta(context: context, texto: '¿Seguro de eliminar los vehiculos seleccionados?', funcionAlProceder: eliminarVehiculosSeleccionados(context), titulo: 'Eliminar'),
+                icon: const Icon(Icons.delete_forever)
+              ),
+            ],
           ),
           bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
           body: Column(
             children: [
-              CuadroDeBusqueda(controladorDeBusqueda: controladorDeBusqueda,),
+              if(!estaModoSeleccionActivo) CuadroDeBusqueda(controladorDeBusqueda: controladorDeBusqueda,),
               Expanded(
                 child: FutureBuilder<List<Vehiculo>>(
-                  future: obtenerListaVehiculos(),
+                  future: estaModoSeleccionActivo? replicaDeListaVehiculosParaSeleccionar:obtenerListaVehiculos(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const WidgetCargando();
                     } else {
-                      final vehiculos = snapshot.data ?? []; // Lista de vehículos filtrada.
+                      final vehiculos = snapshot.data ?? []; // Lista de vehículos ya filtrada.
 
                       return vehiculos.isEmpty
                           ? const Center(
@@ -102,14 +151,20 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
                               itemCount: vehiculos.length,
                               itemBuilder: (context, index) {
                                 final vehiculo = vehiculos[index];
-                                return TileVehiculo(vehiculo: vehiculo);
+                                return TileVehiculo(
+                                  vehiculo: vehiculo,
+                                  estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id), 
+                                  estaModoSeleccionActivo: estaModoSeleccionActivo, 
+                                  funcionAlSeleccionar: alSeleccionarVehiculo,
+                                  funcionAlDejarPresionado: alDejarPresionadoVehiculo,
+                                );
                               },
                             );
                     }
                   },
                 ),
               ),
-              BotonAgregar(texto: 'Agregar Vehiculo', funcionAlPresionar: funcionAgregarVehiculo(),)
+              BotonAgregar(texto: 'Agregar Vehiculo', funcionAlPresionar: estaModoSeleccionActivo? null:funcionAgregarVehiculo(),)
             ],
           ),
         );
@@ -120,17 +175,19 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
 class TileVehiculo extends StatelessWidget {
   const TileVehiculo({
     super.key,
-    required this.vehiculo,
+    required this.vehiculo, 
+    required this.estaSeleccionado, 
+    required this.estaModoSeleccionActivo, 
+    required this.funcionAlSeleccionar, 
+    required this.funcionAlDejarPresionado, 
   });
 
   final Vehiculo vehiculo;
-
-  Function eliminarVehiculo(BuildContext context, int idVehiculo) {
-    return () {
-      context.read<VehiculoBloc>().add(EliminadoVehiculo(id: idVehiculo));
-      mostrarToast(context, 'Gastos archivados');
-    };
-  }
+  final bool estaSeleccionado;
+  final bool estaModoSeleccionActivo;
+  final Function(int) funcionAlSeleccionar;
+  final Function(int) funcionAlDejarPresionado;
+  
   Future mostrarCuadroDeDialogoDeVehiculo(BuildContext context) { // Cuadro de diálogo que aparece al hacer clic en un vehículo.
     return showDialog(
       context: context,
@@ -193,11 +250,17 @@ class TileVehiculo extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: Text(vehiculo.matricula),
-          trailing: BotonesTileVehiculo(vehiculo: vehiculo),
-          onTap: () {
+          trailing: estaModoSeleccionActivo?null:BotonesTileVehiculo(vehiculo: vehiculo),
+          onTap: estaModoSeleccionActivo? (){funcionAlSeleccionar(vehiculo.id);}: () {
             mostrarCuadroDeDialogoDeVehiculo(context);
           },
-          onLongPress: dialogoAlerta(context: context, texto: '¿Desea eliminar este vehículo?', funcionAlProceder: eliminarVehiculo(context, vehiculo.id), titulo: 'Eliminar'),
+          onLongPress: estaModoSeleccionActivo?null:() {
+            funcionAlDejarPresionado(vehiculo.id);
+            context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionVehiculo(estaModoSeleccionActivo: true));
+          },
+          selected: estaSeleccionado,
+          selectedColor: Colors.green,
+          selectedTileColor: colorTileSeleccionado,
         ),
       ),
     );

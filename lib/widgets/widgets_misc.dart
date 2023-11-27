@@ -225,7 +225,7 @@ class BotonAgregar extends StatelessWidget {
   });
 
   final String texto;
-  final VoidCallback funcionAlPresionar;
+  final VoidCallback? funcionAlPresionar;
 
   @override
   Widget build(BuildContext context) {

@@ -24,11 +24,12 @@ class Inicial extends VehiculoEstado{
 class MisVehiculos extends VehiculoEstado {
   final Future<List<Vehiculo>>? misVehiculos;
   final String buscarVehiculosQueContengan;
+  final bool estaModoSeleccionActivo;
 
-  MisVehiculos({required this.misVehiculos, required this.buscarVehiculosQueContengan, });
+  MisVehiculos({required this.misVehiculos, required this.buscarVehiculosQueContengan, required this.estaModoSeleccionActivo, });
 
   @override
-  List<Object?> get props => [misVehiculos, buscarVehiculosQueContengan];
+  List<Object?> get props => [misVehiculos, buscarVehiculosQueContengan,estaModoSeleccionActivo];
 }
 class PlantillaVehiculo extends VehiculoEstado {
    final Vehiculo? vehiculo;
@@ -139,6 +140,16 @@ class BuscadoVehiculos extends VehiculoEvento {
 
   BuscadoVehiculos({required this.buscarVehiculosQueContengan});
 }
+class CambiadaModalidadSeleccionVehiculo extends VehiculoEvento {
+  final bool estaModoSeleccionActivo;
+
+  CambiadaModalidadSeleccionVehiculo({required this.estaModoSeleccionActivo});
+}
+class EliminadosVehiculosSeleccionados extends VehiculoEvento {
+  final List<int> idsVehiculosSeleccionados;
+
+  EliminadosVehiculosSeleccionados({required this.idsVehiculosSeleccionados});
+}
 
 // ETIQUETAS
 class ClickeadoAdministrarEtiquetas extends VehiculoEvento {}
@@ -176,10 +187,10 @@ class EliminadasEtiquetasSeleccionadas extends VehiculoEvento {
 
   EliminadasEtiquetasSeleccionadas({required this.idsEtiquetasSeleccionadas});
 }
-class CambiadaModalidadSeleccion extends VehiculoEvento {
-  final bool estModoSeleccionActivo;
+class CambiadaModalidadSeleccionEtiqueta extends VehiculoEvento {
+  final bool estaModoSeleccionActivo;
 
-  CambiadaModalidadSeleccion({required this.estModoSeleccionActivo});
+  CambiadaModalidadSeleccionEtiqueta({required this.estaModoSeleccionActivo});
 }
 
 // GASTOS
@@ -285,11 +296,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Vehiculos
   Future<List<String>>? matriculasVehiculos; // Para no ingresar vehiculos duplicados.
   String buscarVehiculosQueContengan = ""; // Filtro de búsqueda en MisVehículos.
+  bool estaModoSeleccionVehiculosActivo = false;
 
   // Etiquetas
   Future<List<Etiqueta>>? get misEtiquetas => _misEtiquetas;
   Future<List<String>>? nombresEtiquetas; // Para no ingresar etiquetas duplicadas.
-  bool estaModoSeleccionActivo = false;
+  bool estaModoSeleccionEtiquetasActivo = false;
 
   // Gastos
   DateTime filtroFechaInicial = DateTime.now();
@@ -304,6 +316,18 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   Future<List<String>>? misVehiculosArchivados;
 
   // MÉTODOS
+  // Métodos para vehículos
+  void abortarSeleccionVehiculos() {
+    estaModoSeleccionVehiculosActivo = false;
+  }
+  Future<void> eliminarVehiculosSeleccionados(List<int> idsVehiculosSeleccionados) async {
+    for (var idVehiculo in idsVehiculosSeleccionados) {
+      await archivarGastosDeIdVehiculo(idVehiculo);
+      await vehiculos.delete(idVehiculo);
+    }
+    abortarSeleccionVehiculos();
+  }
+
   //Métodos para gastos.
   void reiniciarFiltrosGastos() {
     //yyyy-MM-dd HH:mm:ss
@@ -368,7 +392,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     abortarSeleccionEtiquetas();
   }
   void abortarSeleccionEtiquetas() {
-    estaModoSeleccionActivo = false;
+    estaModoSeleccionEtiquetasActivo = false;
   }
   Future<bool> hayAlmenosUnaEtiqueta() async{
     var etiquetas = await _misEtiquetas??[];
@@ -383,7 +407,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       _misEtiquetas = etiquetas.fetchAll();
       _misGastos = obtenerGastos();
       _misGastosArchivados = gastosArchivados.fetchAll();
-      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     
     // Vehiculos
@@ -397,13 +421,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.create(datos: datos);
       _misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan,estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<EliminadoVehiculo>((event, emit) async {
       await archivarGastosDeIdVehiculo(event.id);
       await vehiculos.delete(event.id);
       _misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<EditadoVehiculo>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -415,7 +439,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await vehiculos.update(id: event.vehiculo.id, datos: datos);
       _misVehiculos = vehiculos.fetchAll();
-      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
       matriculasVehiculos = vehiculos.fetchAllPlatesExcept('0');
@@ -427,7 +451,16 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<BuscadoVehiculos>((event, emit) {
       buscarVehiculosQueContengan = event.buscarVehiculosQueContengan;
-      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
+    });
+    on<CambiadaModalidadSeleccionVehiculo>((event, emit) {
+      estaModoSeleccionVehiculosActivo = event.estaModoSeleccionActivo;
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
+    });
+    on<EliminadosVehiculosSeleccionados>((event, emit) async {
+      await eliminarVehiculosSeleccionados(event.idsVehiculosSeleccionados);
+      _misVehiculos = vehiculos.fetchAll();
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
 
     // Gastos
@@ -445,7 +478,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": event.gasto.fecha,
       };
       await gastos.create(datos: datos);
-      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
       //reiniciarFiltrosGastos();
@@ -501,22 +534,22 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // Etiquetas
     on<ClickeadoAdministrarEtiquetas>((event, emit) {
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
     });   
     on<AgregadoEtiqueta>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
     });
     on<EditadoEtiqueta>((event, emit) async {
       await etiquetas.update(id: event.etiqueta.id, nombre: event.etiqueta.nombre);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
     });
     on<EliminadaEtiqueta>((event, emit) async {
       await etiquetas.delete(event.id);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
     });
     on<ClickeadoAgregarEtiqueta>((event, emit) {
       nombresEtiquetas = etiquetas.fetchAllTagsExcept('0');
@@ -531,16 +564,16 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       _misEtiquetas = etiquetas.fetchAll();
       emit(PlantillaGasto(idVehiculo: event.idVehiculo, gasto: event.gasto, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true, esEditarGasto: event.esEditarGasto));
     });
+    on<CambiadaModalidadSeleccionEtiqueta>((event, emit) {
+      estaModoSeleccionEtiquetasActivo = event.estaModoSeleccionActivo;
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
+    });
     on<EliminadasEtiquetasSeleccionadas>((event, emit) async {
       await eliminarEtiquetasSeleccionadas(event.idsEtiquetasSeleccionadas);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
     });
-    on<CambiadaModalidadSeleccion>((event, emit) {
-      estaModoSeleccionActivo = event.estModoSeleccionActivo;
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
-    });
-
+    
     // Gastos Archivados
     on<ClickeadoConsultarGastosArchivados>((event, emit) {
       _misGastosArchivados = gastosArchivados.fetchAll();
@@ -568,10 +601,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       //reiniciarFiltrosGastos();
       _misVehiculos = vehiculos.fetchAll();
       if (event.reiniciarBusquedaDeVehiculos) buscarVehiculosQueContengan = "";
-      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+      emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<ClickeadoRegresarAAdministradorEtiquetas>((event, emit) {
-      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
+      emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
     });
     on<ClickeadoregresarAConsultarGastos>((event, emit) {
       _misGastos = obtenerGastos();
@@ -581,14 +614,15 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // Bottom Bar
     on<CambiadoDePantalla>((event, emit) async {
       abortarSeleccionEtiquetas();
+      abortarSeleccionVehiculos();
       if(event.pantalla == OpcionesBottomBar.misVehiculos){
         _misVehiculos = vehiculos.fetchAll();
-        emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan));
+        emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
         return;
       }
       if(event.pantalla == OpcionesBottomBar.misEtiquetas){
         _misEtiquetas = etiquetas.fetchAll();
-        emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionActivo));
+        emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
         return;
       }
       //reiniciarFiltrosGastos();
