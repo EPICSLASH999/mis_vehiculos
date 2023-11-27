@@ -263,7 +263,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     return double.tryParse(s) != null;
   }
   InputDecoration obtenerDecoracion({Icon? icono}){
-    if (campoRequerido) return obtenerDecoracionCampoObligatorio(hintText: 'Gasolina', icono: icono);
+    if (campoRequerido) return obtenerDecoracionCampoObligatorio(hintText: 'Ej: Gasolina', icono: icono);
     return obtenerDecoracionCampoOpcional(icono: icono);
   }
   bool existeEtiqueta(List<String> etiquetas, String etiquetaRecibida){

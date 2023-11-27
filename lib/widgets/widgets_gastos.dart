@@ -399,8 +399,8 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
     return double.tryParse(s) != null;
   }
   InputDecoration obtenerDecoracion({Icon? icono}){
-    if (campoRequerido) return obtenerDecoracionCampoObligatorio(hintText: 'Gasolina', icono: icono);
-    return obtenerDecoracionCampoOpcional(hintText: 'Gasolina', icono: icono);
+    if (campoRequerido) return obtenerDecoracionCampoObligatorio(hintText: 'Ej: Gasolina', icono: icono);
+    return obtenerDecoracionCampoOpcional(hintText: 'Ej: Gasolina', icono: icono);
   }
   bool existeEtiqueta(List<Etiqueta> etiquetas, String etiquetaRecibida){
     for (var etiqueta in etiquetas) {
@@ -669,6 +669,10 @@ class Filtros extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text('Filtros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+        ),
         FiltroParaRangoFechas(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -822,7 +826,7 @@ class FiltroParaMecanico extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false);
+    return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false, icono: const Icon(Icons.build),);
   }
 }
 

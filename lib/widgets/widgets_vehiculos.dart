@@ -187,8 +187,28 @@ class TileVehiculo extends StatelessWidget {
   final bool estaModoSeleccionActivo;
   final Function(int) funcionAlSeleccionar;
   final Function(int) funcionAlDejarPresionado;
-  
+
+  VoidCallback agregarGasto(BuildContext context){
+    Future<bool> futureHayEtiquetas = context.watch<VehiculoBloc>().hayAlmenosUnaEtiqueta();
+
+    return () async {
+      // ignore: use_build_context_synchronously
+        Navigator.of(context).pop(); // Primero desaparece el cuadro de diálogo de Mostrar vehículo.
+
+        bool hayAlmenosUnaEtiqueta = await futureHayEtiquetas;
+        if (!hayAlmenosUnaEtiqueta) { // Si no hay etiquetas, mostrar Toast / SnackBar.
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          // ignore: use_build_context_synchronously
+          mostrarToast(context, "Primero cree una etiqueta!");
+          return;
+        }
+        // ignore: use_build_context_synchronously
+        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+      };
+  }  
   Future mostrarCuadroDeDialogoDeVehiculo(BuildContext context) { // Cuadro de diálogo que aparece al hacer clic en un vehículo.
+
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -217,18 +237,36 @@ class TileVehiculo extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton( // Botón Editar Vehículo.
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
-            },
-            child: const Text('Editar')
-          ),
-          TextButton( // Botón Aceptar (Desaparece el cuadro de diálogo).
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Aceptar')
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton.icon( // Botón Agregar Gasto.
+                onPressed: agregarGasto(context),
+                icon: const Icon(Icons.monetization_on, color: colorGastoDorado), 
+                label: const Text('Agregar Costo', style: TextStyle(color: colorGastoDorado),),
+              ),
+              SizedBox(
+                width: 140,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton( // Botón Editar Vehículo.
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        context.read<VehiculoBloc>().add(ClickeadoEditarVehiculo(vehiculo: vehiculo));
+                      },
+                      child: const Text('Editar')
+                    ),
+                    TextButton( // Botón Aceptar (Desaparece el cuadro de diálogo).
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Aceptar')
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -304,12 +342,10 @@ class BotonesTileVehiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //Future<List<Etiqueta>>? misEtiquetas = context.watch<VehiculoBloc>().misEtiquetas;
     Future<bool> futureHayEtiquetas = context.watch<VehiculoBloc>().hayAlmenosUnaEtiqueta();
 
     return IconButton(
       onPressed: () async {
-        //var etiquetas = await misEtiquetas ?? [];
         bool hayAlmenosUnaEtiqueta = await futureHayEtiquetas;
 
         if (!hayAlmenosUnaEtiqueta) { // Si no hay etiquetas, mostrar Toast / SnackBar.
@@ -322,7 +358,7 @@ class BotonesTileVehiculo extends StatelessWidget {
         // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
       },
-      icon: const Icon(Icons.monetization_on, color: Color.fromARGB(255, 228, 185, 31),)
+      icon: const Icon(Icons.monetization_on, color: colorGastoDorado,)
     );
   }
 

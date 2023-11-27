@@ -35,6 +35,7 @@ const int indiceMisGastos = 2;
 // Colores
 const Color colorIcono = Color.fromARGB(255, 158, 190, 42);
 const Color colorTileSeleccionado = Color.fromARGB(104, 201, 255, 7);
+const Color colorGastoDorado = Color.fromARGB(255, 228, 185, 31);
 
 //Decoración
 InputDecoration obtenerDecoracionCampoObligatorio({String? hintText, Icon? icono}) {
