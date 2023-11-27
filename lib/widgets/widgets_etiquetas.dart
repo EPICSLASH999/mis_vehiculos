@@ -18,6 +18,8 @@ class WidgetMisEtiquetas extends StatefulWidget {
   State<WidgetMisEtiquetas> createState() => _WidgetMisEtiquetasState();
 }
 class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
+
+  /* ********************** SECCION PARA SELECCIONAR Y ELIMINAR ETIQUETAS ********************** */
   List<int> idsEtiquetasSeleccionadas = [];
   bool estaModoSeleccionActivo = false;
 
@@ -48,12 +50,21 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
       estaModoSeleccionActivo = false;
     });
   }
+  /* ******************************************************************************************* */
+
+  VoidCallback funcionAgregarEtiqueta(){
+    return () {
+      context.read<VehiculoBloc>().add(ClickeadoAgregarEtiqueta());
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
+    /* ********************** SECCION PARA SELECCIONAR Y ELIMINAR ETIQUETAS ********************** */
     estaModoSeleccionActivo = context.watch<VehiculoBloc>().estaModoSeleccionEtiquetasActivo;
     if (!estaModoSeleccionActivo) idsEtiquetasSeleccionadas = [];
-
+    /* ******************************************************************************************* */
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Etiquetas'),
@@ -119,16 +130,7 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
               },
             ),
           ),
-          Padding( // Botón para Agregar Etiqueta.
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton.icon(
-              onPressed: estaModoSeleccionActivo?null: () {
-                context.read<VehiculoBloc>().add(ClickeadoAgregarEtiqueta());
-              }, 
-              icon: const Icon(Icons.add), 
-              label: const Text('Agregar Etiqueta'),
-            ),
-          )
+          BotonAgregar(texto: 'Agregar Etiqueta', funcionAlPresionar: estaModoSeleccionActivo? null:funcionAgregarEtiqueta()),
         ],
       ),
     );
