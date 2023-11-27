@@ -188,7 +188,7 @@ class TileVehiculo extends StatelessWidget {
   final Function(int) funcionAlSeleccionar;
   final Function(int) funcionAlDejarPresionado;
 
-  VoidCallback agregarGasto(BuildContext context){
+  VoidCallback funcionIrAPlantillaAgregarGasto(BuildContext context){
     Future<bool> futureHayEtiquetas = context.watch<VehiculoBloc>().hayAlmenosUnaEtiqueta();
 
     return () async {
@@ -204,7 +204,7 @@ class TileVehiculo extends StatelessWidget {
           return;
         }
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id)); // Ir a PlantillaGasto para agregar un gasto.
       };
   }  
   Future mostrarCuadroDeDialogoDeVehiculo(BuildContext context) { // Cuadro de diálogo que aparece al hacer clic en un vehículo.
@@ -241,9 +241,9 @@ class TileVehiculo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton.icon( // Botón Agregar Gasto.
-                onPressed: agregarGasto(context),
+                onPressed: funcionIrAPlantillaAgregarGasto(context),
                 icon: const Icon(Icons.monetization_on, color: colorGastoDorado), 
-                label: const Text('Agregar Costo', style: TextStyle(color: colorGastoDorado),),
+                label: const Text('Agregar Gasto', style: TextStyle(color: colorGastoDorado),),
               ),
               SizedBox(
                 width: 140,
@@ -356,7 +356,7 @@ class BotonesTileVehiculo extends StatelessWidget {
           return;
         }
         // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id));
+        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id)); // Ir a PlantillaGasto para agregar un gasto.
       },
       icon: const Icon(Icons.monetization_on, color: colorGastoDorado,)
     );
