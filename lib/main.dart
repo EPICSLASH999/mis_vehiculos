@@ -62,11 +62,11 @@ class MainApp extends StatelessWidget {
             context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionEtiqueta(estaModoSeleccionActivo: false));
             return Future(() => false);
           }
-          if (state is MisVehiculos && state.estaModoSeleccionActivo){
-            context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionVehiculo(estaModoSeleccionActivo: false));
-            return Future(() => false);
-          }
           if (state is MisVehiculos){
+            if (state.estaModoSeleccionActivo){
+              context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionVehiculo(estaModoSeleccionActivo: false));
+              return Future(() => false);
+            }
             context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos(reiniciarBusquedaDeVehiculos: true));
             return Future(() => false);
           }
