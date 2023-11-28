@@ -57,7 +57,7 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
   }
   /* ******************************************************************************************* */
 
-  void escuchador(){ // Event listener del controlador.
+  void escuchador(){ // Event listener del controladorDeBusqueda.
     context.read<VehiculoBloc>().add(BuscadoVehiculos(buscarVehiculosQueContengan: controladorDeBusqueda.text));
     // Le quité el Set State, puesto que cada vez que con cada estado emitido se recarga la pantalla completa.
   }

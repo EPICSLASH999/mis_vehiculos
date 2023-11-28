@@ -475,6 +475,7 @@ class WidgetMisGastos extends StatefulWidget {
   final int idEtiquetaSeleccionada;
   final int idVehiculoSeleccionado;
   final Future <List<Vehiculo>>? misVehiculos;
+  final String filtroMecanico;
 
    const WidgetMisGastos({
     super.key, 
@@ -484,7 +485,8 @@ class WidgetMisGastos extends StatefulWidget {
     required this.misEtiquetas, 
     required this.idEtiquetaSeleccionada,
     required this.idVehiculoSeleccionado,
-    required this.misVehiculos,
+    required this.misVehiculos, 
+    required this.filtroMecanico,
   }); 
 
   @override
@@ -535,10 +537,9 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     return gastosAcumulados;
   }
 
-  void escuchador(){
-    setState(() {
-
-    });
+  void escuchador(){// Event listener del controladorMecanico
+    context.read<VehiculoBloc>().add(FiltradoGastosPorMecanico(mecanico: controladorMecanico.text));
+    // Le quité el Set State, puesto que cada vez que con cada estado emitido se recarga la pantalla completa.
   }
   
   @override
@@ -551,6 +552,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   Widget build(BuildContext context) {
     controladorMecanico.addListener(escuchador);
     filtrosVisibles = context.watch<VehiculoBloc>().filtrosVisibles;
+    controladorMecanico.text = widget.filtroMecanico;
 
     return Scaffold(
       appBar: AppBar(

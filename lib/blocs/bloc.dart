@@ -62,6 +62,7 @@ class MisGastos extends VehiculoEstado {
   final int filtroIdEtiqueta;
   final int filtroIdVehiculo;
   final Future <List<Vehiculo>>? misVehiculos;
+  final String filtroMecanico;
 
   MisGastos({
     required this.misGastos, 
@@ -71,10 +72,11 @@ class MisGastos extends VehiculoEstado {
     required this.filtroIdEtiqueta,
     required this.filtroIdVehiculo, 
     required this.misVehiculos,
+    required this.filtroMecanico, 
   });
 
   @override
-  List<Object?> get props => [misGastos, fechaInicial, fechaFinal, misEtiquetas, filtroIdEtiqueta, filtroIdVehiculo, misVehiculos];
+  List<Object?> get props => [misGastos, fechaInicial, fechaFinal, misEtiquetas, filtroIdEtiqueta, filtroIdVehiculo, misVehiculos, filtroMecanico];
 }
 
 // ETIQUETAS
@@ -241,6 +243,11 @@ class VisibilitadoFiltros extends VehiculoEvento {
 
   VisibilitadoFiltros({required this.estanVisibles});
 }
+class FiltradoGastosPorMecanico extends VehiculoEvento{
+  final String mecanico;
+
+  FiltradoGastosPorMecanico({required this.mecanico});
+}
 
 // GASTOS ARCHIVADOS
 class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}
@@ -310,6 +317,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   int filtroIdVehiculo = valorOpcionTodas;
   Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta; // IA para rellenar automáticamente campo mecánico.
   bool filtrosVisibles = false;
+  String filtroMecanico = "";
 
   // Gastos Archivados
   String filtroVehiculo = valorOpcionTodas.toString();
@@ -486,13 +494,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       //reiniciarFiltrosGastos();
       _misGastos = obtenerGastos();
       _misEtiquetas = etiquetas.fetchAll();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));
     });
     on<EliminadoGasto>((event, emit) async {
       await archivarGastoIndividual(event.id);
       await gastos.delete(event.id);
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));
     });
     on<ClickeadoEditarGasto>((event, emit) {
       listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.gasto.vehiculo);
@@ -509,28 +517,32 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       };
       await gastos.update(id: event.gasto.id, datos: datos);
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));
     });
     on<FiltradoGastosPorFecha>((event, emit) {
       filtroFechaInicial = event.fechaInicial;
       filtroFechaFinal = event.fechaFinal;
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));
     });
     on<FiltradoGastosPorEtiqueta>((event, emit) {
       filtroIdEtiqueta = event.idEtiqueta;
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));
     });
     on<FiltradoGastosPorVehiculo>((event, emit) {
       filtroIdVehiculo = event.idVehiculo;
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));    
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));    
     });
     on<VisibilitadoFiltros>((event, emit) {
       filtrosVisibles = event.estanVisibles;
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));   
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));   
+    });
+    on<FiltradoGastosPorMecanico>((event, emit) {
+      filtroMecanico = event.mecanico;
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));   
     });
 
     // Etiquetas
@@ -610,7 +622,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<ClickeadoregresarAConsultarGastos>((event, emit) {
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));
     });
 
     // Bottom Bar
@@ -629,7 +641,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       }
       //reiniciarFiltrosGastos();
       _misGastos = obtenerGastos();
-      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos));    
+      emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));    
     });
 
   }
