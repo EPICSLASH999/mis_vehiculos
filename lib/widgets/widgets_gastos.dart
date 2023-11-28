@@ -351,7 +351,7 @@ class BotonCrearEtiqueta extends StatelessWidget {
           TextButton( // Botón Agregar Nueva Etiqueta.
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                Navigator.of(context).pop(controladorNuevaEtiqueta.text);
+                Navigator.of(context).pop(controladorNuevaEtiqueta.text.trim());
               }
             }, 
             child: const Text('Agregar')

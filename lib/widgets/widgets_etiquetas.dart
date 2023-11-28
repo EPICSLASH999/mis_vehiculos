@@ -192,7 +192,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
   Etiqueta obtenerEtiqueta(){
     return Etiqueta(
       id: (etiqueta?.id)??0, 
-      nombre: controladorNombre.text, 
+      nombre: controladorNombre.text.trim(), 
     );
   }
   String obtenerTextoDePlantilla() => "${(etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
@@ -225,7 +225,7 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     if (etiqueta == null) {
-                      context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text)); // Agrega nueva Etiqueta.
+                      context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text.trim())); // Agrega nueva Etiqueta.
                       return;
                     }
                     context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta())); // Edita la etiqueta.
