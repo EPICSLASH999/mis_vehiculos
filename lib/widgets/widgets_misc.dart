@@ -95,7 +95,7 @@ class CuadroDeTexto extends StatelessWidget {
               if((!esInt && !esDouble) && esNumerico(valorNormalizado)) return 'Campo inválido';
               if((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
               if(minCaracteres != null && valorNormalizado.length < minCaracteres!) return 'Debe tener al menos $minCaracteres caracteres';
-              if (valorDebeSermayorA != null && esNumerico(valorNormalizado) && double.parse(valorNormalizado) <= double.parse(valorDebeSermayorA.toString())) return 'Valor mínimo es ${valorDebeSermayorA!+1}';
+              if (valorDebeSermayorA != null && esNumerico(valorNormalizado) && double.parse(valorNormalizado) <= double.parse(valorDebeSermayorA.toString())) return 'Valor debe ser mayor a $valorDebeSermayorA';
               if (valorDebeSerMenorOIgualA != null && esNumerico(valorNormalizado) && double.parse(valorNormalizado) > valorDebeSerMenorOIgualA!.toDouble()) return 'Valor máximo es $valorDebeSerMenorOIgualA';
               return null;
             },

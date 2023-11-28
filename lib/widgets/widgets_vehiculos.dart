@@ -475,7 +475,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
     this.focusTecaldo = false, 
     this.icono, 
     required this.maxCaracteres,
-    this.minCaracteres = 4,
+    this.minCaracteres = 7,
     this.puedeTenerEspacios = true,
   });
 
@@ -524,6 +524,19 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                     String valorNormalizado = (value ?? '').trim();
                     if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';
                     if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
+
+                    // Método para validar mátricas en formato XXX0000
+                    int numeroDeCaracter = 1;
+                    for (var caracter in valorNormalizado.characters) {
+                      if (numeroDeCaracter <= 3){
+                        if (!caracter.toLowerCase().contains(RegExp(r'[a-z]'))) return 'Caracter "$caracter" (pos $numeroDeCaracter) debe ser letra';
+                        numeroDeCaracter++;
+                        continue;
+                      }
+                      if (!caracter.toLowerCase().contains(RegExp(r'[0-9]'))) return 'Caracter "$caracter" (pos $numeroDeCaracter) debe ser número';
+                      numeroDeCaracter++;
+                    }
+
                     if ((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
                     if (valorNormalizado.length < minCaracteres) return 'Debe tener al menos $minCaracteres caracteres';
                     if (existeMatricula(matriculasVehiculos, valorNormalizado)) return 'Matricula ya existente';
