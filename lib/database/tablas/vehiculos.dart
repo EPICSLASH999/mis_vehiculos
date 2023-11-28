@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:mis_vehiculos/database/database_service.dart';
 import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/modelos/vehiculo.dart';
@@ -14,7 +15,8 @@ abstract class RepositorioVehiculos{
   Future<String> obtenerNombreVehiculoDeId(int id);
 }
 
-class VehiculosFalso implements RepositorioVehiculos{
+// ignore: must_be_immutable
+class VehiculosFalso extends Equatable implements RepositorioVehiculos {
   List<Vehiculo> listaVehiculos = [];
 
   @override
@@ -72,6 +74,9 @@ class VehiculosFalso implements RepositorioVehiculos{
     listaVehiculos = listaVehiculos.copiar()..add(nuevoVehiculo);
     return Future(() => 1);
   }
+  
+  @override
+  List<Object?> get props => [listaVehiculos];
 
 }
 
