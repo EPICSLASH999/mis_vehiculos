@@ -975,6 +975,7 @@ class DropDownSearch extends StatefulWidget {
 class _DropDownSearchState extends State<DropDownSearch> {
   final TextEditingController textEditingController = TextEditingController(); // Controlador propio de este widget. NO ALTERAR.
   final TextEditingController controladorVehiculo = TextEditingController(); // Controlador para pasar el ID del vehiculo seleccionado.
+  Vehiculo opcionTodosLosVehiculos = const Vehiculo(id: valorOpcionTodas, matricula: "Todos", marca: "", modelo: "", color: "", ano: 2000);
   Vehiculo? vehiculoSeleccionado;
 
   @override
@@ -985,6 +986,8 @@ class _DropDownSearchState extends State<DropDownSearch> {
 
   @override
   Widget build(BuildContext context) {
+    vehiculoSeleccionado ??= opcionTodosLosVehiculos;
+
     return Column(
       children: [
         const TituloComponente(titulo: 'Vehículo'),
@@ -995,18 +998,20 @@ class _DropDownSearchState extends State<DropDownSearch> {
               return const WidgetCargando();
             } else{
               final vehiculos = snapshot.data?? [];
+              List<Vehiculo> listaVehiculos = vehiculos.copiar();
+              listaVehiculos.insert(0,opcionTodosLosVehiculos);
 
               return DropdownButtonHideUnderline(
                 child: DropdownButton2<Vehiculo>(
                   isExpanded: true,
                   hint: Text(
-                    'Seleccione un vehículo',
+                    'Vehiculo...',
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).hintColor,
                     ),
                   ),
-                  items: vehiculos
+                  items: listaVehiculos
                       .map((item) => DropdownMenuItem(
                             value: item,
                             child: Text(
@@ -1062,7 +1067,7 @@ class _DropDownSearchState extends State<DropDownSearch> {
                             horizontal: 10,
                             vertical: 8,
                           ),
-                          hintText: 'Search for an item...',
+                          hintText: 'Matricula...',
                           hintStyle: const TextStyle(fontSize: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
