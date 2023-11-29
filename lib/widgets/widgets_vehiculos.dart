@@ -289,7 +289,7 @@ class TileVehiculo extends StatelessWidget {
         elevation: 2,
         shadowColor: Colors.green,
         child: ListTile( // ListTile de Vehículo.
-          leading: (vehiculo.matricula.length == 7)? iconoVehiculo: iconoVehiculoMotocicleta, // Icono del tile
+          leading: (vehiculo.matricula.length == 5)? iconoVehiculoMotocicleta : iconoVehiculo, // Icono del tile
           title: Text(
             vehiculo.modelo,
             style: const TextStyle(fontWeight: FontWeight.bold),
