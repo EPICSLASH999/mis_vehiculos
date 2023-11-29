@@ -289,7 +289,7 @@ class TileVehiculo extends StatelessWidget {
         elevation: 2,
         shadowColor: Colors.green,
         child: ListTile( // ListTile de Vehículo.
-          leading: iconoVehiculo,
+          leading: (vehiculo.matricula.length == 7)? iconoVehiculo: iconoVehiculoMotocicleta, // Icono del tile
           title: Text(
             vehiculo.modelo,
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -393,10 +393,10 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   Vehiculo obtenerVehiculo() {
     return Vehiculo(
         id: (widget.vehiculo?.id) ?? 0,
-        matricula: controladorMatricula.text,
-        marca: controladorMarca.text,
-        modelo: controladorModelo.text,
-        color: controladorColor.text,
+        matricula: controladorMatricula.text.trim(),
+        marca: controladorMarca.text.trim(),
+        modelo: controladorModelo.text.trim(),
+        color: controladorColor.text.trim(),
         ano: int.tryParse(controladorAno.text)??2000);
   }
 
@@ -443,7 +443,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
             key: _formKey,
             child: Column(
               children: <Widget>[
-                CuadroDeTextoMatricula(controlador: controladorMatricula, titulo: 'Matricula', focusTecaldo: true, icono: const Icon(Icons.abc_outlined), maxCaracteres: 7, puedeTenerEspacios: false,),
+                CuadroDeTextoMatricula(controlador: controladorMatricula, titulo: 'Matricula', focusTecaldo: true, icono: const Icon(Icons.abc_outlined), maxCaracteres: 7, puedeTenerEspacios: false, minCaracteres: 5,),
                 CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca', icono: const Icon(Icons.factory)),
                 CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo', icono: const Icon(Icons.car_rental)),
                 CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15, icono: const Icon(Icons.colorize),),
@@ -524,9 +524,18 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                     String valorNormalizado = (value ?? '').trim();
                     if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';
                     if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
-
-                    // Método para validar mátricas en formato XXX0000
+                    
+                    // Validar que cada caracter sea almenos o una letra o un número
                     int numeroDeCaracter = 1;
+                    for (var caracter in valorNormalizado.characters) {
+                      if (!caracter.toLowerCase().contains(RegExp(r'[a-z]')) && !caracter.contains(RegExp(r'[0-9]'))) return 'Caracter "$caracter" (pos $numeroDeCaracter) debe ser letra o  número';
+                      numeroDeCaracter++;
+                    }
+                    if (!valorNormalizado.contains(RegExp(r'[0-9]'))) return 'Requiere al menos un número';
+                    if (!valorNormalizado.toLowerCase().contains(RegExp(r'[a-z]'))) return 'Requiere al menos una letra';
+                    
+                    // Método para validar mátricas en formato XXX0000
+                    /*int numeroDeCaracter = 1;
                     for (var caracter in valorNormalizado.characters) {
                       if (numeroDeCaracter <= 3){
                         if (!caracter.toLowerCase().contains(RegExp(r'[a-z]'))) return 'Caracter "$caracter" (pos $numeroDeCaracter) debe ser letra';
@@ -535,7 +544,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                       }
                       if (!caracter.toLowerCase().contains(RegExp(r'[0-9]'))) return 'Caracter "$caracter" (pos $numeroDeCaracter) debe ser número';
                       numeroDeCaracter++;
-                    }
+                    }*/
 
                     if ((valorNormalizado).contains(caracteresEspeciales)) return 'No se permiten caracteres especiales';
                     if (valorNormalizado.length < minCaracteres) return 'Debe tener al menos $minCaracteres caracteres';

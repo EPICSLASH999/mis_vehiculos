@@ -56,4 +56,5 @@ InputDecoration obtenerDecoracionCampoOpcional({String? hintText, Icon? icono}) 
 
 // Iconos
 const Icon iconoVehiculo = Icon(Icons.directions_car);
+const Icon iconoVehiculoMotocicleta = Icon(Icons.motorcycle);
 const Icon iconoEtiqueta = Icon(Icons.card_travel);
