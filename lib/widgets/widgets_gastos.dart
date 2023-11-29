@@ -687,6 +687,7 @@ class Filtros extends StatelessWidget {
           ],
         ),
         FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
+        DropDownSearch(listaVehiculos: widget.misVehiculos,)
       ],
     );
   }
@@ -963,117 +964,128 @@ class BotonesTileGasto extends StatelessWidget {
 //Rama DE dROPdOWNbUTTON_2--
 /* ----------------------------------- PRUEBAS ----------------------------------- */
 class DropDownSearch extends StatefulWidget {
-  const DropDownSearch({super.key});
+  const DropDownSearch({super.key, required this.listaVehiculos});
+
+  final Future<List<Vehiculo>>? listaVehiculos;
 
   @override
   State<DropDownSearch> createState() => _DropDownSearchState();
 }
 
 class _DropDownSearchState extends State<DropDownSearch> {
-  final List<String> items = [
-    'Item1',
-    'Item2',
-    'Item3',
-    'Item4',
-    'Item5',
-    'Item6',
-    'Item7',
-    'Item8',
-  ];
-  String? selectedValue;
+  final TextEditingController textEditingController = TextEditingController(); // Controlador propio de este widget. NO ALTERAR.
+  final TextEditingController controladorVehiculo = TextEditingController(); // Controlador para pasar el ID del vehiculo seleccionado.
+  Vehiculo? vehiculoSeleccionado;
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton2<String>(
-            isExpanded: true,
-            hint: const Row(
-              children: [
-                Icon(
-                  Icons.list,
-                  size: 16,
-                  color: Colors.yellow,
-                ),
-                SizedBox(
-                  width: 4,
-                ),
-                Expanded(
-                  child: Text(
-                    'Select Item',
+    return Column(
+      children: [
+        const TituloComponente(titulo: 'Vehículo'),
+        FutureBuilder<List<Vehiculo>>(
+          future: widget.listaVehiculos,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting){
+              return const WidgetCargando();
+            } else{
+              final vehiculos = snapshot.data?? [];
+
+              return DropdownButtonHideUnderline(
+                child: DropdownButton2<Vehiculo>(
+                  isExpanded: true,
+                  hint: Text(
+                    'Seleccione un vehículo',
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.yellow,
+                      color: Theme.of(context).hintColor,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            items: items
-                .map((String item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                  items: vehiculos
+                      .map((item) => DropdownMenuItem(
+                            value: item,
+                            child: Text(
+                              item.matricula,
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                  value: vehiculoSeleccionado,
+                  onChanged: (value) {
+                    setState(() {
+                      vehiculoSeleccionado = value;
+                      controladorVehiculo.text = vehiculoSeleccionado!.id.toString(); // Actualziar el controlador.
+                    });
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 40,
+                    width: widthDeComponente,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Colors.black26,
                       ),
-                    ))
-                .toList(),
-            value: selectedValue,
-            onChanged: (String? value) {
-              setState(() {
-                selectedValue = value;
-              });
-            },
-            buttonStyleData: ButtonStyleData(
-              height: 50,
-              width: 160,
-              padding: const EdgeInsets.only(left: 14, right: 14),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: Colors.black26,
+                    ),
+                  ),
+                  dropdownStyleData: const DropdownStyleData(
+                    maxHeight: 200,
+                  ),
+                  menuItemStyleData: const MenuItemStyleData(
+                    height: 40,
+                  ),
+                  dropdownSearchData: DropdownSearchData(
+                    searchController: textEditingController,
+                    searchInnerWidgetHeight: 50,
+                    searchInnerWidget: Container(
+                      height: 50,
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                        bottom: 4,
+                        right: 8,
+                        left: 8,
+                      ),
+                      child: TextFormField(
+                        expands: true,
+                        maxLines: null,
+                        controller: textEditingController,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          hintText: 'Search for an item...',
+                          hintStyle: const TextStyle(fontSize: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    searchMatchFn: (item, searchValue) {
+                      return (item.value as Vehiculo).matricula.toString().containsIgnoreCase(searchValue); // Filtrar por matrícula.
+                    },
+                  ),
+                  //This to clear the search value when you close the menu
+                  onMenuStateChange: (isOpen) {
+                    if (!isOpen) {
+                      textEditingController.clear();
+                    }
+                  },
                 ),
-                color: Colors.redAccent,
-              ),
-              elevation: 2,
-            ),
-            iconStyleData: const IconStyleData(
-              icon: Icon(
-                Icons.arrow_forward_ios_outlined,
-              ),
-              iconSize: 14,
-              iconEnabledColor: Colors.yellow,
-              iconDisabledColor: Colors.grey,
-            ),
-            dropdownStyleData: DropdownStyleData(
-              maxHeight: 200,
-              width: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: Colors.redAccent,
-              ),
-              offset: const Offset(-20, 0),
-              scrollbarTheme: ScrollbarThemeData(
-                radius: const Radius.circular(40),
-                thickness: MaterialStateProperty.all<double>(6),
-                thumbVisibility: MaterialStateProperty.all<bool>(true),
-              ),
-            ),
-            menuItemStyleData: const MenuItemStyleData(
-              height: 40,
-              padding: EdgeInsets.only(left: 14, right: 14),
-            ),
-          ),
+              );
+            }
+          }
         ),
-      ),
+      ],
     );
   }
 }
