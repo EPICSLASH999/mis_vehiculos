@@ -393,7 +393,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   Vehiculo obtenerVehiculo() {
     return Vehiculo(
         id: (widget.vehiculo?.id) ?? 0,
-        matricula: controladorMatricula.text.trim(),
+        matricula: controladorMatricula.text.trim().toUpperCase(),
         marca: controladorMarca.text.trim(),
         modelo: controladorModelo.text.trim(),
         color: controladorColor.text.trim(),
