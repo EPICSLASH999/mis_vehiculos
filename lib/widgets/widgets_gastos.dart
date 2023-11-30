@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -269,7 +271,11 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
       if(agregadaEtiquetaDesdeGasto && etiquetas.isNotEmpty) {
         agregadaEtiquetaDesdeGasto = false;
-        return etiquetas.last.id;
+        int maxIdEtiqueta = 0;
+        for (var etiqueta in etiquetas) {
+          if (etiqueta.id >= maxIdEtiqueta) maxIdEtiqueta = etiqueta.id;
+        }
+        return maxIdEtiqueta;
       }
       if ((esSinEtiqueta()) && etiquetas.isNotEmpty) return idSinEtiqueta;
       if(idEtiquetaSeleccionada != null && idEtiquetaSeleccionada != valorNoTieneEtiquetaConMayorOcurrencias) return idEtiquetaSeleccionada!; 
