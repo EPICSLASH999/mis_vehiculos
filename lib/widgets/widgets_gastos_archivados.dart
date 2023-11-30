@@ -190,10 +190,6 @@ class TileGastoArchivado extends StatelessWidget {
   }
 }*/
 
-/* ----------------------------------------------------------------------------- */
-
-//Rama DE dROPdOWNbUTTON_2--
-/* ----------------------------------- PRUEBAS ----------------------------------- */
 class FiltroVehiculo extends StatefulWidget {
   const FiltroVehiculo({super.key, required this.misVehiculos, required this.matriculaVehiculoSeleccionado, required this.titulo});
 

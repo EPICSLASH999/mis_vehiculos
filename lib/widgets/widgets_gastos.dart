@@ -889,80 +889,6 @@ class FiltroParaMecanico extends StatelessWidget {
   }
 }*/
 
-class TileGasto extends StatelessWidget {
-  const TileGasto({
-    super.key,
-    required this.gasto, 
-  });
-
-  final Gasto gasto;
-  
-  String get obtenerMecanico => (gasto.mecanico.isNotEmpty)? gasto.mecanico:valorSinMecanico;
-
-  @override
-  Widget build(BuildContext context) {
-    DateTime nuevaFecha = DateTime.parse(gasto.fecha);
-
-    return ListTile(
-      title: Text(
-        gasto.nombreEtiqueta??'',
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(DateFormat.yMMMd().format(nuevaFecha)),
-          Text(gasto.nombreVehiculo??''),
-          Text(obtenerMecanico),
-          Text('\$${gasto.costo}'),
-        ],
-      ),
-      trailing: BotonesTileGasto(gasto: gasto),
-      onTap: null,
-    );
-  }
-}
-
-class BotonesTileGasto extends StatelessWidget {
-  const BotonesTileGasto({
-    super.key,
-    required this.gasto,
-  });
-
-  final Gasto gasto;
-
-  Function eliminarGasto(BuildContext context){
-    return () {
-      context.read<VehiculoBloc>().add(EliminadoGasto(id: gasto.id));
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context), titulo: 'Eliminar'), 
-            icon: const Icon(Icons.delete, color: colorIcono)
-          ),
-          IconButton(
-            onPressed: () {
-              context.read<VehiculoBloc>().add(ClickeadoEditarGasto(gasto: gasto));
-            }, 
-            icon: const Icon(Icons.edit, color: colorIcono)
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-//Rama DE dROPdOWNbUTTON_2--
-/* ----------------------------------- PRUEBAS ----------------------------------- */
 class FiltroParaVehiculo extends StatefulWidget {
   const FiltroParaVehiculo({super.key, required this.listaVehiculos, required this.idVehiculoSeleccionado, required this.titulo});
 
@@ -1097,6 +1023,78 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
           }
         ),
       ],
+    );
+  }
+}
+
+class TileGasto extends StatelessWidget {
+  const TileGasto({
+    super.key,
+    required this.gasto, 
+  });
+
+  final Gasto gasto;
+  
+  String get obtenerMecanico => (gasto.mecanico.isNotEmpty)? gasto.mecanico:valorSinMecanico;
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime nuevaFecha = DateTime.parse(gasto.fecha);
+
+    return ListTile(
+      title: Text(
+        gasto.nombreEtiqueta??'',
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(DateFormat.yMMMd().format(nuevaFecha)),
+          Text(gasto.nombreVehiculo??''),
+          Text(obtenerMecanico),
+          Text('\$${gasto.costo}'),
+        ],
+      ),
+      trailing: BotonesTileGasto(gasto: gasto),
+      onTap: null,
+    );
+  }
+}
+
+class BotonesTileGasto extends StatelessWidget {
+  const BotonesTileGasto({
+    super.key,
+    required this.gasto,
+  });
+
+  final Gasto gasto;
+
+  Function eliminarGasto(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadoGasto(id: gasto.id));
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar este gasto?', funcionAlProceder: eliminarGasto(context), titulo: 'Eliminar'), 
+            icon: const Icon(Icons.delete, color: colorIcono)
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<VehiculoBloc>().add(ClickeadoEditarGasto(gasto: gasto));
+            }, 
+            icon: const Icon(Icons.edit, color: colorIcono)
+          ),
+        ],
+      ),
     );
   }
 }
