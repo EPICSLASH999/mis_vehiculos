@@ -832,7 +832,7 @@ class FiltroParaMecanico extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false, icono: const Icon(Icons.build),);
+    return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false, icono: const Icon(Icons.build), validarCampo: false,);
   }
 }
 

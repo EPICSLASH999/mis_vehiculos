@@ -34,7 +34,8 @@ class CuadroDeTexto extends StatelessWidget {
     this.icono, 
     this.valorDebeSermayorA, 
     this.puedeTenerEspacios = true, 
-    this.valorDebeSerMenorOIgualA,
+    this.valorDebeSerMenorOIgualA, 
+    this.validarCampo = true,
   });
 
   final TextEditingController controlador;
@@ -50,6 +51,7 @@ class CuadroDeTexto extends StatelessWidget {
   final int? valorDebeSermayorA;
   final int? valorDebeSerMenorOIgualA;
   final bool puedeTenerEspacios;
+  final bool validarCampo;
 
   bool esNumerico(String? valor) {
     if(valor == null) return false;    
@@ -86,7 +88,7 @@ class CuadroDeTexto extends StatelessWidget {
           TextFormField(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
-              if (esSoloLectura) return null;
+              if (esSoloLectura || !validarCampo) return null;
               String valorNormalizado = (value??'').trim();
               if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';
               if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
