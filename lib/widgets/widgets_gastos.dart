@@ -684,7 +684,7 @@ class Filtros extends StatelessWidget {
           children: [
             FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada, titulo: 'Etiqueta'),
             //FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
-            DropDownSearch(listaVehiculos: widget.misVehiculos, titulo: 'Vehículo', idVehiculoSeleccionado: widget.idVehiculoSeleccionado,),
+            FiltroParaVehiculo(listaVehiculos: widget.misVehiculos, titulo: 'Vehículo', idVehiculoSeleccionado: widget.idVehiculoSeleccionado,),
           ],
         ),
         FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
@@ -836,7 +836,7 @@ class FiltroParaMecanico extends StatelessWidget {
   }
 }
 
-class FiltroParaVehiculo extends StatelessWidget{
+/*class FiltroParaVehiculo extends StatelessWidget{
   const FiltroParaVehiculo({
     super.key,
     required this.idVehiculoSeleccionado,
@@ -887,7 +887,7 @@ class FiltroParaVehiculo extends StatelessWidget{
       ),
     );
   }
-}
+}*/
 
 class TileGasto extends StatelessWidget {
   const TileGasto({
@@ -963,18 +963,18 @@ class BotonesTileGasto extends StatelessWidget {
 
 //Rama DE dROPdOWNbUTTON_2--
 /* ----------------------------------- PRUEBAS ----------------------------------- */
-class DropDownSearch extends StatefulWidget {
-  const DropDownSearch({super.key, required this.listaVehiculos, required this.idVehiculoSeleccionado, required this.titulo});
+class FiltroParaVehiculo extends StatefulWidget {
+  const FiltroParaVehiculo({super.key, required this.listaVehiculos, required this.idVehiculoSeleccionado, required this.titulo});
 
   final Future<List<Vehiculo>>? listaVehiculos;
   final int idVehiculoSeleccionado;
   final String titulo;
 
   @override
-  State<DropDownSearch> createState() => _DropDownSearchState();
+  State<FiltroParaVehiculo> createState() => _FiltroParaVehiculoState();
 }
 
-class _DropDownSearchState extends State<DropDownSearch> {
+class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
   final TextEditingController textEditingController = TextEditingController(); // Controlador propio de este widget. NO ALTERAR.
   final Vehiculo opcionTodosLosVehiculos = const Vehiculo(id: valorOpcionTodas, matricula: "Todos", marca: "", modelo: "", color: "", ano: 2000); // Opción por omisión 'Todos'
   Vehiculo? vehiculoSeleccionado;

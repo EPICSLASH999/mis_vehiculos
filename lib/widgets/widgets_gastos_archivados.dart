@@ -60,7 +60,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
       body: Column(
         children: [
           //FiltroSeleccionadorVehiculo(vehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo', misVehiculos: misVehiculosArchivados),
-          DropDownSearch(misVehiculos: misVehiculosArchivados, matriculaVehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo'),
+          FiltroVehiculo(misVehiculos: misVehiculosArchivados, matriculaVehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo'),
           Expanded(
             child: 
             FutureBuilder<List<GastoArchivado>>(
@@ -138,7 +138,7 @@ class TileGastoArchivado extends StatelessWidget {
   }
 }
 
-class FiltroSeleccionadorVehiculo extends StatelessWidget{
+/*class FiltroSeleccionadorVehiculo extends StatelessWidget{
   const FiltroSeleccionadorVehiculo({
     super.key,
     required this.vehiculoSeleccionado,
@@ -188,24 +188,24 @@ class FiltroSeleccionadorVehiculo extends StatelessWidget{
       ),
     );
   }
-}
+}*/
 
 /* ----------------------------------------------------------------------------- */
 
 //Rama DE dROPdOWNbUTTON_2--
 /* ----------------------------------- PRUEBAS ----------------------------------- */
-class DropDownSearch extends StatefulWidget {
-  const DropDownSearch({super.key, required this.misVehiculos, required this.matriculaVehiculoSeleccionado, required this.titulo});
+class FiltroVehiculo extends StatefulWidget {
+  const FiltroVehiculo({super.key, required this.misVehiculos, required this.matriculaVehiculoSeleccionado, required this.titulo});
 
   final Future<List<String>>? misVehiculos;
   final String matriculaVehiculoSeleccionado;
   final String titulo;
 
   @override
-  State<DropDownSearch> createState() => _DropDownSearchState();
+  State<FiltroVehiculo> createState() => _FiltroVehiculoState();
 }
 
-class _DropDownSearchState extends State<DropDownSearch> {
+class _FiltroVehiculoState extends State<FiltroVehiculo> {
   final TextEditingController textEditingController = TextEditingController(); // Controlador propio de este widget. NO ALTERAR.
   String? matriculaVehiculoSeleccionado;
 
