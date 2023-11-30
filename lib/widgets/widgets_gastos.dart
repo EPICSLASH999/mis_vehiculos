@@ -683,11 +683,11 @@ class Filtros extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada, titulo: 'Etiqueta'),
-            FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
+            //FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
+            DropDownSearch(listaVehiculos: widget.misVehiculos, titulo: 'Vehículo', idVehiculoSeleccionado: widget.idVehiculoSeleccionado,),
           ],
         ),
         FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
-        DropDownSearch(listaVehiculos: widget.misVehiculos,)
       ],
     );
   }
@@ -964,9 +964,11 @@ class BotonesTileGasto extends StatelessWidget {
 //Rama DE dROPdOWNbUTTON_2--
 /* ----------------------------------- PRUEBAS ----------------------------------- */
 class DropDownSearch extends StatefulWidget {
-  const DropDownSearch({super.key, required this.listaVehiculos});
+  const DropDownSearch({super.key, required this.listaVehiculos, required this.idVehiculoSeleccionado, required this.titulo});
 
   final Future<List<Vehiculo>>? listaVehiculos;
+  final int idVehiculoSeleccionado;
+  final String titulo;
 
   @override
   State<DropDownSearch> createState() => _DropDownSearchState();
@@ -974,8 +976,7 @@ class DropDownSearch extends StatefulWidget {
 
 class _DropDownSearchState extends State<DropDownSearch> {
   final TextEditingController textEditingController = TextEditingController(); // Controlador propio de este widget. NO ALTERAR.
-  final TextEditingController controladorVehiculo = TextEditingController(); // Controlador para pasar el ID del vehiculo seleccionado.
-  Vehiculo opcionTodosLosVehiculos = const Vehiculo(id: valorOpcionTodas, matricula: "Todos", marca: "", modelo: "", color: "", ano: 2000);
+  final Vehiculo opcionTodosLosVehiculos = const Vehiculo(id: valorOpcionTodas, matricula: "Todos", marca: "", modelo: "", color: "", ano: 2000); // Opción por omisión 'Todos'
   Vehiculo? vehiculoSeleccionado;
 
   @override
@@ -986,11 +987,10 @@ class _DropDownSearchState extends State<DropDownSearch> {
 
   @override
   Widget build(BuildContext context) {
-    vehiculoSeleccionado ??= opcionTodosLosVehiculos;
 
     return Column(
       children: [
-        const TituloComponente(titulo: 'Vehículo'),
+        TituloComponente(titulo: widget.titulo),
         FutureBuilder<List<Vehiculo>>(
           future: widget.listaVehiculos,
           builder: (context, snapshot) {
@@ -1000,6 +1000,8 @@ class _DropDownSearchState extends State<DropDownSearch> {
               final vehiculos = snapshot.data?? [];
               List<Vehiculo> listaVehiculos = vehiculos.copiar();
               listaVehiculos.insert(0,opcionTodosLosVehiculos);
+
+              vehiculoSeleccionado ??= listaVehiculos.where((element) => element.id == widget.idVehiculoSeleccionado).toList().first;
 
               return DropdownButtonHideUnderline(
                 child: DropdownButton2<Vehiculo>(
@@ -1026,7 +1028,8 @@ class _DropDownSearchState extends State<DropDownSearch> {
                   onChanged: (value) {
                     setState(() {
                       vehiculoSeleccionado = value;
-                      controladorVehiculo.text = vehiculoSeleccionado!.id.toString(); // Actualziar el controlador.
+                      //controladorVehiculo.text = vehiculoSeleccionado!.id.toString(); // Actualizar el controlador.
+                      context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!.id));
                     });
                   },
                   buttonStyleData: ButtonStyleData(
