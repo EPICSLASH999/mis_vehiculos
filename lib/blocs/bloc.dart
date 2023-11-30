@@ -320,7 +320,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   String filtroMecanico = "";
 
   // Gastos Archivados
-  String filtroVehiculo = valorOpcionTodas.toString();
+  String filtroVehiculoGastosArchivados = valorOpcionTodas.toString();
   Future<List<String>>? misVehiculosArchivados;
 
   // MÉTODOS
@@ -383,7 +383,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     if(matricula == valorOpcionTodas.toString()) {
       return gastosArchivados.fetchAll();
     }
-    return gastosArchivados.fetchByVehicule(filtroVehiculo);
+    return gastosArchivados.fetchByVehicule(filtroVehiculoGastosArchivados);
   }
   Future<void> eliminarGastosArchivados(EliminadosGastosArchivados event) async {
     if(event.matricula == valorOpcionTodas.toString()) {
@@ -591,23 +591,23 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // Gastos Archivados
     on<ClickeadoConsultarGastosArchivados>((event, emit) {
       _misGastosArchivados = gastosArchivados.fetchAll();
-      filtroVehiculo = valorOpcionTodas.toString();
+      filtroVehiculoGastosArchivados = valorOpcionTodas.toString();
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados));
     });
     on<FiltradoGastoArchivadoPorVehiculo>((event, emit) {
-      filtroVehiculo = event.matricula;
+      filtroVehiculoGastosArchivados = event.matricula;
       _misGastosArchivados = obtenerGastosArchivados(event.matricula);
 
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados));
     });
     on<EliminadosGastosArchivados>((event, emit) async {
       await eliminarGastosArchivados(event);
       _misGastosArchivados = gastosArchivados.fetchAll();
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      filtroVehiculo = valorOpcionTodas.toString();
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculo, misVehiculosArchivados: misVehiculosArchivados));
+      filtroVehiculoGastosArchivados = valorOpcionTodas.toString();
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados));
     });
 
     // MISC

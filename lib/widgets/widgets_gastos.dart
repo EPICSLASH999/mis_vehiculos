@@ -990,7 +990,10 @@ class _DropDownSearchState extends State<DropDownSearch> {
 
     return Column(
       children: [
-        TituloComponente(titulo: widget.titulo),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TituloComponente(titulo: widget.titulo),
+        ),
         FutureBuilder<List<Vehiculo>>(
           future: widget.listaVehiculos,
           builder: (context, snapshot) {
@@ -1001,7 +1004,7 @@ class _DropDownSearchState extends State<DropDownSearch> {
               List<Vehiculo> listaVehiculos = vehiculos.copiar();
               listaVehiculos.insert(0,opcionTodosLosVehiculos);
 
-              vehiculoSeleccionado ??= listaVehiculos.where((element) => element.id == widget.idVehiculoSeleccionado).toList().first;
+              vehiculoSeleccionado = listaVehiculos.where((element) => element.id == widget.idVehiculoSeleccionado).toList().first;
 
               return DropdownButtonHideUnderline(
                 child: DropdownButton2<Vehiculo>(
@@ -1079,7 +1082,7 @@ class _DropDownSearchState extends State<DropDownSearch> {
                       ),
                     ),
                     searchMatchFn: (item, searchValue) {
-                      return (item.value as Vehiculo).matricula.toString().containsIgnoreCase(searchValue); // Filtrar por matrícula.
+                      return ((item.value as Vehiculo).matricula.toString().containsIgnoreCase(searchValue)); // Filtrar por matrícula.
                     },
                   ),
                   //This to clear the search value when you close the menu
