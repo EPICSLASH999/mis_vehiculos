@@ -500,9 +500,11 @@ class WidgetMisGastos extends StatefulWidget {
   State<WidgetMisGastos> createState() => _WidgetMisGastosState();
 }
 
+enum RepresentacionGastos {lista, grafica}
 class _WidgetMisGastosState extends State<WidgetMisGastos> {
   TextEditingController controladorMecanico = TextEditingController();
   bool filtrosVisibles = true;
+  RepresentacionGastos representacionGasto = RepresentacionGastos.lista;
 
   String normalizarNumeroA2DigitosFecha(int numeroRecibido){
     String numeroNormalizado = '';
@@ -588,8 +590,11 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (filtrosVisibles) Filtros(widget: widget, controladorMecanico: controladorMecanico), // Filtros de MisGastos.
+          if (filtrosVisibles) Filtros(widget: widget, controladorMecanico: controladorMecanico, representacionGasto: representacionGasto), // Filtros de MisGastos.
+          //const Expanded(child: MyPieChart()),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -610,7 +615,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                         ),
                       ),
                     )
-                  : ListView.separated(
+                  : (representacionGasto == RepresentacionGastos.lista)? ListView.separated(
                     separatorBuilder: (context, index) => 
                         const SizedBox(height: 12,), 
                     itemCount: gastos.length,
@@ -618,12 +623,32 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                       final gasto = gastos[index];
                       return TileGasto(gasto: gasto);
                     }, 
-                  );
+                  ): MyPieChart(misgastos: gastos,);
                 }
               },
             ),
           ),
-          TotalGastos(listaGastos: obtenerListaGastos()), // Muestra el total de gastos '$'
+          if (representacionGasto == RepresentacionGastos.lista) TotalGastos(listaGastos: obtenerListaGastos()), // Muestra el total de gastos '$'
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: SizedBox(
+              height: 40,
+              width: 300,
+              child: SegmentedButton(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(value: RepresentacionGastos.lista, label: Text('Lista'), icon: Icon(Icons.list)),
+                  ButtonSegment(value: RepresentacionGastos.grafica, label: Text('Grafica'), icon: Icon(Icons.auto_graph_sharp))
+                ], 
+                selected: {representacionGasto},
+                onSelectionChanged: (valor) {
+                  setState(() {
+                    representacionGasto = valor.first;
+                  });
+                },
+              ),
+            ),
+          )
         ],
       ),
       
@@ -670,11 +695,13 @@ class Filtros extends StatelessWidget {
   const Filtros({
     super.key,
     required this.widget,
-    required this.controladorMecanico,
+    required this.controladorMecanico, 
+    required this.representacionGasto,
   });
 
   final WidgetMisGastos widget;
   final TextEditingController controladorMecanico;
+  final RepresentacionGastos representacionGasto;
 
   @override
   Widget build(BuildContext context) {
@@ -688,12 +715,12 @@ class Filtros extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada, titulo: 'Etiqueta'),
+            if (representacionGasto == RepresentacionGastos.lista) FiltroParaEtiqueta(misEtiquetas: widget.misEtiquetas, idEtiquetaSeleccionada: widget.idEtiquetaSeleccionada, titulo: 'Etiqueta'),
             //FiltroParaVehiculo(idVehiculoSeleccionado: widget.idVehiculoSeleccionado, titulo: 'Vehículo', misVehiculos: widget.misVehiculos),
             FiltroParaVehiculo(listaVehiculos: widget.misVehiculos, titulo: 'Vehículo', idVehiculoSeleccionado: widget.idVehiculoSeleccionado,),
           ],
         ),
-        FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
+        if (representacionGasto == RepresentacionGastos.lista) FiltroParaMecanico(controladorMecanico: controladorMecanico, titulo: 'Mecánico', campoRequerido: false),
       ],
     );
   }
@@ -1108,3 +1135,95 @@ class BotonesTileGasto extends StatelessWidget {
 /* ------------------------------------------------------------------------------ */
 
 // Ramita pie_chart
+
+class MyPieChart extends StatelessWidget {
+  const MyPieChart({super.key, required this.misgastos});
+
+  final List<Gasto> misgastos;
+  final double radio = 235;
+
+  @override
+  Widget build(BuildContext context) {
+
+    Map<String, double> etiquetaPorGasto = {};
+    for (var gasto in misgastos) {
+      if (!etiquetaPorGasto.containsKey(gasto.nombreEtiqueta!)){
+        etiquetaPorGasto[gasto.nombreEtiqueta!] = gasto.costo;
+        continue;
+      }
+      etiquetaPorGasto[gasto.nombreEtiqueta!] = etiquetaPorGasto[gasto.nombreEtiqueta!]! + gasto.costo;
+    }
+
+    double total = 0;
+    List<PieChartSectionData> lista = [];
+    etiquetaPorGasto.forEach((key, value) => lista.add(
+      PieChartSectionData(
+        value: value, 
+        badgePositionPercentageOffset: 1.9, 
+        badgeWidget: SizedBox(
+          width: 68, 
+          child: Text(
+            key.toString(), 
+            overflow: TextOverflow.clip,
+          )
+        )
+      )
+    ));
+    etiquetaPorGasto.forEach((key, value) { total += value;});
+
+    return Center(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Title of pie chart in the center
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26)),
+              Text('\$ $total', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),),
+            ],
+          ),
+          // Pie chart
+          SizedBox(
+            width: radio,
+            height: radio,
+            child: PieChart(
+              swapAnimationDuration: const Duration(milliseconds: 750),
+              swapAnimationCurve: Curves.easeInOutQuint,
+              PieChartData(
+                sections: lista.toList(),
+                  
+                  //[
+                    // Item 1
+                  /*PieChartSectionData(
+                    value: 200,
+                    color: Colors.blue,
+                    badgePositionPercentageOffset: 1.5,
+                    badgeWidget: const Text('hi'),
+          
+                  ),
+                  // Item 2
+                  PieChartSectionData(
+                    value: 20,
+                    color: Colors.red,
+                  ),
+                  // Item 3
+                  PieChartSectionData(
+                    value: 20,
+                    color: Colors.green,
+                  ),
+                  // Item 4
+                  PieChartSectionData(
+                    value: 20,
+                    color: Colors.yellow,
+                  ),*/
+                //]
+              )
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
