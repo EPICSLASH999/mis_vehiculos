@@ -768,11 +768,16 @@ class FiltroParaRangoFechas extends StatelessWidget {
         lastDate: DateTime.now(),
         initialEntryMode: DatePickerEntryMode.calendarOnly
       );
-      if (nuevaFecha != null && (nuevaFecha.isBefore(fechaSeleccionadaFinal) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaFinal))) {
+      if (nuevaFecha == null) return;
+      if (!((nuevaFecha.isBefore(fechaSeleccionadaFinal) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaFinal)))) {
+        // ignore: use_build_context_synchronously
+        mostrarToast(context, 'Fecha Inicial debe ser menor a la Fecha Final');
+        return;
+      }
         fechaSeleccionadaInicial = nuevaFecha;
         // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
-      }
+      
     };
   }
   VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
@@ -784,15 +789,21 @@ class FiltroParaRangoFechas extends StatelessWidget {
         lastDate: DateTime.now(),
         initialEntryMode: DatePickerEntryMode.calendarOnly
       );
-      if (nuevaFecha != null  && (nuevaFecha.isAfter(fechaSeleccionadaInicial) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaInicial))) {
+      if (nuevaFecha == null) return;
+      if (!((nuevaFecha.isAfter(fechaSeleccionadaInicial) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaInicial)))) {
+        // ignore: use_build_context_synchronously
+        mostrarToast(context, 'Fecha Final debe ser mayor a la Fecha inicial');
+        return;
+      }
         //Formato: 2023-01-01 00:00:00.000
         DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
         fechaSeleccionadaFinal = fechaNormalizada;
         // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
-      }
+      
     };
   }
+  
   String normalizarNumeroA2DigitosFecha(int numero){
     String numeroRecibido = '';
     if (numero.toString().length == 1) numeroRecibido += '0';
