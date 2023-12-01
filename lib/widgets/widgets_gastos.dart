@@ -1114,10 +1114,7 @@ class BotonesTileGasto extends StatelessWidget {
   }
 }
 
-/* ------------------------------------------------------------------------------ */
-
-// Ramita pie_chart
-
+// Grafica
 class Graficas extends StatelessWidget {
   const Graficas({super.key, required this.misgastos});
 
@@ -1242,3 +1239,7 @@ class GraficaCircular extends StatelessWidget {
     );
   }
 }
+
+/* ------------------------------------------------------------------------------ */
+
+
