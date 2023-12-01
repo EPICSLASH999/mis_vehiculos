@@ -188,7 +188,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   // Este procedimiento solamente se ejecuta 1 vez, y es en cuantro se carga este widget/estado.
                   int idEtiquetaConMayorOcurrencias = obtenerEtiquetaConMayorOcurrencias(listaMecanicoPorEtiqueta, widget.fueAgregadaUnaEtiquetaDesdeGasto);
                   String mecanicoConMayorOcurrenciasDeEtiqueta = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(listaMecanicoPorEtiqueta, idEtiquetaConMayorOcurrencias);
-                  // Solo se actualiza el mecanico si es en 'Agregar Gasto' y NO acaba de agregar una etiqueta por medio de esta Plantilla. Y no ha escrito nada en mecánico.
+                  // Solo se actualiza el mecanico si es en 'Agregar Gasto' y NO acaba de agregar una etiqueta por medio de esta Plantilla. 
                   if(!esEditarGasto && !widget.fueAgregadaUnaEtiquetaDesdeGasto) controladorMecanico.text = mecanicoConMayorOcurrenciasDeEtiqueta;
                   if(!esEditarGasto && !widget.fueAgregadaUnaEtiquetaDesdeGasto) controladorEtiqueta.text = idEtiquetaConMayorOcurrencias.toString(); 
                     
@@ -1105,3 +1105,5 @@ class BotonesTileGasto extends StatelessWidget {
 }
 
 /* ------------------------------------------------------------------------------ */
+
+// Ramita pie_chart
