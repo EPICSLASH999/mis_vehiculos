@@ -518,7 +518,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
 
   List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
-    if (widget.idEtiquetaSeleccionada != valorOpcionTodas) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta  
+    if (widget.idEtiquetaSeleccionada != valorOpcionTodas && representacionGasto == RepresentacionGastos.lista) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta  
     String filtroMecanico = controladorMecanico.text.trim();
 
     
@@ -1141,9 +1141,10 @@ class MyPieChart extends StatelessWidget {
 
   final List<Gasto> misgastos;
   final double radio = 235;
-
+  
   @override
   Widget build(BuildContext context) {
+    final List<Color> colores = [Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, Colors.purple, Colors.grey, Colors.green, Colors.lightBlue, Colors.lightBlueAccent, Colors.blue, ];
 
     Map<String, double> etiquetaPorGasto = {};
     for (var gasto in misgastos) {
@@ -1156,7 +1157,11 @@ class MyPieChart extends StatelessWidget {
 
     double total = 0;
     List<PieChartSectionData> lista = [];
-    etiquetaPorGasto.forEach((key, value) => lista.add(
+    int idColor = 0;
+    etiquetaPorGasto.forEach((key, value) {
+      idColor ++;
+      if (idColor > colores.length-1) idColor = 0;
+      lista.add(
       PieChartSectionData(
         value: value, 
         badgePositionPercentageOffset: 1.9, 
@@ -1165,10 +1170,12 @@ class MyPieChart extends StatelessWidget {
           child: Text(
             key.toString(), 
             overflow: TextOverflow.clip,
-          )
-        )
+          ),
+        ),
+        color: colores[idColor]
       )
-    ));
+    );
+    });
     etiquetaPorGasto.forEach((key, value) { total += value;});
 
     return Center(
