@@ -114,6 +114,78 @@ class Vehiculos implements RepositorioVehiculos{
     return registros.map((vehiculo) => Vehiculo.fromSQfliteDatabase(vehiculo)).toList();
   }
 
+  Future<List<Vehiculo>> fetchAllFavoritesAndFrequent() async{
+    final database = await DatabaseService().database;
+    String queryUnion = '''
+      WITH Favoritos AS (
+        SELECT
+            id_vehiculo,
+            MAX($tablaGastos.id_gasto) AS ultima_aparicion,
+            matricula,
+            marca,
+            modelo,
+            color,
+            ano,
+            COUNT(id_vehiculo) AS `frecuencia`,
+            ROW_NUMBER() OVER (PARTITION BY id_vehiculo ORDER BY COUNT(id_vehiculo) DESC) AS rn,
+            1 as filter
+        FROM
+            $tableName
+        INNER JOIN
+            $tablaGastos ON $tablaGastos.vehiculo = $tableName.id_vehiculo
+        GROUP BY
+            id_vehiculo
+        ORDER BY
+            `frecuencia` DESC
+        LIMIT
+            $numeroVehiculosFavoritos
+    )
+    SELECT *
+    FROM Favoritos
+
+    UNION ALL
+
+    SELECT * FROM (
+        SELECT
+            id_vehiculo,
+            MAX($tablaGastos.id_gasto) AS ultima_aparicion,
+            matricula,
+            marca,
+            modelo,
+            color,
+            ano,
+            COUNT(id_vehiculo) AS frecuencia,
+            ROW_NUMBER() OVER (PARTITION BY id_vehiculo ORDER BY MAX($tablaGastos.id_gasto) DESC) AS rn,
+            2 as filter
+        FROM
+            $tableName
+        LEFT JOIN
+            $tablaGastos ON $tablaGastos.vehiculo = $tableName.id_vehiculo
+        WHERE
+          id_vehiculo NOT IN (
+            SELECT
+                id_vehiculo
+            FROM
+                Favoritos
+            LIMIT
+                $numeroVehiculosFavoritos
+          )
+        GROUP BY
+            id_vehiculo, matricula, marca, modelo, color, ano
+        ORDER BY
+            ultima_aparicion DESC, frecuencia DESC
+    ) AS AllResults
+    WHERE rn = 1
+    ORDER BY
+      filter;
+
+    ''';
+
+    final registros = await database.rawQuery(queryUnion);
+
+    return registros.map((vehiculo) => Vehiculo.fromSQfliteDatabase(vehiculo)).toList();
+  }
+
   @override
   Future<Vehiculo> fetchById(int id) async {
     final database = await DatabaseService().database;

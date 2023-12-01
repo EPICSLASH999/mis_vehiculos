@@ -9,6 +9,9 @@ const nombreBD = 'mis_vehiculos.db';
 // Valores por omisión
 const int valorOpcionTodas = 999;
 
+// Vehiculos
+const int numeroVehiculosFavoritos = 3;
+
 // Etiquetas
 const String nombreSinEtiqueta = 'Sin etiqueta'; // NO CAMBIAR despues de inicializar tabla en la base de datos.
 const int idSinEtiqueta = 1; // NO CAMBIAR ESTE VALOR. 

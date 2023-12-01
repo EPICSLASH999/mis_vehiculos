@@ -27,6 +27,8 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
   bool estaModoSeleccionActivo = false; // Estado para hacer clic en los vehiculos y seleccionarlos, para su posterior eliminación.
   Future<List<Vehiculo>> replicaDeListaVehiculosParaSeleccionar = Future(() => []); // Esta lista la uso al activar el modo selección. Para evitar recargar la pantalla al intentar refiltrar la lista de vehiculos recibida desde el bloc.
 
+  bool get mostrarSeparador => !estaModoSeleccionActivo && controladorDeBusqueda.text.isEmpty;
+
   Function eliminarVehiculosSeleccionados(BuildContext context){
     return () {
       context.read<VehiculoBloc>().add(EliminadosVehiculosSeleccionados(idsVehiculosSeleccionados: idsVehiculosSeleccionados));
@@ -143,7 +145,7 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
                       return const WidgetCargando();
                     } else {
                       final vehiculos = snapshot.data ?? []; // Lista de vehículos ya filtrada.
-
+              
                       return vehiculos.isEmpty
                           ? const Center(
                               child: Text(
@@ -154,16 +156,28 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
                                 ),
                               ),
                             )
-                          : ListView.builder(
+                          : ListView.separated(
                               itemCount: vehiculos.length,
+                              separatorBuilder:  (context, index) {
+                                if (index == 2 && mostrarSeparador) return const Text('Últimos cambios'); // Separador para lista siguiente a los top más frecuentes o favoritos.
+                                return const SizedBox(width: 0,);
+                              },
                               itemBuilder: (context, index) {
                                 final vehiculo = vehiculos[index];
-                                return TileVehiculo(
-                                  vehiculo: vehiculo,
-                                  estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id), 
-                                  estaModoSeleccionActivo: estaModoSeleccionActivo, 
-                                  funcionAlSeleccionar: alSeleccionarVehiculo,
-                                  funcionAlDejarPresionado: alDejarPresionadoVehiculo,
+                                
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (index == 0 && mostrarSeparador && vehiculos.length > numeroVehiculosFavoritos) const Text('Frecuentes'), // Separador al inicio de la lista, los top frecuentes o favoritos.
+                                    TileVehiculo(
+                                      vehiculo: vehiculo,
+                                      estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id), 
+                                      estaModoSeleccionActivo: estaModoSeleccionActivo, 
+                                      funcionAlSeleccionar: alSeleccionarVehiculo,
+                                      funcionAlDejarPresionado: alDejarPresionadoVehiculo,
+                                    ),
+                                  ],
                                 );
                               },
                             );

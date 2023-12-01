@@ -413,7 +413,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   VehiculoBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async {
       reiniciarFiltrosGastos();
-      _misVehiculos = vehiculos.fetchAll();
+      //_misVehiculos = vehiculos.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       _misEtiquetas = etiquetas.fetchAll();
       _misGastos = obtenerGastos();
       _misGastosArchivados = gastosArchivados.fetchAll();
@@ -430,13 +431,15 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "ano": event.vehiculo.ano,
       };
       await vehiculos.create(datos: datos);
-      _misVehiculos = vehiculos.fetchAll();
+      //_misVehiculos = vehiculos.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan,estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<EliminadoVehiculo>((event, emit) async {
       await archivarGastosDeIdVehiculo(event.id);
       await vehiculos.delete(event.id);
-      _misVehiculos = vehiculos.fetchAll();
+      //_misVehiculos = vehiculos.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<EditadoVehiculo>((event, emit) async {
@@ -448,7 +451,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "ano": event.vehiculo.ano,
       };
       await vehiculos.update(id: event.vehiculo.id, datos: datos);
-      _misVehiculos = vehiculos.fetchAll();
+      //_misVehiculos = vehiculos.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<ClickeadoAgregarVehiculo>((event, emit) async {
@@ -469,7 +473,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<EliminadosVehiculosSeleccionados>((event, emit) async {
       await eliminarVehiculosSeleccionados(event.idsVehiculosSeleccionados);
-      _misVehiculos = vehiculos.fetchAll();
+      //_misVehiculos = vehiculos.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
 
@@ -488,6 +493,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": event.gasto.fecha,
       };
       await gastos.create(datos: datos);
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
     on<ClickeadoConsultarGastos>((event, emit) async {    
@@ -500,6 +506,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await archivarGastoIndividual(event.id);
       await gastos.delete(event.id);
       _misGastos = obtenerGastos();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico));
     });
     on<ClickeadoEditarGasto>((event, emit) {
@@ -613,7 +620,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     // MISC
     on<ClickeadoRegresarAMisvehiculos>((event, emit) async {
       //reiniciarFiltrosGastos();
-      _misVehiculos = vehiculos.fetchAll();
+      //_misVehiculos = vehiculos.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       if (event.reiniciarBusquedaDeVehiculos) buscarVehiculosQueContengan = "";
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
@@ -630,7 +638,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       abortarSeleccionEtiquetas();
       abortarSeleccionVehiculos();
       if(event.pantalla == OpcionesBottomBar.misVehiculos){
-        _misVehiculos = vehiculos.fetchAll();
+        //_misVehiculos = vehiculos.fetchAll();
+
+        //var listaFrecuencia = await vehiculos.fetchAllFavoritesAndFrequent();
+        //listaFrecuencia.forEach(print);
+
+        _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
         emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
         return;
       }
