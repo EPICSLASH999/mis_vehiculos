@@ -1200,34 +1200,46 @@ class MyPieChart extends StatelessWidget {
               swapAnimationCurve: Curves.easeInOutQuint,
               PieChartData(
                 sections: lista.toList(),
-                  
-                  //[
-                    // Item 1
-                  /*PieChartSectionData(
-                    value: 200,
-                    color: Colors.blue,
-                    badgePositionPercentageOffset: 1.5,
-                    badgeWidget: const Text('hi'),
-          
-                  ),
-                  // Item 2
-                  PieChartSectionData(
-                    value: 20,
-                    color: Colors.red,
-                  ),
-                  // Item 3
-                  PieChartSectionData(
-                    value: 20,
-                    color: Colors.green,
-                  ),
-                  // Item 4
-                  PieChartSectionData(
-                    value: 20,
-                    color: Colors.yellow,
-                  ),*/
-                //]
-              )
+              ),
             ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Indicator(
+                color: AppColors.contentColorBlue,
+                text: 'First',
+                isSquare: true,
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              Indicator(
+                color: AppColors.contentColorYellow,
+                text: 'Second',
+                isSquare: true,
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              Indicator(
+                color: AppColors.contentColorPurple,
+                text: 'Third',
+                isSquare: true,
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              Indicator(
+                color: AppColors.contentColorGreen,
+                text: 'Fourth',
+                isSquare: true,
+              ),
+              const SizedBox(
+                height: 18,
+              ),
+            ],
           ),
         ],
       ),
