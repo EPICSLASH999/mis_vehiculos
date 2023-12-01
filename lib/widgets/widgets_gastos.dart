@@ -1120,13 +1120,8 @@ class Graficas extends StatelessWidget {
 
   final List<Gasto> misgastos;
   final double radio = 235;
-  
-  @override
-  Widget build(BuildContext context) {
-    final List<Color> colores = [Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, Colors.purple, Colors.grey, Colors.green, Colors.lightBlue,];
-    
-    Map<String, Color> colorPorEtiqueta = {};
-    Map<String, double> gastoPorEtiqueta = {};
+
+  void llenarListasEtiquetas(Map<String, double> gastoPorEtiqueta, Map<String, Color> colorPorEtiqueta, List<Color> colores) {
     int idColor = 0;
     for (var gasto in misgastos) {
       gastoPorEtiqueta[gasto.nombreEtiqueta!] = (gastoPorEtiqueta[gasto.nombreEtiqueta!]??0) + gasto.costo;
@@ -1135,36 +1130,56 @@ class Graficas extends StatelessWidget {
         idColor++; if (idColor > colores.length-1) idColor = 0;
       }
     }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    final List<Color> colores = [Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, Colors.purple, Colors.grey, Colors.green, Colors.orange, Colors.lightBlue,];
+    
+    // Para Etiquetas
+    Map<String, Color> colorPorEtiqueta = {};
+    Map<String, double> gastoPorEtiqueta = {};
+    llenarListasEtiquetas(gastoPorEtiqueta, colorPorEtiqueta, colores);
 
     double totalGastos = 0;
     List<PieChartSectionData> pieCharts = [];
+    gastoPorEtiqueta.forEach((key, value) {totalGastos += value;}); // Obtener total de gastos.
     gastoPorEtiqueta.forEach((key, value) {
       pieCharts.add(
         PieChartSectionData(
           value: value, 
           color: colorPorEtiqueta[key],
+          showTitle: true,
+          title: '${((value*100)/totalGastos).toStringAsFixed(1)}%',
         )
       );
-      totalGastos += value;
+      //totalGastos += value;
     });
+
+    // Reordenar mapa por cantidad de gasto
+    gastoPorEtiqueta = Map.fromEntries(gastoPorEtiqueta.entries.toList()..sort((e1,e2) => e2.value.compareTo(e1.value)));
 
     return GraficaCircular(
       totalGastos: totalGastos, 
       radio: radio, 
       pieCharts: pieCharts, 
-      gastoPorEtiqueta: gastoPorEtiqueta, 
-      colorPorEtiqueta: colorPorEtiqueta,
+      gastoPorElemento: gastoPorEtiqueta, 
+      colorPorElemento: colorPorEtiqueta,
       titulo: 'Relación por etiqueta'
     );
+    // Para tener multiples graficas
     /*return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
         children: [
-          GraficaCircular(totalGastos: totalGastos, radio: radio, pieCharts: pieCharts, gastoPorEtiqueta: gastoPorEtiqueta, colorPorEtiqueta: colorPorEtiqueta,titulo: 'Relación por etiqueta'),          
+          GraficaCircular(totalGastos: totalGastos, radio: radio, pieCharts: pieCharts, gastoPorElemento: gastoPorEtiqueta, colorPorElemento: colorPorEtiqueta,titulo: 'Relación por etiqueta'),
+          //GraficaCircular(totalGastos: totalGastos2, radio: radio, pieCharts: pieChartsVehiculos, gastoPorElemento: gastoPorVehiculo, colorPorElemento: colorPorVehiculo,titulo: 'Relación por vehículo'),
         ],
       ),
     );*/
   }
+
+  
 }
 
 class GraficaCircular extends StatelessWidget {
@@ -1173,16 +1188,16 @@ class GraficaCircular extends StatelessWidget {
     required this.totalGastos,
     required this.radio,
     required this.pieCharts,
-    required this.gastoPorEtiqueta,
-    required this.colorPorEtiqueta, 
+    required this.gastoPorElemento,
+    required this.colorPorElemento, 
     required this.titulo,
   });
 
   final double totalGastos;
   final double radio;
   final List<PieChartSectionData> pieCharts;
-  final Map<String, double> gastoPorEtiqueta;
-  final Map<String, Color> colorPorEtiqueta;
+  final Map<String, double> gastoPorElemento;
+  final Map<String, Color> colorPorElemento;
   final String titulo;
 
   @override
@@ -1193,9 +1208,9 @@ class GraficaCircular extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 280), child: Text(titulo, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),)),
-            // Title of pie chart in the center
-            Column(
+            Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 280), child: Text(titulo, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),)), // Titulo de la Gráfica
+            
+            Column( // Datos en el centro
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -1215,17 +1230,17 @@ class GraficaCircular extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
+            Container( // Simbología de elementos por colores
               margin: const EdgeInsets.fromLTRB(0, 280, 0, 0),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    for(var etiqueta in gastoPorEtiqueta.keys) Padding(
+                    for(var etiqueta in gastoPorElemento.keys) Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Indicator(
-                        color: colorPorEtiqueta[etiqueta]!,
-                        text: etiqueta,
+                        color: colorPorElemento[etiqueta]!,
+                        text: '$etiqueta \n \$${gastoPorElemento[etiqueta]}',
                         isSquare: true,
                       ),
                     ),
