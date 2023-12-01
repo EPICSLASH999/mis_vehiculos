@@ -944,11 +944,26 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
                   items: listaVehiculos
                       .map((item) => DropdownMenuItem(
                             value: item,
-                            child: Text(
-                              item.matricula,
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (item.id != valorOpcionTodas) Text(
+                                  item.modelo,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    overflow: TextOverflow.ellipsis
+                                  ),
+                                ),
+                                Text(
+                                  item.matricula,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                
+                              ],
                             ),
                           ))
                       .toList(),
@@ -998,7 +1013,7 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
                             horizontal: 10,
                             vertical: 8,
                           ),
-                          hintText: 'Matricula...',
+                          hintText: 'Vehículo...',
                           hintStyle: const TextStyle(fontSize: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -1007,7 +1022,8 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
                       ),
                     ),
                     searchMatchFn: (item, searchValue) {
-                      return ((item.value as Vehiculo).matricula.toString().containsIgnoreCase(searchValue)); // Filtrar por matrícula.
+                      return ((item.value as Vehiculo).matricula.toString().containsIgnoreCase(searchValue) // Filtrar por matrícula.
+                        || (item.value as Vehiculo).modelo.toString().containsIgnoreCase(searchValue)); // o por modelo.
                     },
                   ),
                   //This to clear the search value when you close the menu
