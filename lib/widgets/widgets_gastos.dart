@@ -506,6 +506,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   bool filtrosVisibles = true;
   RepresentacionGastos representacionGasto = RepresentacionGastos.lista;
 
+  // Métodos
   String normalizarNumeroA2DigitosFecha(int numeroRecibido){
     String numeroNormalizado = '';
     if (numeroRecibido.toString().length == 1) numeroNormalizado += '0';
@@ -603,8 +604,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         children: [
           if (filtrosVisibles) Filtros(widget: widget, controladorMecanico: controladorMecanico, representacionGasto: representacionGasto), // Filtros de MisGastos.
           Expanded(
-            child: 
-            FutureBuilder<List<Gasto>>(
+            child: FutureBuilder<List<Gasto>>(
               future: obtenerListaGastos(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting){
@@ -630,7 +630,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                       final gasto = gastos[index];
                       return TileGasto(gasto: gasto);
                     }, 
-                  ): MyPieChart(misgastos: gastos,);
+                  ): Graficas(misgastos: gastos,);
                 }
               },
             ),
@@ -1102,23 +1102,25 @@ class BotonesTileGasto extends StatelessWidget {
 
 // Ramita pie_chart
 
-class MyPieChart extends StatelessWidget {
-  const MyPieChart({super.key, required this.misgastos});
+class Graficas extends StatelessWidget {
+  const Graficas({super.key, required this.misgastos});
 
   final List<Gasto> misgastos;
   final double radio = 235;
   
   @override
   Widget build(BuildContext context) {
-    final List<Color> colores = [Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, Colors.purple, Colors.grey, Colors.green, Colors.lightBlue, Colors.lightBlueAccent, Colors.blue, ];
+    final List<Color> colores = [Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, Colors.purple, Colors.grey, Colors.green, Colors.lightBlue,];
     
     Map<String, Color> colorPorEtiqueta = {};
     Map<String, double> gastoPorEtiqueta = {};
-    int idColor2 = 0;
+    int idColor = 0;
     for (var gasto in misgastos) {
       gastoPorEtiqueta[gasto.nombreEtiqueta!] = (gastoPorEtiqueta[gasto.nombreEtiqueta!]??0) + gasto.costo;
-      colorPorEtiqueta[gasto.nombreEtiqueta!] = colores[idColor2];
-      idColor2++; if (idColor2 > colores.length-1) idColor2 = 0;
+      if (!colorPorEtiqueta.containsKey(gasto.nombreEtiqueta)) {
+        colorPorEtiqueta[gasto.nombreEtiqueta!] = colores[idColor];
+        idColor++; if (idColor > colores.length-1) idColor = 0;
+      }
     }
 
     double totalGastos = 0;
@@ -1133,37 +1135,76 @@ class MyPieChart extends StatelessWidget {
       totalGastos += value;
     });
 
-    return Center(
-      child: Stack(
-        alignment: Alignment.center,
+    return GraficaCircular(
+      totalGastos: totalGastos, 
+      radio: radio, 
+      pieCharts: pieCharts, 
+      gastoPorEtiqueta: gastoPorEtiqueta, 
+      colorPorEtiqueta: colorPorEtiqueta,
+      titulo: 'Relación por etiqueta'
+    );
+    /*return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Column(
         children: [
-          Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 280), child: const Text('Relación por etiqueta', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),)),
-          // Title of pie chart in the center
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26)),
-              Text('\$ ${totalGastos.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),),
-            ],
-          ),
-          // Pie chart
-          SizedBox(
-            width: radio,
-            height: radio,
-            child: PieChart(
-              swapAnimationDuration: const Duration(milliseconds: 750),
-              swapAnimationCurve: Curves.easeInOutQuint,
-              PieChartData(
-                sections: pieCharts,
+          GraficaCircular(totalGastos: totalGastos, radio: radio, pieCharts: pieCharts, gastoPorEtiqueta: gastoPorEtiqueta, colorPorEtiqueta: colorPorEtiqueta,titulo: 'Relación por etiqueta'),          
+        ],
+      ),
+    );*/
+  }
+}
+
+class GraficaCircular extends StatelessWidget {
+  const GraficaCircular({
+    super.key,
+    required this.totalGastos,
+    required this.radio,
+    required this.pieCharts,
+    required this.gastoPorEtiqueta,
+    required this.colorPorEtiqueta, 
+    required this.titulo,
+  });
+
+  final double totalGastos;
+  final double radio;
+  final List<PieChartSectionData> pieCharts;
+  final Map<String, double> gastoPorEtiqueta;
+  final Map<String, Color> colorPorEtiqueta;
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 280), child: Text(titulo, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),)),
+            // Title of pie chart in the center
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26)),
+                Text('\$ ${totalGastos.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),),
+              ],
+            ),
+            // Pie chart
+            SizedBox(
+              width: radio,
+              height: radio,
+              child: PieChart(
+                swapAnimationDuration: const Duration(milliseconds: 750),
+                swapAnimationCurve: Curves.easeInOutQuint,
+                PieChartData(
+                  sections: pieCharts,
+                ),
               ),
             ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              SingleChildScrollView(
+            Container(
+              margin: const EdgeInsets.fromLTRB(0, 280, 0, 0),
+              child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
@@ -1178,9 +1219,9 @@ class MyPieChart extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
