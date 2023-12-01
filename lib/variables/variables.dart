@@ -21,6 +21,7 @@ const int valorNoTieneEtiquetaConMayorOcurrencias = 0;
 //Gastos
 const String valorSinMecanico = 'Sin mecanico';
 const String valorSinLugar = 'Sin lugar';
+enum RepresentacionGastos {lista, grafica}
 
 // Tablas
 const tablaGastos = 'gastos';

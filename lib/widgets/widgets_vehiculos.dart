@@ -94,7 +94,7 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
       return Future(() => lista);
     }
     /* ******************************************************************************************* */
-
+    const estiloSeparadorTiles = TextStyle(fontWeight: FontWeight.w300);
     controladorDeBusqueda.addListener(escuchador); // Se agrega el Event Listener al controlador.
     controladorDeBusqueda.text = widget.buscarVehiculosQueContengan; // Obtener el valor a buscar/filtrar de Vehiculos.
 
@@ -159,7 +159,12 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
                           : ListView.separated(
                               itemCount: vehiculos.length,
                               separatorBuilder:  (context, index) {
-                                if (index == 2 && mostrarSeparador) return const Text('Últimos cambios'); // Separador para lista siguiente a los top más frecuentes o favoritos.
+                                if (index == 2 && mostrarSeparador) { // Separador para lista siguiente a los top más frecuentes o favoritos.
+                                  return const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Últimos cambios', style: estiloSeparadorTiles),
+                                  ); 
+                                }
                                 return const SizedBox(width: 0,);
                               },
                               itemBuilder: (context, index) {
@@ -169,7 +174,11 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (index == 0 && mostrarSeparador && vehiculos.length > numeroVehiculosFavoritos) const Text('Frecuentes'), // Separador al inicio de la lista, los top frecuentes o favoritos.
+                                    if (index == 0 && mostrarSeparador && vehiculos.length > numeroVehiculosFavoritos) // Separador al inicio de la lista, los top frecuentes o favoritos.
+                                      const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text('Frecuentes', style: estiloSeparadorTiles,),
+                                      ), 
                                     TileVehiculo(
                                       vehiculo: vehiculo,
                                       estaSeleccionado: idsVehiculosSeleccionados.contains(vehiculo.id), 

@@ -12,6 +12,7 @@ import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:mis_vehiculos/widgets/widgets_fl_chart.dart';
 
 // Variables Globales
 // Métodos IA
@@ -500,7 +501,6 @@ class WidgetMisGastos extends StatefulWidget {
   State<WidgetMisGastos> createState() => _WidgetMisGastosState();
 }
 
-enum RepresentacionGastos {lista, grafica}
 class _WidgetMisGastosState extends State<WidgetMisGastos> {
   TextEditingController controladorMecanico = TextEditingController();
   bool filtrosVisibles = true;
@@ -551,6 +551,14 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     // Le quité el Set State, puesto que cada vez que con cada estado emitido se recarga la pantalla completa.
   }
   
+  cambiarRepresentacionDeGastos(){
+    return (valor) {
+      setState(() {
+        representacionGasto = valor.first;
+      });
+    };
+  }
+
   @override
   void dispose() {
     controladorMecanico.dispose();
@@ -594,7 +602,6 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (filtrosVisibles) Filtros(widget: widget, controladorMecanico: controladorMecanico, representacionGasto: representacionGasto), // Filtros de MisGastos.
-          //const Expanded(child: MyPieChart()),
           Expanded(
             child: 
             FutureBuilder<List<Gasto>>(
@@ -629,29 +636,41 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
             ),
           ),
           if (representacionGasto == RepresentacionGastos.lista) TotalGastos(listaGastos: obtenerListaGastos()), // Muestra el total de gastos '$'
-          Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: SizedBox(
-              height: 40,
-              width: 300,
-              child: SegmentedButton(
-                showSelectedIcon: false,
-                segments: const [
-                  ButtonSegment(value: RepresentacionGastos.lista, label: Text('Lista'), icon: Icon(Icons.list)),
-                  ButtonSegment(value: RepresentacionGastos.grafica, label: Text('Grafica'), icon: Icon(Icons.auto_graph_sharp))
-                ], 
-                selected: {representacionGasto},
-                onSelectionChanged: (valor) {
-                  setState(() {
-                    representacionGasto = valor.first;
-                  });
-                },
-              ),
-            ),
-          )
+          BotonRepresentacionGastos(representacionGasto: representacionGasto, cambiarRepresentacionDeGastos: cambiarRepresentacionDeGastos,)
         ],
       ),
       
+    );
+  }
+}
+
+class BotonRepresentacionGastos extends StatelessWidget {
+  const BotonRepresentacionGastos({
+    super.key,
+    required this.representacionGasto, 
+    required this.cambiarRepresentacionDeGastos,
+  });
+
+  final RepresentacionGastos representacionGasto;
+  final Function cambiarRepresentacionDeGastos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(6.0),
+      child: SizedBox(
+        height: 40,
+        width: 300,
+        child: SegmentedButton(
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(value: RepresentacionGastos.lista, label: Text('Lista'), icon: Icon(Icons.list)),
+            ButtonSegment(value: RepresentacionGastos.grafica, label: Text('Grafica'), icon: Icon(Icons.auto_graph_sharp))
+          ], 
+          selected: {representacionGasto},
+          onSelectionChanged: cambiarRepresentacionDeGastos(),
+        ),
+      ),
     );
   }
 }
@@ -868,59 +887,6 @@ class FiltroParaMecanico extends StatelessWidget {
     return CuadroDeTexto(controlador: controladorMecanico, titulo: titulo, campoRequerido: false, icono: const Icon(Icons.build), validarCampo: false,);
   }
 }
-
-/*class FiltroParaVehiculo extends StatelessWidget{
-  const FiltroParaVehiculo({
-    super.key,
-    required this.idVehiculoSeleccionado,
-    required this.titulo, 
-    required this.misVehiculos
-  });
-
-  final int idVehiculoSeleccionado;
-  final String titulo;
-  final Future <List<Vehiculo>>? misVehiculos;
-
-  @override
-  Widget build(BuildContext context)  {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TituloComponente(titulo: titulo),
-          SizedBox(
-            width: 160,
-            child: FutureBuilder<List<Vehiculo>>(
-              future: misVehiculos,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const WidgetCargando();
-                } else{
-                  final vehiculos = snapshot.data?? [];
-                  
-                  return DropdownButtonFormField(
-                    validator: (value) {
-                      if ((value != null) && value == valorOpcionTodas) return 'Valor requerido';
-                      return null;
-                    },
-                    value: idVehiculoSeleccionado,
-                    items: [
-                      const DropdownMenuItem(value: valorOpcionTodas, child: Text('Todos')),
-                      for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo.id, child: Text(vehiculo.matricula),)
-                    ],
-                    onChanged: (value) {
-                      context.read<VehiculoBloc>().add(FiltradoGastosPorVehiculo(idVehiculo: value!));
-                    },
-                  );
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}*/
 
 class FiltroParaVehiculo extends StatefulWidget {
   const FiltroParaVehiculo({super.key, required this.listaVehiculos, required this.idVehiculoSeleccionado, required this.titulo});
@@ -1145,50 +1111,40 @@ class MyPieChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Color> colores = [Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, Colors.purple, Colors.grey, Colors.green, Colors.lightBlue, Colors.lightBlueAccent, Colors.blue, ];
-
-    Map<String, double> etiquetaPorGasto = {};
+    
+    Map<String, Color> colorPorEtiqueta = {};
+    Map<String, double> gastoPorEtiqueta = {};
+    int idColor2 = 0;
     for (var gasto in misgastos) {
-      if (!etiquetaPorGasto.containsKey(gasto.nombreEtiqueta!)){
-        etiquetaPorGasto[gasto.nombreEtiqueta!] = gasto.costo;
-        continue;
-      }
-      etiquetaPorGasto[gasto.nombreEtiqueta!] = etiquetaPorGasto[gasto.nombreEtiqueta!]! + gasto.costo;
+      gastoPorEtiqueta[gasto.nombreEtiqueta!] = (gastoPorEtiqueta[gasto.nombreEtiqueta!]??0) + gasto.costo;
+      colorPorEtiqueta[gasto.nombreEtiqueta!] = colores[idColor2];
+      idColor2++; if (idColor2 > colores.length-1) idColor2 = 0;
     }
 
-    double total = 0;
-    List<PieChartSectionData> lista = [];
-    int idColor = 0;
-    etiquetaPorGasto.forEach((key, value) {
-      idColor ++;
-      if (idColor > colores.length-1) idColor = 0;
-      lista.add(
-      PieChartSectionData(
-        value: value, 
-        badgePositionPercentageOffset: 1.9, 
-        badgeWidget: SizedBox(
-          width: 68, 
-          child: Text(
-            key.toString(), 
-            overflow: TextOverflow.clip,
-          ),
-        ),
-        color: colores[idColor]
-      )
-    );
+    double totalGastos = 0;
+    List<PieChartSectionData> pieCharts = [];
+    gastoPorEtiqueta.forEach((key, value) {
+      pieCharts.add(
+        PieChartSectionData(
+          value: value, 
+          color: colorPorEtiqueta[key],
+        )
+      );
+      totalGastos += value;
     });
-    etiquetaPorGasto.forEach((key, value) { total += value;});
 
     return Center(
       child: Stack(
         alignment: Alignment.center,
         children: [
+          Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 280), child: const Text('Relación por etiqueta', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),)),
           // Title of pie chart in the center
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26)),
-              Text('\$ $total', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),),
+              Text('\$ ${totalGastos.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),),
             ],
           ),
           // Pie chart
@@ -1199,45 +1155,28 @@ class MyPieChart extends StatelessWidget {
               swapAnimationDuration: const Duration(milliseconds: 750),
               swapAnimationCurve: Curves.easeInOutQuint,
               PieChartData(
-                sections: lista.toList(),
+                sections: pieCharts,
               ),
             ),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Indicator(
-                color: AppColors.contentColorBlue,
-                text: 'First',
-                isSquare: true,
-              ),
-              const SizedBox(
-                height: 4,
-              ),
-              Indicator(
-                color: AppColors.contentColorYellow,
-                text: 'Second',
-                isSquare: true,
-              ),
-              const SizedBox(
-                height: 4,
-              ),
-              Indicator(
-                color: AppColors.contentColorPurple,
-                text: 'Third',
-                isSquare: true,
-              ),
-              const SizedBox(
-                height: 4,
-              ),
-              Indicator(
-                color: AppColors.contentColorGreen,
-                text: 'Fourth',
-                isSquare: true,
-              ),
-              const SizedBox(
-                height: 18,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for(var etiqueta in gastoPorEtiqueta.keys) Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Indicator(
+                        color: colorPorEtiqueta[etiqueta]!,
+                        text: etiqueta,
+                        isSquare: true,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
