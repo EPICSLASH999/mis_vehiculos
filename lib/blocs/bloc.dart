@@ -360,7 +360,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   }
   Future<void> eliminarVehiculosSeleccionados(List<int> idsVehiculosSeleccionados) async {
     for (var idVehiculo in idsVehiculosSeleccionados) {
-      if (idVehiculo == filtroIdVehiculo) filtroIdVehiculo = valorOpcionTodas; // Si se elimina el vehiculo seleccionado en el filtro, se reinicia a Opcion 'Todos'.
+      if (idVehiculo == filtroIdVehiculo) { // Si se elimina el vehiculo seleccionado en el filtro, se reinicia a Opcion 'Todos'.
+        filtroIdVehiculo = valorOpcionTodas; 
+        tipoReporte = TipoReporte.year; // Reiniciar reporte
+      }
       await archivarGastosDeIdVehiculo(idVehiculo);
       await vehiculos.delete(idVehiculo);
     }
@@ -468,13 +471,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan,estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
     });
-    on<EliminadoVehiculo>((event, emit) async {
+    /*on<EliminadoVehiculo>((event, emit) async {
       await archivarGastosDeIdVehiculo(event.id);
       await vehiculos.delete(event.id);
       //_misVehiculos = vehiculos.fetchAll();
       _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisVehiculos(misVehiculos: _misVehiculos, buscarVehiculosQueContengan: buscarVehiculosQueContengan, estaModoSeleccionActivo: estaModoSeleccionVehiculosActivo));
-    });
+    });*/
     on<EditadoVehiculo>((event, emit) async {
       Map<String,dynamic> datos = {
         "matricula": event.vehiculo.matricula,
@@ -572,6 +575,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<FiltradoGastosPorVehiculo>((event, emit) {
       filtroIdVehiculo = event.idVehiculo;
+      tipoReporte = TipoReporte.year;
       _misGastos = obtenerGastosFiltrados();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico, representacionGasto: representacionGasto, tipoReporte: tipoReporte));    
     });
