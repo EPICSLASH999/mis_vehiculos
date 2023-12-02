@@ -1276,7 +1276,7 @@ class GraficaCircular extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: Indicator(
                         color: colorPorElemento[etiqueta]!,
-                        text: '$etiqueta \n \$${gastoPorElemento[etiqueta]}',
+                        text: '$etiqueta \n \$${(gastoPorElemento[etiqueta]??0.0).toStringAsFixed(2)}',
                         isSquare: true,
                       ),
                     ),
@@ -1417,6 +1417,37 @@ class _ReporteState extends State<Reporte> {
       return gasto;
     }
 
+    Padding obtenerTituloReporte(){
+      String titulo;
+      String? subtitulo;
+       switch (mostrarReporte) {
+         case MostrarReporte.year:
+            titulo = 'Anual';
+            break;
+          case MostrarReporte.month:
+            titulo =  'Mensual';
+            subtitulo = anoAMostrar.toString();
+            break;
+          case MostrarReporte.day:
+            titulo = 'Diario';
+            subtitulo = '${obtenerMes(mesAMostrar)} - $anoAMostrar';
+            break;
+         default:
+            titulo = '';
+            break;
+       }
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TituloGrande(titulo: titulo),
+            if (subtitulo != null) Text(subtitulo, style: const TextStyle(fontWeight: FontWeight.w300),)
+      
+          ],
+        ),
+      );
+    }
+
     /* ------------------------------------------------------------------------------------ */
 
     return FutureBuilder(
@@ -1432,57 +1463,97 @@ class _ReporteState extends State<Reporte> {
 
             return Padding(
               padding: const EdgeInsets.all(8.0),
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                child: Column(
-                  children: [
-                    // Reporte Anual
-                    if (mostrarReporte == MostrarReporte.year) const TituloGrande(titulo: 'Anual'),
-                    if (mostrarReporte == MostrarReporte.year) for (var year in reporteHistorico.keys) ListTile( // Mostrar gastos por años
-                        title: Text(year.toString()),
-                        subtitle: Text('\$ ${obtenerGastosPorAno(reporteHistorico, year).toStringAsFixed(2)}'),
-                        onTap: () {
-                          setState(() {
-                            mostrarReporte = MostrarReporte.month;
-                            anoAMostrar = year;
-                              _scrollController.animateTo(
-                                0.0,
-                                curve: Curves.easeOut,
-                                duration: const Duration(milliseconds: 500),
-                              );
-                          });
-                        },
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: obtenerTituloReporte() // Titulo del Reporte
+                  ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        children: [
+                          // Reporte Anual
+                          if (mostrarReporte == MostrarReporte.year) for (var year in reporteHistorico.keys) Column(
+                            children: [
+                              const Divider(
+                                  thickness: 2,
+                                ),
+                              ListTile( // Mostrar gastos por años
+                                  title: Text(year.toString(), style: const TextStyle( fontWeight: FontWeight.bold),),
+                                  subtitle: Text(
+                                    '\$ ${obtenerGastosPorAno(reporteHistorico, year).toStringAsFixed(2)}',
+                                  ),
+                                  leading: const CircleAvatar(
+                                    backgroundColor: Color.fromARGB(255, 196, 248, 212),
+                                    child: Icon(Icons.calendar_month, color: Colors.blueGrey,)
+                                  ),
+                                  trailing: const Icon(Icons.pageview_sharp),
+                                  onTap: () {
+                                    setState(() {
+                                      mostrarReporte = MostrarReporte.month;
+                                      anoAMostrar = year;
+                                        _scrollController.animateTo(
+                                          0.0,
+                                          curve: Curves.easeOut,
+                                          duration: const Duration(milliseconds: 500),
+                                        );
+                                    });
+                                  },
+                                ),
+                                const Divider(
+                                  thickness: 2,
+                                ),
+                            ],
+                          ),
+                            // Reporte Mensual
+                            if (mostrarReporte == MostrarReporte.month) for (var month in reporteHistorico[anoAMostrar]!.keys) Column(
+                              children: [
+                                const Divider(
+                                  thickness: 2,
+                                ),
+                                ListTile( // Mostrar gastos por meses
+                                  title: Text(obtenerMes(month), style: const TextStyle(fontWeight: FontWeight.bold),),
+                                  subtitle: Text('\$ ${obtenerGastosPorMesYAno(reporteHistorico, anoAMostrar, month).toStringAsFixed(2)}',),
+                                  leading: CircleAvatar(
+                                    backgroundColor: const Color.fromARGB(255, 196, 248, 212),
+                                    child: Text(month.toString(), style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w300),),
+                                  ),
+                                  trailing: const Icon(Icons.pageview_sharp),
+                                  onTap: () {
+                                    setState(() {
+                                      mostrarReporte = MostrarReporte.day;
+                                      mesAMostrar = month;
+                                    });
+                                    _scrollController.animateTo(
+                                      0.0,
+                                      curve: Curves.easeOut,
+                                      duration: const Duration(milliseconds: 500),
+                                    );
+                                  },
+                                ),
+                                const Divider(
+                                  thickness: 2,
+                                ),
+                              ],
+                            ),
+                            // Reporte Diario
+                            if (mostrarReporte == MostrarReporte.day) for (var day in reporteHistorico[anoAMostrar]![mesAMostrar]!.keys) ListTile( // Mostrar gastos por meses
+                              title: Text(day.toString()),
+                              subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
+                              onTap: () {
+                                setState(() {
+                                  mostrarReporte = MostrarReporte.day;
+                                });
+                              },
+                            ),
+                        ],
                       ),
-                      // Reporte Mensual
-                      if (mostrarReporte == MostrarReporte.month) const TituloGrande(titulo: 'Mensual'),
-                      if (mostrarReporte == MostrarReporte.month) for (var month in reporteHistorico[anoAMostrar]!.keys) ListTile( // Mostrar gastos por meses
-                        title: Text(obtenerMes(month)),
-                        subtitle: Text('\$ ${obtenerGastosPorMesYAno(reporteHistorico, anoAMostrar, month).toStringAsFixed(2)}'),
-                        onTap: () {
-                          setState(() {
-                            mostrarReporte = MostrarReporte.day;
-                            mesAMostrar = month;
-                          });
-                          _scrollController.animateTo(
-                            0.0,
-                            curve: Curves.easeOut,
-                            duration: const Duration(milliseconds: 500),
-                          );
-                        },
-                      ),
-                      // Reporte Diario
-                      if (mostrarReporte == MostrarReporte.day) const TituloGrande(titulo: 'Diario'),
-                      if (mostrarReporte == MostrarReporte.day) for (var day in reporteHistorico[anoAMostrar]![mesAMostrar]!.keys) ListTile( // Mostrar gastos por meses
-                        title: Text(day.toString()),
-                        subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
-                        onTap: () {
-                          setState(() {
-                            mostrarReporte = MostrarReporte.day;
-                          });
-                        },
-                      ),
-                  ],
-                ),
+                    ),
+                  ),
+                ],
               ),
             );
           }
