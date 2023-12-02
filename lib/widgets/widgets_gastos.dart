@@ -520,10 +520,12 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
 
   List<Gasto> filtrarListaGastos(List<Gasto> gastos) {
     List<Gasto> gastosRecibidos = gastos.copiar();
-    if (widget.idEtiquetaSeleccionada != valorOpcionTodas && representacionGasto == RepresentacionGastos.lista) gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada)); // Filtrar por etiqueta  
-    String filtroMecanico = controladorMecanico.text.trim();
-
+    if (representacionGasto != RepresentacionGastos.lista) return gastosRecibidos; // No filtrar si no es la representación de la Lista.
     
+    if (widget.idEtiquetaSeleccionada != valorOpcionTodas) {
+      gastosRecibidos.removeWhere((element) => (element.etiqueta != widget.idEtiquetaSeleccionada));  // Filtrar por etiqueta  
+    }
+    String filtroMecanico = controladorMecanico.text.trim();
     if (filtroMecanico.isNotEmpty) { // Filtrar por mecánico
       gastosRecibidos.removeWhere((element) {
         String mecanicoRecibido = element.mecanico;
@@ -1544,7 +1546,7 @@ class _ReporteState extends State<Reporte> {
                                   title: Text(obtenerMes(month), style: const TextStyle(fontWeight: FontWeight.bold),),
                                   subtitle: Text('\$ ${obtenerGastosPorMesYAno(reporteHistorico, anoAMostrarReporte, month).toStringAsFixed(2)}',),
                                   leading: CircleAvatar(
-                                    backgroundColor: const Color.fromARGB(255, 196, 248, 212),
+                                    backgroundColor: (obtenerGastosPorMesYAno(reporteHistorico, anoAMostrarReporte, month) <= 0)? colorReporteSinGastos:colorReporteConGastos,
                                     child: Text(month.toString(), style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w300),),
                                   ),
                                   trailing: const Icon(Icons.pageview_sharp),
@@ -1582,7 +1584,7 @@ class _ReporteState extends State<Reporte> {
                               width: 80,
                               height: 80,
                               child: Card(
-                                color: (obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrarReporte, mesAMostrarReporte, day) <= 0)? const Color.fromARGB(255, 209, 208, 208):null,
+                                color: (obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrarReporte, mesAMostrarReporte, day) <= 0)? colorReporteSinGastos:null,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     crossAxisAlignment: CrossAxisAlignment.center,

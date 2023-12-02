@@ -362,7 +362,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     for (var idVehiculo in idsVehiculosSeleccionados) {
       if (idVehiculo == filtroIdVehiculo) { // Si se elimina el vehiculo seleccionado en el filtro, se reinicia a Opcion 'Todos'.
         filtroIdVehiculo = valorOpcionTodas; 
-        tipoReporte = TipoReporte.year; // Reiniciar reporte
+        reiniciarTipoReporte(); // Reiniciar reporte
       }
       await archivarGastosDeIdVehiculo(idVehiculo);
       await vehiculos.delete(idVehiculo);
@@ -384,6 +384,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     misGastosGlobales = gastos.fetchAllInnerJoined(idVehiculo); // Obtiene los gastos de toda la lista de un vehiculo proporcionado. Esto es para el Reporte.
 
     return gastos.fetchAllWithFilters(filtroFechaInicial, filtroFechaFinal, idVehiculo);
+  }
+  void reiniciarTipoReporte() {
+    tipoReporte = TipoReporte.year;
   }
 
   // Métodos para gastos archivados.
@@ -575,7 +578,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<FiltradoGastosPorVehiculo>((event, emit) {
       filtroIdVehiculo = event.idVehiculo;
-      tipoReporte = TipoReporte.year;
+      reiniciarTipoReporte();
       _misGastos = obtenerGastosFiltrados();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico, representacionGasto: representacionGasto, tipoReporte: tipoReporte));    
     });
@@ -590,7 +593,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<CambiadaRepresentacionGastos>((event, emit) {
       representacionGasto = event.representacionGastos;
-      tipoReporte = TipoReporte.year; // Devovler a año
+      reiniciarTipoReporte(); // Devovler a año
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico, representacionGasto: representacionGasto, tipoReporte: tipoReporte));   
     });
     on<CambiadoAnoAMostrarReporte>((event, emit) {
