@@ -583,7 +583,8 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         title: const Text('Mis Gastos'),
         leading: IconButton( // Botón Volver a Vehículos.
           onPressed: () {
-            context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+            //context.read<VehiculoBloc>().add(ClickeadoRegresarAMisvehiculos());
+            context.read<VehiculoBloc>().add(ClickeadoRegresarDesdeGastos());
           }, 
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
@@ -1315,9 +1316,9 @@ class Reporte extends StatefulWidget {
 
 class _ReporteState extends State<Reporte> {
   
-  TipoReporte mostrarReporte = TipoReporte.year;
-  int anoAMostrar = 0;
-  int mesAMostrar = 0;
+  TipoReporte tipoReporte = TipoReporte.year;
+  int anoAMostrarReporte = 0;
+  int mesAMostrarReporte = 0;
 
   
   final List<String> meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -1327,6 +1328,9 @@ class _ReporteState extends State<Reporte> {
 
   @override
   Widget build(BuildContext context) {
+    tipoReporte = context.watch<VehiculoBloc>().tipoReporte;
+    anoAMostrarReporte = context.watch<VehiculoBloc>().anoAMostrarReporte;
+    mesAMostrarReporte = context.watch<VehiculoBloc>().mesAMostrarReporte;
 
     /* ---------------------------------- TRABAJO ACTUAL ---------------------------------- */
     Map<int, Map<int, Map<int, double>>> reporteHistorico;
@@ -1437,17 +1441,17 @@ class _ReporteState extends State<Reporte> {
     Padding obtenerTituloReporte(){
       String titulo;
       String? subtitulo;
-       switch (mostrarReporte) {
+       switch (tipoReporte) {
          case TipoReporte.year:
             titulo = 'Anual';
             break;
           case TipoReporte.month:
             titulo =  'Mensual';
-            subtitulo = anoAMostrar.toString();
+            subtitulo = anoAMostrarReporte.toString();
             break;
           case TipoReporte.day:
             titulo = 'Diario';
-            subtitulo = '${obtenerMes(mesAMostrar)} - $anoAMostrar';
+            subtitulo = '${obtenerMes(mesAMostrarReporte)} - $anoAMostrarReporte';
             break;
          default:
             titulo = '';
@@ -1500,7 +1504,7 @@ class _ReporteState extends State<Reporte> {
                       child: Column(
                         children: [
                           // Reporte Anual
-                          if (mostrarReporte == TipoReporte.year) for (var year in reporteHistorico.keys) Column(
+                          if (tipoReporte == TipoReporte.year) for (var year in reporteHistorico.keys) Column(
                             children: [
                               const Divider(
                                   thickness: 2,
@@ -1517,10 +1521,12 @@ class _ReporteState extends State<Reporte> {
                                   trailing: const Icon(Icons.pageview_sharp),
                                   onTap: () {
                                     setState(() {
-                                      mostrarReporte = TipoReporte.month;
-                                      anoAMostrar = year;
+                                      tipoReporte = TipoReporte.month;
+                                      anoAMostrarReporte = year;
                                         animacionDeSubida();
                                     });
+                                    context.read<VehiculoBloc>().add(CambiadoTipoReporte(tipoReporte: tipoReporte));
+                                    context.read<VehiculoBloc>().add(CambiadoAnoAMostrarReporte(anoAMostrarReporte: anoAMostrarReporte));
                                   },
                                 ),
                                 const Divider(
@@ -1529,14 +1535,14 @@ class _ReporteState extends State<Reporte> {
                             ],
                           ),
                             // Reporte Mensual
-                            if (mostrarReporte == TipoReporte.month) for (var month in reporteHistorico[anoAMostrar]!.keys) Column(
+                            if (tipoReporte == TipoReporte.month) for (var month in reporteHistorico[anoAMostrarReporte]!.keys) Column(
                               children: [
                                 const Divider(
                                   thickness: 2,
                                 ),
                                 ListTile( // Mostrar gastos por meses
                                   title: Text(obtenerMes(month), style: const TextStyle(fontWeight: FontWeight.bold),),
-                                  subtitle: Text('\$ ${obtenerGastosPorMesYAno(reporteHistorico, anoAMostrar, month).toStringAsFixed(2)}',),
+                                  subtitle: Text('\$ ${obtenerGastosPorMesYAno(reporteHistorico, anoAMostrarReporte, month).toStringAsFixed(2)}',),
                                   leading: CircleAvatar(
                                     backgroundColor: const Color.fromARGB(255, 196, 248, 212),
                                     child: Text(month.toString(), style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w300),),
@@ -1544,10 +1550,12 @@ class _ReporteState extends State<Reporte> {
                                   trailing: const Icon(Icons.pageview_sharp),
                                   onTap: () {
                                     setState(() {
-                                      mostrarReporte = TipoReporte.day;
-                                      mesAMostrar = month;
+                                      tipoReporte = TipoReporte.day;
+                                      mesAMostrarReporte = month;
                                     });
                                     animacionDeSubida();
+                                    context.read<VehiculoBloc>().add(CambiadoTipoReporte(tipoReporte: tipoReporte));
+                                    context.read<VehiculoBloc>().add(CambiadoMesAMostrarReporte(mesAMostrarReporte: mesAMostrarReporte));
                                   },
                                 ),
                                 const Divider(
@@ -1561,7 +1569,7 @@ class _ReporteState extends State<Reporte> {
                             children: 
                             [
 
-                            if (mostrarReporte == TipoReporte.day) for (var day in reporteHistorico[anoAMostrar]![mesAMostrar]!.keys) /*ListTile( // Mostrar gastos por meses
+                            if (tipoReporte == TipoReporte.day) for (var day in reporteHistorico[anoAMostrarReporte]![mesAMostrarReporte]!.keys) /*ListTile( // Mostrar gastos por meses
                               title: Text(day.toString()),
                               subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
                               onTap: () {
@@ -1574,12 +1582,13 @@ class _ReporteState extends State<Reporte> {
                               width: 80,
                               height: 80,
                               child: Card(
+                                color: (obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrarReporte, mesAMostrarReporte, day) <= 0)? const Color.fromARGB(255, 209, 208, 208):null,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Text(day.toString(), style: const TextStyle(fontWeight: FontWeight.bold),),
-                                      Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}', 
+                                      Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrarReporte, mesAMostrarReporte, day).toStringAsFixed(2)}', 
                                         style: const TextStyle(fontWeight: FontWeight.w400),
                                       ),
                                     ],

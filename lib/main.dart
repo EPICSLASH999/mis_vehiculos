@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
+import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_etiquetas.dart';
 import 'package:mis_vehiculos/widgets/widgets_gastos.dart';
 import 'package:mis_vehiculos/widgets/widgets_gastos_archivados.dart';
@@ -60,6 +61,10 @@ class MainApp extends StatelessWidget {
           }
           if (state is MisEtiquetas && state.estaModoSeleccionActivo){
             context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionEtiqueta(estaModoSeleccionActivo: false));
+            return Future(() => false);
+          }
+          if (state is MisGastos && state.tipoReporte != TipoReporte.year){
+            context.read<VehiculoBloc>().add(ClickeadoRegresarDesdeGastos());
             return Future(() => false);
           }
           if (state is MisVehiculos){

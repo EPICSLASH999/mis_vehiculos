@@ -241,7 +241,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), buscarVehiculosQueContengan: "", estaModoSeleccionActivo: false),
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), buscarVehiculosQueContengan: "", estaModoSeleccionActivo: false),        
-        MisGastos(misGastos: Gastos().fetchAllWithFilters(DateTime.now(), DateTime.now(), 1), fechaFinal: DateTime.now(), fechaInicial: DateTime.now(), misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista),
+        MisGastos(misGastos: Gastos().fetchAllWithFilters(DateTime.now(), DateTime.now(), 1), fechaFinal: DateTime.now(), fechaInicial: DateTime.now(), misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista, tipoReporte: TipoReporte.year),
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -271,8 +271,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), buscarVehiculosQueContengan: "", estaModoSeleccionActivo: false),        
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), buscarVehiculosQueContengan: "", estaModoSeleccionActivo: false),        
-        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista),
-        MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista),
+        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista, tipoReporte: TipoReporte.year),
+        MisGastos(misGastos: Future.value([]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista, tipoReporte: TipoReporte.year),
       ],
     );
     blocTest<VehiculoBloc, VehiculoEstado>(
@@ -303,9 +303,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), buscarVehiculosQueContengan: "", estaModoSeleccionActivo: false), 
         PlantillaGasto(idVehiculo: 1, misEtiquetas: Etiquetas().fetchAll()),
         MisVehiculos(misVehiculos: Future.value([const Vehiculo(id: 1, matricula: 'xxx-1', marca: 'Toyota', modelo: 'Camry', color: 'Plateada', ano: 1969)]), buscarVehiculosQueContengan: "", estaModoSeleccionActivo: false), 
-        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista),
+        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista, tipoReporte: TipoReporte.year),
         PlantillaGasto(idVehiculo: 1, misEtiquetas: etiquetas.fetchAll()),
-        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico 2', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista),
+        MisGastos(misGastos: Future.value([const Gasto(id: 1, vehiculo: 1, etiqueta: 1, mecanico: 'mecanico 2', lugar: 'lugar', costo: 200.19, fecha: '26 Nov, 2023')]), fechaInicial: DateTime.now(), fechaFinal: DateTime.now(),misEtiquetas: Etiquetas().fetchAll(), filtroIdEtiqueta: valorOpcionTodas, filtroIdVehiculo: valorOpcionTodas, misVehiculos: vehiculos.fetchAll(), filtroMecanico: "", representacionGasto: RepresentacionGastos.lista, tipoReporte: TipoReporte.year),
       ],
     );
   });
