@@ -1286,9 +1286,25 @@ class GraficaCircular extends StatelessWidget {
   }
 }
 
-class Reporte extends StatelessWidget {
+enum MostrarReporte {year, month, day}
+class Reporte extends StatefulWidget {
   const Reporte({super.key, required this.misgastos});
   final List<Gasto> misgastos;
+
+  @override
+  State<Reporte> createState() => _ReporteState();
+}
+
+class _ReporteState extends State<Reporte> {
+  
+  MostrarReporte mostrarReporte = MostrarReporte.year;
+  int anoAMostrar = 0;
+  int mesAMostrar = 0;
+
+  
+  final List<String> meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  String obtenerMes(int mes) => meses.elementAt(mes-1);
+
 
   @override
   Widget build(BuildContext context) {
@@ -1300,7 +1316,7 @@ class Reporte extends StatelessWidget {
 
     int mesActual = 0;
     int anoActual = 0;
-    for (var gasto in misgastos) { 
+    for (var gasto in widget.misgastos) { 
       var fechaDateTime = DateTime.parse(gasto.fecha);
       var year = fechaDateTime.year;
       var mes = fechaDateTime.month;
@@ -1332,40 +1348,87 @@ class Reporte extends StatelessWidget {
     //print('--> Gastos totales por mes: $totalesPorMes');
     //print('--> Gastos totales por año: $totalesPorAno');
 
+   
     double obtenerGastosPorAno(Map<int, Map> mesesPorAno, int ano) {
       double sumatoria = 0;
-      List<int> mesesDelAno = [1,2,3,4,5,6,7,8,9,10,11,12];
-      for (var mes in mesesDelAno) {
+      for (int mes = 1; mes <= 12; mes++) {
         for (var gasto in Map.from(mesesPorAno[ano]![mes]??{mes:0}).values) {
           sumatoria += gasto;
         }
       }
       return sumatoria;
     }
+    double obtenerGastosPorMesYAno(Map<int, Map> mesesPorAno, int ano, int mes) {
+      double sumatoria = 0;
+      for (int dia = 1; dia <= 31; dia++) {
+        double gasto = (mesesPorAno[ano]![mes]??{mes:0.0})[dia]??0.0;
+        sumatoria += gasto;
+      }
+      return sumatoria;
+    }
 
+    //mesesPorAno = Map.from(normalizarMesesPorAno(mesesPorAno));
+    //print(mesesPorAno);
    
    
     //var resultado = totalDelAno.reduce((sum, element) => sum + element);
     //totalesPorAno[anoActual] = resultado;
 
+    void llenarMesesAAno(Map<int, Map<dynamic, dynamic>> mesesPorAno, int ano) {
+      for (var mes = 1; mes <= 12; mes++) {
+        if (mesesPorAno[ano]?[mes] == null) mesesPorAno[ano]?[mes] = {0:0};
+      }
+      mesesPorAno[ano] = Map.fromEntries(
+        mesesPorAno[ano]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
+    }
+
+    //print(mesesPorAno[2023]?[12]);
+    for (var year in mesesPorAno.keys) {
+      llenarMesesAAno(mesesPorAno, year);
+    }
+    
+
+
     /* ------------------------------------------------------------------------------------ */
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          //for (var year in totalesPorAno.entries) Text('${year.key}- ${year.value}'),
-          /*for (var year in totalesPorAno.entries) ListTile(
-              title: Text(year.key.toString()),
-              subtitle: Text('\$ ${year.value}'),
-            ),*/
-          for (var year in mesesPorAno.keys) ListTile(
-              title: Text(year.toString()),
-              subtitle: Text('\$ ${obtenerGastosPorAno(mesesPorAno, year).toStringAsFixed(2)}'),
-            ),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            //for (var year in totalesPorAno.entries) Text('${year.key}- ${year.value}'),
+            /*for (var year in totalesPorAno.entries) ListTile(
+                title: Text(year.key.toString()),
+                subtitle: Text('\$ ${year.value}'),
+              ),*/
+             if (mostrarReporte == MostrarReporte.year) for (var year in mesesPorAno.keys) ListTile( // Mostrar gastos por años
+                title: Text(year.toString()),
+                subtitle: Text('\$ ${obtenerGastosPorAno(mesesPorAno, year).toStringAsFixed(2)}'),
+                onTap: () {
+                  setState(() {
+                    mostrarReporte = MostrarReporte.month;
+                    anoAMostrar = year;
+                  });
+                },
+              ),
+              if (mostrarReporte == MostrarReporte.month) for (var month in mesesPorAno[anoAMostrar]!.keys) ListTile( // Mostrar gastos por meses
+                title: Text(obtenerMes(month)),
+                subtitle: Text('\$ ${obtenerGastosPorMesYAno(mesesPorAno, anoAMostrar, month).toStringAsFixed(2)}'),
+                onTap: () {
+                  setState(() {
+                    mostrarReporte = MostrarReporte.month;
+                    mesAMostrar = month;
+                  });
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
+
+  
+
+  
 }
 
 /* ------------------------------------------------------------------------------ */
