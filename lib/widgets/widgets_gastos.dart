@@ -622,15 +622,12 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                         ),
                       ),
                     )
-                  : (representacionGasto == RepresentacionGastos.lista)? ListView.separated(
-                    separatorBuilder: (context, index) => 
-                        const SizedBox(height: 12,), 
-                    itemCount: gastos.length,
-                    itemBuilder: (context, index) {
-                      final gasto = gastos[index];
-                      return TileGasto(gasto: gasto);
-                    }, 
-                  ): Graficas(misgastos: gastos,);
+                  : switch (representacionGasto) {
+                    RepresentacionGastos.lista => ListaGastos(gastos: gastos),
+                    RepresentacionGastos.grafica => Graficas(misgastos: gastos,),
+                    RepresentacionGastos.reporte => Reporte(misgastos: gastos),
+                  };
+                  //(representacionGasto == RepresentacionGastos.lista)? ListaGastos(gastos: gastos): Graficas(misgastos: gastos,);
                 }
               },
             ),
@@ -640,6 +637,28 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         ],
       ),
       
+    );
+  }
+}
+
+class ListaGastos extends StatelessWidget {
+  const ListaGastos({
+    super.key,
+    required this.gastos,
+  });
+
+  final List<Gasto> gastos;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      separatorBuilder: (context, index) => 
+          const SizedBox(height: 12,), 
+      itemCount: gastos.length,
+      itemBuilder: (context, index) {
+        final gasto = gastos[index];
+        return TileGasto(gasto: gasto);
+      }, 
     );
   }
 }
@@ -665,7 +684,8 @@ class BotonRepresentacionGastos extends StatelessWidget {
           showSelectedIcon: false,
           segments: const [
             ButtonSegment(value: RepresentacionGastos.lista, label: Text('Lista'), icon: Icon(Icons.list)),
-            ButtonSegment(value: RepresentacionGastos.grafica, label: Text('Grafica'), icon: Icon(Icons.auto_graph_sharp))
+            ButtonSegment(value: RepresentacionGastos.grafica, label: Text('Grafica'), icon: Icon(Icons.auto_graph_sharp)),
+            ButtonSegment(value: RepresentacionGastos.reporte, label: Text('Reporte'), icon: Icon(Icons.calendar_today)),
           ], 
           selected: {representacionGasto},
           onSelectionChanged: cambiarRepresentacionDeGastos(),
@@ -730,7 +750,7 @@ class Filtros extends StatelessWidget {
           padding: EdgeInsets.all(8.0),
           child: Text('Filtros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
         ),
-        FiltroParaRangoFechas(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
+        if (representacionGasto != RepresentacionGastos.reporte) FiltroParaRangoFechas(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -1242,7 +1262,7 @@ class GraficaCircular extends StatelessWidget {
               ),
             ),
             Container( // Simbología de elementos por colores
-              margin: const EdgeInsets.fromLTRB(0, 280, 0, 0),
+              margin: const EdgeInsets.fromLTRB(0, 340, 0, 0),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -1266,6 +1286,90 @@ class GraficaCircular extends StatelessWidget {
   }
 }
 
+class Reporte extends StatelessWidget {
+  const Reporte({super.key, required this.misgastos});
+  final List<Gasto> misgastos;
+
+  @override
+  Widget build(BuildContext context) {
+
+    /* ---------------------------------- TRABAJO ACTUAL ---------------------------------- */
+    Map<int, double> gastosPorDia = {}; // Relacion gastos por dia
+    Map<int, Map> diasPorMes = {}; // Relacion dias por mes
+    Map<int,Map> mesesPorAno = {}; // Relacion meses por año
+
+    int mesActual = 0;
+    int anoActual = 0;
+    for (var gasto in misgastos) { 
+      var fechaDateTime = DateTime.parse(gasto.fecha);
+      var year = fechaDateTime.year;
+      var mes = fechaDateTime.month;
+      var dia = fechaDateTime.day;
+      
+      // Limpiar mapas al cambio de mes y/o año
+      if (mesActual != mes) {
+        gastosPorDia.clear();
+        mesActual = mes;
+      }
+      if (anoActual != year) {
+        gastosPorDia.clear(); // Por si cambia de año, pero no de mes.
+        diasPorMes.clear();
+        anoActual = year;
+      }
+      
+      gastosPorDia[dia] = (gastosPorDia[dia]??0) + gasto.costo;
+      diasPorMes[mes] = Map.from(gastosPorDia);
+      mesesPorAno[year] = Map.from(diasPorMes);
+
+    }
+    //print('---> Dias por Mes: $diasPorMes');
+    //print('--> Meses por Ano: $mesesPorAno');
+
+    //print('--> Registros del año 2022: ${mesesPorAno[2022]}');
+    //print('--> Registros del mes 12 del año 2022: ${mesesPorAno[2022]?[12]}');
+    //print('--> Registros del dia 31 del mes 12 del año 2022: ${mesesPorAno[2022]?[12]?[31]}');
+
+    //print('--> Gastos totales por mes: $totalesPorMes');
+    //print('--> Gastos totales por año: $totalesPorAno');
+
+    double obtenerGastosPorAno(Map<int, Map> mesesPorAno, int ano) {
+      double sumatoria = 0;
+      List<int> mesesDelAno = [1,2,3,4,5,6,7,8,9,10,11,12];
+      for (var mes in mesesDelAno) {
+        for (var gasto in Map.from(mesesPorAno[ano]![mes]??{mes:0}).values) {
+          sumatoria += gasto;
+        }
+      }
+      return sumatoria;
+    }
+
+   
+   
+    //var resultado = totalDelAno.reduce((sum, element) => sum + element);
+    //totalesPorAno[anoActual] = resultado;
+
+    /* ------------------------------------------------------------------------------------ */
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          //for (var year in totalesPorAno.entries) Text('${year.key}- ${year.value}'),
+          /*for (var year in totalesPorAno.entries) ListTile(
+              title: Text(year.key.toString()),
+              subtitle: Text('\$ ${year.value}'),
+            ),*/
+          for (var year in mesesPorAno.keys) ListTile(
+              title: Text(year.toString()),
+              subtitle: Text('\$ ${obtenerGastosPorAno(mesesPorAno, year).toStringAsFixed(2)}'),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 /* ------------------------------------------------------------------------------ */
 
 //Rama reporte_gastos
+
+
