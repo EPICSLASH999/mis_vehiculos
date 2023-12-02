@@ -18,6 +18,22 @@ class TituloComponente extends StatelessWidget {
     return Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),);
   }
 }
+class TituloGrande extends StatelessWidget {
+  const TituloGrande({
+    super.key, 
+    required this.titulo,
+  });
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding( 
+      padding: const EdgeInsets.all(8.0),
+      child: Text(titulo, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+    );
+  }
+}
+
 
 class CuadroDeTexto extends StatelessWidget {
   const CuadroDeTexto({

@@ -747,10 +747,7 @@ class Filtros extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text('Filtros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-        ),
+        const TituloGrande(titulo: 'Filtros'),
         if (representacionGasto != RepresentacionGastos.reporte) FiltroParaRangoFechas(fechaSeleccionadaInicial: widget.fechaSeleccionadaInicial, fechaSeleccionadaFinal: widget.fechaSeleccionadaFinal),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1306,6 +1303,7 @@ class _ReporteState extends State<Reporte> {
   final List<String> meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
   String obtenerMes(int mes) => meses.elementAt(mes-1);
 
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -1403,6 +1401,7 @@ class _ReporteState extends State<Reporte> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           children: [
             //for (var year in totalesPorAno.entries) Text('${year.key}- ${year.value}'),
@@ -1410,6 +1409,8 @@ class _ReporteState extends State<Reporte> {
                 title: Text(year.key.toString()),
                 subtitle: Text('\$ ${year.value}'),
               ),*/
+              // Reporte Anual
+            if (mostrarReporte == MostrarReporte.year) const TituloGrande(titulo: 'Anual'),
              if (mostrarReporte == MostrarReporte.year) for (var year in mesesPorAno.keys) ListTile( // Mostrar gastos por años
                 title: Text(year.toString()),
                 subtitle: Text('\$ ${obtenerGastosPorAno(mesesPorAno, year).toStringAsFixed(2)}'),
@@ -1417,9 +1418,16 @@ class _ReporteState extends State<Reporte> {
                   setState(() {
                     mostrarReporte = MostrarReporte.month;
                     anoAMostrar = year;
+                      _scrollController.animateTo(
+                        0.0,
+                        curve: Curves.easeOut,
+                        duration: const Duration(milliseconds: 500),
+                      );
                   });
                 },
               ),
+              // Reporte Mensual
+              if (mostrarReporte == MostrarReporte.month) const TituloGrande(titulo: 'Mensual'),
               if (mostrarReporte == MostrarReporte.month) for (var month in mesesPorAno[anoAMostrar]!.keys) ListTile( // Mostrar gastos por meses
                 title: Text(obtenerMes(month)),
                 subtitle: Text('\$ ${obtenerGastosPorMesYAno(mesesPorAno, anoAMostrar, month).toStringAsFixed(2)}'),
@@ -1428,8 +1436,15 @@ class _ReporteState extends State<Reporte> {
                     mostrarReporte = MostrarReporte.day;
                     mesAMostrar = month;
                   });
+                  _scrollController.animateTo(
+                    0.0,
+                    curve: Curves.easeOut,
+                    duration: const Duration(milliseconds: 500),
+                  );
                 },
               ),
+              // Reporte Diario
+              if (mostrarReporte == MostrarReporte.day) const TituloGrande(titulo: 'Diario'),
                if (mostrarReporte == MostrarReporte.day) for (var day in mesesPorAno[anoAMostrar]![mesAMostrar]!.keys) ListTile( // Mostrar gastos por meses
                 title: Text(day.toString()),
                 subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(mesesPorAno, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
