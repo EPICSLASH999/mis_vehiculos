@@ -567,11 +567,15 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     super.dispose();
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     controladorMecanico.addListener(escuchador);
     filtrosVisibles = context.watch<VehiculoBloc>().filtrosVisibles;
     controladorMecanico.text = widget.filtroMecanico;
+
+    Future<List<Gasto>>? misGastosGlobales = context.watch<VehiculoBloc>().misGastosGlobales; // Lista con los gastos hitoricos de un vehiculo.
 
     return Scaffold(
       appBar: AppBar(
@@ -626,7 +630,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
                   : switch (representacionGasto) {
                     RepresentacionGastos.lista => ListaGastos(gastos: gastos),
                     RepresentacionGastos.grafica => Graficas(misgastos: gastos,),
-                    RepresentacionGastos.reporte => Reporte(misgastos: gastos),
+                    RepresentacionGastos.reporte => Reporte(misGastosGlobales: misGastosGlobales),
                   };
                   //(representacionGasto == RepresentacionGastos.lista)? ListaGastos(gastos: gastos): Graficas(misgastos: gastos,);
                 }
@@ -1163,7 +1167,10 @@ class Graficas extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    final List<Color> colores = [Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, Colors.purple, Colors.grey, Colors.green, Colors.orange, Colors.lightBlue,];
+    final List<Color> colores = [
+      Colors.blueGrey, Colors.cyan, Colors.amber, Colors.red, 
+      Colors.purple, Colors.grey, Colors.green, Colors.orange, Colors.brown, Colors.lightBlue,
+    ];
     
     // Para Etiquetas
     Map<String, Color> colorPorEtiqueta = {};
@@ -1286,8 +1293,8 @@ class GraficaCircular extends StatelessWidget {
 
 enum MostrarReporte {year, month, day}
 class Reporte extends StatefulWidget {
-  const Reporte({super.key, required this.misgastos});
-  final List<Gasto> misgastos;
+  const Reporte({super.key, required this.misGastosGlobales});
+  final Future<List<Gasto>>? misGastosGlobales;
 
   @override
   State<Reporte> createState() => _ReporteState();
@@ -1309,34 +1316,74 @@ class _ReporteState extends State<Reporte> {
   Widget build(BuildContext context) {
 
     /* ---------------------------------- TRABAJO ACTUAL ---------------------------------- */
-    Map<int, double> gastosPorDia = {}; // Relacion gastos por dia
-    Map<int, Map<int,double>> diasPorMes = {}; // Relacion dias por mes
-    Map<int,Map<int, Map<int,double>>> mesesPorAno = {}; // Relacion meses por año
+    Map<int, Map<int, Map<int, double>>> reporteHistorico;
+    
+    Map<int, Map<int, Map<int, double>>> generarReporte(List<Gasto> misGastosGlobales) {
+      Map<int, double> gastosPorDia = {}; // Relacion (temporal) gastos por dia
+      Map<int, Map<int,double>> diasPorMes = {}; // Relacion (temporal) dias por mes
+      Map<int,Map<int, Map<int,double>>> mesesPorAno = {}; // Relacion meses por año
 
-    int mesActual = 0;
-    int anoActual = 0;
-    for (var gasto in widget.misgastos) { 
-      var fechaDateTime = DateTime.parse(gasto.fecha);
-      var year = fechaDateTime.year;
-      var mes = fechaDateTime.month;
-      var dia = fechaDateTime.day;
+      int mesActual = 0;
+      int anoActual = 0;
+      for (var gasto in misGastosGlobales) { 
+        var fechaDateTime = DateTime.parse(gasto.fecha);
+        var year = fechaDateTime.year;
+        var mes = fechaDateTime.month;
+        var dia = fechaDateTime.day;
       
-      // Limpiar mapas al cambio de mes y/o año
-      if (mesActual != mes) {
-        gastosPorDia.clear();
-        mesActual = mes;
+        // Limpiar mapas al cambio de mes y/o año
+        if (mesActual != mes) {
+          gastosPorDia.clear();
+          mesActual = mes;
+        }
+        if (anoActual != year) {
+          gastosPorDia.clear(); // Por si cambia de año, pero no de mes.
+          diasPorMes.clear();
+          anoActual = year;
+        }
+        
+        gastosPorDia[dia] = (gastosPorDia[dia]??0) + gasto.costo;
+        diasPorMes[mes] = Map.from(gastosPorDia);
+        mesesPorAno[year] = Map.from(diasPorMes); // Reporte 
       }
-      if (anoActual != year) {
-        gastosPorDia.clear(); // Por si cambia de año, pero no de mes.
-        diasPorMes.clear();
-        anoActual = year;
-      }
-      
-      gastosPorDia[dia] = (gastosPorDia[dia]??0) + gasto.costo;
-      diasPorMes[mes] = Map.from(gastosPorDia);
-      mesesPorAno[year] = Map.from(diasPorMes);
-
+      return Map.from(mesesPorAno);
     }
+
+    Map<int, Map<int, Map<int, double>>> normalizarTodosLosMesesAAno(Map<int, Map<int, Map<int, double>>> reporteRecibido, int ano) {
+      Map<int, Map<int, Map<int, double>>> reporteNormalizado = Map.from(reporteRecibido);
+      for (var mes = 1; mes <= 12; mes++) {
+        if (reporteNormalizado[ano]?[mes] == null) reporteNormalizado[ano]?[mes] = {0:0};
+      }
+      reporteNormalizado[ano] = Map.fromEntries(
+        reporteNormalizado[ano]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
+
+      return reporteNormalizado;
+    }
+    Map<int, Map<int, Map<int, double>>> normalizarTodosLosDiasAMes(Map<int, Map<int, Map<int, double>>> reporteRecibido, int ano, int mes) {
+      Map<int, Map<int, Map<int, double>>> reporteNormalizado = Map.from(reporteRecibido);
+      for (var dia = 1; dia <= 31; dia++) {
+        if (reporteNormalizado[ano]?[mes]?[dia] == null) reporteNormalizado[ano]![mes]![dia] = 0.0;
+      }
+      reporteNormalizado[ano]?[mes] = Map.fromEntries(
+        reporteNormalizado[ano]![mes]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
+
+      return reporteNormalizado;
+    }
+
+
+    Map<int, Map<int, Map<int, double>>> llenarFechasFaltantes(Map<int, Map<int, Map<int, double>>> reporteRecibido){
+      // Normalizar que un año tenga todos los meses y dias aunque no tengan gastos
+      Map<int, Map<int, Map<int, double>>> reporteNormalizado = Map.from(reporteRecibido);
+      for (var year in reporteNormalizado.keys) {
+        reporteNormalizado = Map.from(normalizarTodosLosMesesAAno(reporteNormalizado, year));
+        for (var mes in reporteNormalizado[year]!.keys) {
+          reporteNormalizado = Map.from(normalizarTodosLosDiasAMes(reporteNormalizado,year, mes));
+        }
+      }
+      return reporteNormalizado;
+    }
+
+   
     //print('---> Dias por Mes: $diasPorMes');
     //print('--> Meses por Ano: $mesesPorAno');
 
@@ -1367,102 +1414,78 @@ class _ReporteState extends State<Reporte> {
       return gasto;
     }
 
-    //mesesPorAno = Map.from(normalizarMesesPorAno(mesesPorAno));
-    //print(mesesPorAno);
-   
-   
-    //var resultado = totalDelAno.reduce((sum, element) => sum + element);
-    //totalesPorAno[anoActual] = resultado;
-
-    void llenarMesesAAno(int ano) {
-      for (var mes = 1; mes <= 12; mes++) {
-        if (mesesPorAno[ano]?[mes] == null) mesesPorAno[ano]?[mes] = {0:0};
-      }
-      mesesPorAno[ano] = Map.fromEntries(
-        mesesPorAno[ano]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
-    }
-    void llenarDiasAMes(int ano, int mes) {
-      for (var dia = 1; dia <= 31; dia++) {
-        if (mesesPorAno[ano]?[mes]?[dia] == null) mesesPorAno[ano]![mes]![dia] = 0.0;
-      }
-      mesesPorAno[ano]?[mes] = Map.fromEntries(
-        mesesPorAno[ano]![mes]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
-    }
-
-    // Normalizar que un año tenga todos los meses aunque no tengan gastos
-    for (var year in mesesPorAno.keys) {
-      llenarMesesAAno(year);
-      for (var mes in mesesPorAno[year]!.keys) {
-        llenarDiasAMes(year, mes);
-      }
-    }
     /* ------------------------------------------------------------------------------------ */
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
-            //for (var year in totalesPorAno.entries) Text('${year.key}- ${year.value}'),
-            /*for (var year in totalesPorAno.entries) ListTile(
-                title: Text(year.key.toString()),
-                subtitle: Text('\$ ${year.value}'),
-              ),*/
-              // Reporte Anual
-            if (mostrarReporte == MostrarReporte.year) const TituloGrande(titulo: 'Anual'),
-             if (mostrarReporte == MostrarReporte.year) for (var year in mesesPorAno.keys) ListTile( // Mostrar gastos por años
-                title: Text(year.toString()),
-                subtitle: Text('\$ ${obtenerGastosPorAno(mesesPorAno, year).toStringAsFixed(2)}'),
-                onTap: () {
-                  setState(() {
-                    mostrarReporte = MostrarReporte.month;
-                    anoAMostrar = year;
-                      _scrollController.animateTo(
-                        0.0,
-                        curve: Curves.easeOut,
-                        duration: const Duration(milliseconds: 500),
-                      );
-                  });
-                },
+    return FutureBuilder(
+      future: widget.misGastosGlobales, 
+      builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting){
+            return const WidgetCargando();
+          } else{
+            final misGastosGlobales = snapshot.data?? [];
+
+            reporteHistorico = Map.from(generarReporte(misGastosGlobales));
+            reporteHistorico = Map.from(llenarFechasFaltantes(reporteHistorico));
+
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  children: [
+                    // Reporte Anual
+                    if (mostrarReporte == MostrarReporte.year) const TituloGrande(titulo: 'Anual'),
+                    if (mostrarReporte == MostrarReporte.year) for (var year in reporteHistorico.keys) ListTile( // Mostrar gastos por años
+                        title: Text(year.toString()),
+                        subtitle: Text('\$ ${obtenerGastosPorAno(reporteHistorico, year).toStringAsFixed(2)}'),
+                        onTap: () {
+                          setState(() {
+                            mostrarReporte = MostrarReporte.month;
+                            anoAMostrar = year;
+                              _scrollController.animateTo(
+                                0.0,
+                                curve: Curves.easeOut,
+                                duration: const Duration(milliseconds: 500),
+                              );
+                          });
+                        },
+                      ),
+                      // Reporte Mensual
+                      if (mostrarReporte == MostrarReporte.month) const TituloGrande(titulo: 'Mensual'),
+                      if (mostrarReporte == MostrarReporte.month) for (var month in reporteHistorico[anoAMostrar]!.keys) ListTile( // Mostrar gastos por meses
+                        title: Text(obtenerMes(month)),
+                        subtitle: Text('\$ ${obtenerGastosPorMesYAno(reporteHistorico, anoAMostrar, month).toStringAsFixed(2)}'),
+                        onTap: () {
+                          setState(() {
+                            mostrarReporte = MostrarReporte.day;
+                            mesAMostrar = month;
+                          });
+                          _scrollController.animateTo(
+                            0.0,
+                            curve: Curves.easeOut,
+                            duration: const Duration(milliseconds: 500),
+                          );
+                        },
+                      ),
+                      // Reporte Diario
+                      if (mostrarReporte == MostrarReporte.day) const TituloGrande(titulo: 'Diario'),
+                      if (mostrarReporte == MostrarReporte.day) for (var day in reporteHistorico[anoAMostrar]![mesAMostrar]!.keys) ListTile( // Mostrar gastos por meses
+                        title: Text(day.toString()),
+                        subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
+                        onTap: () {
+                          setState(() {
+                            mostrarReporte = MostrarReporte.day;
+                          });
+                        },
+                      ),
+                  ],
+                ),
               ),
-              // Reporte Mensual
-              if (mostrarReporte == MostrarReporte.month) const TituloGrande(titulo: 'Mensual'),
-              if (mostrarReporte == MostrarReporte.month) for (var month in mesesPorAno[anoAMostrar]!.keys) ListTile( // Mostrar gastos por meses
-                title: Text(obtenerMes(month)),
-                subtitle: Text('\$ ${obtenerGastosPorMesYAno(mesesPorAno, anoAMostrar, month).toStringAsFixed(2)}'),
-                onTap: () {
-                  setState(() {
-                    mostrarReporte = MostrarReporte.day;
-                    mesAMostrar = month;
-                  });
-                  _scrollController.animateTo(
-                    0.0,
-                    curve: Curves.easeOut,
-                    duration: const Duration(milliseconds: 500),
-                  );
-                },
-              ),
-              // Reporte Diario
-              if (mostrarReporte == MostrarReporte.day) const TituloGrande(titulo: 'Diario'),
-               if (mostrarReporte == MostrarReporte.day) for (var day in mesesPorAno[anoAMostrar]![mesAMostrar]!.keys) ListTile( // Mostrar gastos por meses
-                title: Text(day.toString()),
-                subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(mesesPorAno, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
-                onTap: () {
-                  setState(() {
-                    mostrarReporte = MostrarReporte.day;
-                  });
-                },
-              ),
-          ],
-        ),
-      ),
+            );
+          }
+      },
     );
   }
-
-  
-
-  
 }
 
 /* ------------------------------------------------------------------------------ */
