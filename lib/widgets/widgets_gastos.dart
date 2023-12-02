@@ -1361,7 +1361,10 @@ class _ReporteState extends State<Reporte> {
     }
     Map<int, Map<int, Map<int, double>>> normalizarTodosLosDiasAMes(Map<int, Map<int, Map<int, double>>> reporteRecibido, int ano, int mes) {
       Map<int, Map<int, Map<int, double>>> reporteNormalizado = Map.from(reporteRecibido);
+      final List<int> mesesCon31Dias = [1,3,5,7,8,10,12];
       for (var dia = 1; dia <= 31; dia++) {
+        if (mes == 2 && dia == 29) break;
+        if (!mesesCon31Dias.contains(mes) && dia == 31) break;
         if (reporteNormalizado[ano]?[mes]?[dia] == null) reporteNormalizado[ano]![mes]![dia] = 0.0;
       }
       reporteNormalizado[ano]?[mes] = Map.fromEntries(
