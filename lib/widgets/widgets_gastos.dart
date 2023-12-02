@@ -576,6 +576,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
     controladorMecanico.text = widget.filtroMecanico;
 
     Future<List<Gasto>>? misGastosGlobales = context.watch<VehiculoBloc>().misGastosGlobales; // Lista con los gastos hitoricos de un vehiculo.
+    representacionGasto = context.watch<VehiculoBloc>().representacionGasto;
 
     return Scaffold(
       appBar: AppBar(
@@ -646,29 +647,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   }
 }
 
-class ListaGastos extends StatelessWidget {
-  const ListaGastos({
-    super.key,
-    required this.gastos,
-  });
-
-  final List<Gasto> gastos;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      separatorBuilder: (context, index) => 
-          const SizedBox(height: 12,), 
-      itemCount: gastos.length,
-      itemBuilder: (context, index) {
-        final gasto = gastos[index];
-        return TileGasto(gasto: gasto);
-      }, 
-    );
-  }
-}
-
-class BotonRepresentacionGastos extends StatelessWidget {
+class BotonRepresentacionGastos extends StatefulWidget {
   const BotonRepresentacionGastos({
     super.key,
     required this.representacionGasto, 
@@ -679,7 +658,15 @@ class BotonRepresentacionGastos extends StatelessWidget {
   final Function cambiarRepresentacionDeGastos;
 
   @override
+  State<BotonRepresentacionGastos> createState() => _BotonRepresentacionGastosState();
+}
+
+class _BotonRepresentacionGastosState extends State<BotonRepresentacionGastos> {
+  RepresentacionGastos? representacionGasto;
+
+  @override
   Widget build(BuildContext context) {
+    representacionGasto??= widget.representacionGasto;
     return Padding(
       padding: const EdgeInsets.all(6.0),
       child: SizedBox(
@@ -692,8 +679,11 @@ class BotonRepresentacionGastos extends StatelessWidget {
             ButtonSegment(value: RepresentacionGastos.grafica, label: Text('Grafica'), icon: Icon(Icons.auto_graph_sharp)),
             ButtonSegment(value: RepresentacionGastos.reporte, label: Text('Reporte'), icon: Icon(Icons.calendar_today)),
           ], 
-          selected: {representacionGasto},
-          onSelectionChanged: cambiarRepresentacionDeGastos(),
+          selected: {widget.representacionGasto},
+          //onSelectionChanged: widget.cambiarRepresentacionDeGastos(),
+          onSelectionChanged: (valor) {
+            context.read<VehiculoBloc>().add(CambiadaRepresentacionGastos(representacionGastos: valor.first));
+          },
         ),
       ),
     );
@@ -1075,6 +1065,29 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
   }
 }
 
+// Lista
+class ListaGastos extends StatelessWidget {
+  const ListaGastos({
+    super.key,
+    required this.gastos,
+  });
+
+  final List<Gasto> gastos;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      separatorBuilder: (context, index) => 
+          const SizedBox(height: 12,), 
+      itemCount: gastos.length,
+      itemBuilder: (context, index) {
+        final gasto = gastos[index];
+        return TileGasto(gasto: gasto);
+      }, 
+    );
+  }
+}
+
 class TileGasto extends StatelessWidget {
   const TileGasto({
     super.key,
@@ -1291,7 +1304,7 @@ class GraficaCircular extends StatelessWidget {
   }
 }
 
-enum MostrarReporte {year, month, day}
+// Reporte
 class Reporte extends StatefulWidget {
   const Reporte({super.key, required this.misGastosGlobales});
   final Future<List<Gasto>>? misGastosGlobales;
@@ -1302,7 +1315,7 @@ class Reporte extends StatefulWidget {
 
 class _ReporteState extends State<Reporte> {
   
-  MostrarReporte mostrarReporte = MostrarReporte.year;
+  TipoReporte mostrarReporte = TipoReporte.year;
   int anoAMostrar = 0;
   int mesAMostrar = 0;
 
@@ -1352,7 +1365,8 @@ class _ReporteState extends State<Reporte> {
     Map<int, Map<int, Map<int, double>>> normalizarTodosLosMesesAAno(Map<int, Map<int, Map<int, double>>> reporteRecibido, int ano) {
       Map<int, Map<int, Map<int, double>>> reporteNormalizado = Map.from(reporteRecibido);
       for (var mes = 1; mes <= 12; mes++) {
-        if (reporteNormalizado[ano]?[mes] == null) reporteNormalizado[ano]?[mes] = {0:0};
+        if (DateTime.now().year == ano && (mes > DateTime.now().month)) break;
+        if (reporteNormalizado[ano]?[mes] == null) reporteNormalizado[ano]?[mes] = {1:0}; // En caso de que no existan registros del mes, se agrega por omision el dia 1 con gasto 0.
       }
       reporteNormalizado[ano] = Map.fromEntries(
         reporteNormalizado[ano]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
@@ -1363,10 +1377,13 @@ class _ReporteState extends State<Reporte> {
       Map<int, Map<int, Map<int, double>>> reporteNormalizado = Map.from(reporteRecibido);
       final List<int> mesesCon31Dias = [1,3,5,7,8,10,12];
       for (var dia = 1; dia <= 31; dia++) {
+        if (DateTime.now().year == ano && DateTime.now().month == mes &&  (dia > DateTime.now().day)) break;
         if (mes == 2 && dia == 29) break;
         if (!mesesCon31Dias.contains(mes) && dia == 31) break;
         if (reporteNormalizado[ano]?[mes]?[dia] == null) reporteNormalizado[ano]![mes]![dia] = 0.0;
       }
+      //print(reporteNormalizado[ano]?[mes]!.remove(0));
+
       reporteNormalizado[ano]?[mes] = Map.fromEntries(
         reporteNormalizado[ano]![mes]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
 
@@ -1407,7 +1424,7 @@ class _ReporteState extends State<Reporte> {
     double obtenerGastosPorMesYAno(Map<int, Map> mesesPorAno, int ano, int mes) {
       double sumatoria = 0;
       for (int dia = 1; dia <= 31; dia++) {
-        double gasto = (mesesPorAno[ano]![mes]??{mes:0.0})[dia]??0.0;
+        double gasto = mesesPorAno[ano]![mes]![dia]??0.0;
         sumatoria += gasto;
       }
       return sumatoria;
@@ -1421,14 +1438,14 @@ class _ReporteState extends State<Reporte> {
       String titulo;
       String? subtitulo;
        switch (mostrarReporte) {
-         case MostrarReporte.year:
+         case TipoReporte.year:
             titulo = 'Anual';
             break;
-          case MostrarReporte.month:
+          case TipoReporte.month:
             titulo =  'Mensual';
             subtitulo = anoAMostrar.toString();
             break;
-          case MostrarReporte.day:
+          case TipoReporte.day:
             titulo = 'Diario';
             subtitulo = '${obtenerMes(mesAMostrar)} - $anoAMostrar';
             break;
@@ -1448,6 +1465,13 @@ class _ReporteState extends State<Reporte> {
       );
     }
 
+     void animacionDeSubida() {
+      _scrollController.animateTo(
+        0.0,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 400),
+      );
+    }
     /* ------------------------------------------------------------------------------------ */
 
     return FutureBuilder(
@@ -1476,7 +1500,7 @@ class _ReporteState extends State<Reporte> {
                       child: Column(
                         children: [
                           // Reporte Anual
-                          if (mostrarReporte == MostrarReporte.year) for (var year in reporteHistorico.keys) Column(
+                          if (mostrarReporte == TipoReporte.year) for (var year in reporteHistorico.keys) Column(
                             children: [
                               const Divider(
                                   thickness: 2,
@@ -1493,13 +1517,9 @@ class _ReporteState extends State<Reporte> {
                                   trailing: const Icon(Icons.pageview_sharp),
                                   onTap: () {
                                     setState(() {
-                                      mostrarReporte = MostrarReporte.month;
+                                      mostrarReporte = TipoReporte.month;
                                       anoAMostrar = year;
-                                        _scrollController.animateTo(
-                                          0.0,
-                                          curve: Curves.easeOut,
-                                          duration: const Duration(milliseconds: 500),
-                                        );
+                                        animacionDeSubida();
                                     });
                                   },
                                 ),
@@ -1509,7 +1529,7 @@ class _ReporteState extends State<Reporte> {
                             ],
                           ),
                             // Reporte Mensual
-                            if (mostrarReporte == MostrarReporte.month) for (var month in reporteHistorico[anoAMostrar]!.keys) Column(
+                            if (mostrarReporte == TipoReporte.month) for (var month in reporteHistorico[anoAMostrar]!.keys) Column(
                               children: [
                                 const Divider(
                                   thickness: 2,
@@ -1524,14 +1544,10 @@ class _ReporteState extends State<Reporte> {
                                   trailing: const Icon(Icons.pageview_sharp),
                                   onTap: () {
                                     setState(() {
-                                      mostrarReporte = MostrarReporte.day;
+                                      mostrarReporte = TipoReporte.day;
                                       mesAMostrar = month;
                                     });
-                                    _scrollController.animateTo(
-                                      0.0,
-                                      curve: Curves.easeOut,
-                                      duration: const Duration(milliseconds: 500),
-                                    );
+                                    animacionDeSubida();
                                   },
                                 ),
                                 const Divider(
@@ -1540,7 +1556,12 @@ class _ReporteState extends State<Reporte> {
                               ],
                             ),
                             // Reporte Diario
-                            if (mostrarReporte == MostrarReporte.day) for (var day in reporteHistorico[anoAMostrar]![mesAMostrar]!.keys) ListTile( // Mostrar gastos por meses
+                              Wrap(
+                            direction: Axis.horizontal,
+                            children: 
+                            [
+
+                            if (mostrarReporte == TipoReporte.day) for (var day in reporteHistorico[anoAMostrar]![mesAMostrar]!.keys) /*ListTile( // Mostrar gastos por meses
                               title: Text(day.toString()),
                               subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
                               onTap: () {
@@ -1548,7 +1569,25 @@ class _ReporteState extends State<Reporte> {
                                   mostrarReporte = MostrarReporte.day;
                                 });
                               },
+                            ),*/
+                            SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: Card(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(day.toString(), style: const TextStyle(fontWeight: FontWeight.bold),),
+                                      Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}', 
+                                        style: const TextStyle(fontWeight: FontWeight.w400),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ),
+                            ]
+                          ),
                         ],
                       ),
                     ),
