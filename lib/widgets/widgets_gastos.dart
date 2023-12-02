@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -1311,8 +1312,8 @@ class _ReporteState extends State<Reporte> {
 
     /* ---------------------------------- TRABAJO ACTUAL ---------------------------------- */
     Map<int, double> gastosPorDia = {}; // Relacion gastos por dia
-    Map<int, Map> diasPorMes = {}; // Relacion dias por mes
-    Map<int,Map> mesesPorAno = {}; // Relacion meses por año
+    Map<int, Map<int,double>> diasPorMes = {}; // Relacion dias por mes
+    Map<int,Map<int, Map<int,double>>> mesesPorAno = {}; // Relacion meses por año
 
     int mesActual = 0;
     int anoActual = 0;
@@ -1345,9 +1346,6 @@ class _ReporteState extends State<Reporte> {
     //print('--> Registros del mes 12 del año 2022: ${mesesPorAno[2022]?[12]}');
     //print('--> Registros del dia 31 del mes 12 del año 2022: ${mesesPorAno[2022]?[12]?[31]}');
 
-    //print('--> Gastos totales por mes: $totalesPorMes');
-    //print('--> Gastos totales por año: $totalesPorAno');
-
    
     double obtenerGastosPorAno(Map<int, Map> mesesPorAno, int ano) {
       double sumatoria = 0;
@@ -1366,6 +1364,10 @@ class _ReporteState extends State<Reporte> {
       }
       return sumatoria;
     }
+    double obtenerGastosPorDiaMesYAno(Map<int, Map> mesesPorAno, int ano, int mes, int dia) {
+      double gasto = ((mesesPorAno[ano]![mes]??{mes:0.0})[dia]??0.0).toDouble();
+      return gasto;
+    }
 
     //mesesPorAno = Map.from(normalizarMesesPorAno(mesesPorAno));
     //print(mesesPorAno);
@@ -1374,22 +1376,30 @@ class _ReporteState extends State<Reporte> {
     //var resultado = totalDelAno.reduce((sum, element) => sum + element);
     //totalesPorAno[anoActual] = resultado;
 
-    void llenarMesesAAno(Map<int, Map<dynamic, dynamic>> mesesPorAno, int ano) {
+    void llenarMesesAAno(int ano) {
       for (var mes = 1; mes <= 12; mes++) {
         if (mesesPorAno[ano]?[mes] == null) mesesPorAno[ano]?[mes] = {0:0};
       }
       mesesPorAno[ano] = Map.fromEntries(
         mesesPorAno[ano]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
     }
-
-    //print(mesesPorAno[2023]?[12]);
-    for (var year in mesesPorAno.keys) {
-      llenarMesesAAno(mesesPorAno, year);
+    void llenarDiasAMes(int ano, int mes) {
+      for (var dia = 1; dia <= 31; dia++) {
+        if (mesesPorAno[ano]?[mes]?[dia] == null) mesesPorAno[ano]![mes]![dia] = 0.0;
+      }
+      mesesPorAno[ano]?[mes] = Map.fromEntries(
+        mesesPorAno[ano]![mes]!.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))); // Reacomoda el mapa por orden del numero de mes.
     }
-    
 
-
+    // Normalizar que un año tenga todos los meses aunque no tengan gastos
+    for (var year in mesesPorAno.keys) {
+      llenarMesesAAno(year);
+      for (var mes in mesesPorAno[year]!.keys) {
+        llenarDiasAMes(year, mes);
+      }
+    }
     /* ------------------------------------------------------------------------------------ */
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
@@ -1415,8 +1425,17 @@ class _ReporteState extends State<Reporte> {
                 subtitle: Text('\$ ${obtenerGastosPorMesYAno(mesesPorAno, anoAMostrar, month).toStringAsFixed(2)}'),
                 onTap: () {
                   setState(() {
-                    mostrarReporte = MostrarReporte.month;
+                    mostrarReporte = MostrarReporte.day;
                     mesAMostrar = month;
+                  });
+                },
+              ),
+               if (mostrarReporte == MostrarReporte.day) for (var day in mesesPorAno[anoAMostrar]![mesAMostrar]!.keys) ListTile( // Mostrar gastos por meses
+                title: Text(day.toString()),
+                subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(mesesPorAno, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
+                onTap: () {
+                  setState(() {
+                    mostrarReporte = MostrarReporte.day;
                   });
                 },
               ),
