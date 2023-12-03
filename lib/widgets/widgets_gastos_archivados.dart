@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
+import 'package:mis_vehiculos/database/tablas/vehiculos.dart';
 import 'package:mis_vehiculos/extensiones/extensiones.dart';
 import 'package:mis_vehiculos/funciones/funciones.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
+import 'package:mis_vehiculos/modelos/vehiculo.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
 import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
@@ -135,48 +137,68 @@ class TileGastoArchivado extends StatelessWidget {
       context.read<VehiculoBloc>().add(EliminadoGastoArchivado(idGastoArchivado: gastoArchivado.id));
     };
   }
-  Function restaurarGastoArchivado (BuildContext context){
+  Function restaurarGastoArchivado (BuildContext context, bool existeVehiculo) {
+    if(!existeVehiculo){
+      return (){
+        mostrarToast(context, 'No existe Vehiculo');
+      };
+    }
     return () {
       context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado));
     };
   }
+  Future<bool> existeVehiculo(int idVehiculo) async {
+    Vehiculo? vehiculo = await Vehiculos().fetchById(idVehiculo);
+    return (vehiculo != null);
+  }
   
   @override
   Widget build(BuildContext context) {
+    
+    return FutureBuilder(
+      future: existeVehiculo(gastoArchivado.idVehiculo), 
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting){
+          return const WidgetCargando();
+        } else{
+          final siExisteVehiculo = snapshot.data?? false;
 
-    return ListTile(
-      title: Text(
-        gastoArchivado.etiqueta,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(fechaNormalizada),
-          Text(gastoArchivado.vehiculo),
-          Text(mecanico),
-          Text(lugar),
-          Text('\$${gastoArchivado.costo}'),
-        ],
-      ),
-      trailing: SizedBox(
-        width: 110,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton( // Botón borar gasto arhivado
-              onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar permanentemente el gasto archivado?', funcionAlProceder: eliminarGastoArchivado(context), titulo: 'Eliminar'), 
-              icon: const Icon(Icons.delete_forever, color: colorIcono,)
+          return  ListTile(
+            title: Text(
+              gastoArchivado.etiqueta,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            IconButton( // Botón restaurar gasto archivado
-              onPressed: dialogoAlerta(context: context, texto: '¿Desea restaurar el gasto archivado?', funcionAlProceder: restaurarGastoArchivado(context), titulo: 'Restaurar'),
-              icon: const Icon(Icons.restore, color: colorIcono,)
+            subtitle: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(fechaNormalizada),
+                Text(gastoArchivado.vehiculo),
+                Text(mecanico),
+                Text(lugar),
+                Text('\$${gastoArchivado.costo}'),
+              ],
             ),
-          ],
-        ),
-      ),
-      onTap: null,
+            trailing: SizedBox(
+              width: 110,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton( // Botón borar gasto arhivado
+                    onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar permanentemente el gasto archivado?', funcionAlProceder: eliminarGastoArchivado(context), titulo: 'Eliminar'), 
+                    icon: const Icon(Icons.delete_forever, color: colorIcono,)
+                  ),
+                  IconButton( // Botón restaurar gasto archivado
+                    onPressed: dialogoAlerta(context: context, texto: '¿Desea restaurar el gasto archivado?', funcionAlProceder: restaurarGastoArchivado(context, siExisteVehiculo), titulo: 'Restaurar', colorTextoSi: Colors.blue),
+                    icon: const Icon(Icons.restore, color: colorIcono,)
+                  ),
+                ],
+              ),
+            ),
+            onTap: null,
+          );
+        }
+      },
     );
   }
 }

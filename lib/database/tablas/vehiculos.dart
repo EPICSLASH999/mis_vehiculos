@@ -8,7 +8,7 @@ import 'package:sqflite/sqflite.dart';
 abstract class RepositorioVehiculos{
   Future<int> create({required Map<String,dynamic> datos});
   Future<List<Vehiculo>> fetchAll();
-  Future<Vehiculo> fetchById(int id);
+  Future<Vehiculo?> fetchById(int id);
   Future<List<String>> fetchAllPlatesExcept(String plate);
   Future<int> update({required int id, required Map<String,dynamic> datos});
   Future<void> delete(int id);
@@ -39,7 +39,7 @@ class VehiculosFalso extends Equatable implements RepositorioVehiculos {
   }
 
   @override
-  Future<Vehiculo> fetchById(int id) {
+  Future<Vehiculo?> fetchById(int id) {
     late Vehiculo vehiculoPorID;
     for (var vehiculo in listaVehiculos) {
       if (vehiculo.id == id) vehiculoPorID = vehiculo;
@@ -187,11 +187,12 @@ class Vehiculos implements RepositorioVehiculos{
   }
 
   @override
-  Future<Vehiculo> fetchById(int id) async {
+  Future<Vehiculo?> fetchById(int id) async {
     final database = await DatabaseService().database;
-    final todo = await database
+    final vehiculo = await database
         .rawQuery('''SELECT * from $tableName WHERE id_vehiculo = ?''', [id]);
-    return Vehiculo.fromSQfliteDatabase(todo.first);
+    if (vehiculo.isEmpty) return null;
+    return Vehiculo.fromSQfliteDatabase(vehiculo.first);
   }
 
   @override
@@ -231,7 +232,7 @@ class Vehiculos implements RepositorioVehiculos{
 
   @override
   Future<String> obtenerNombreVehiculoDeId(int id) async {
-    Vehiculo vehiculo = await fetchById(id);
-    return vehiculo.matricula;
+    Vehiculo? vehiculo = await fetchById(id);
+    return vehiculo!.matricula;
   }
 }

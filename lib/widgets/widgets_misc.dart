@@ -266,7 +266,7 @@ class BotonAgregar extends StatelessWidget {
 
 /* ---------------------------------- MENSAJES --------------------------------- */
 //Función de AlertDialog
-VoidCallback dialogoAlerta ({required BuildContext context, required String texto, required Function funcionAlProceder, String? titulo}) {
+VoidCallback dialogoAlerta ({required BuildContext context, required String texto, required Function funcionAlProceder, String? titulo, Color colorTextoSi = Colors.red}) {
     return (){
       showDialog(
         context: context,
@@ -282,7 +282,7 @@ VoidCallback dialogoAlerta ({required BuildContext context, required String text
                   Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
+                  foregroundColor: colorTextoSi,
                 ),
                 child: const Text('Si') // Botón de "Si" 
               ),
@@ -302,6 +302,7 @@ VoidCallback dialogoAlerta ({required BuildContext context, required String text
 
 // Toast!
  void mostrarToast(BuildContext context, String mensaje) {
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(mensaje),
     duration: const Duration(seconds: 1),
