@@ -1855,6 +1855,5 @@ class _ReporteState extends State<Reporte> {
 
 /* ------------------------------------------------------------------------------ */
 
-//Rama reporte_gastos
 
 
