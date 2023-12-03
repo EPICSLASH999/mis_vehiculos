@@ -74,7 +74,7 @@ class Gastos {
 
   Future<List<Gasto>> fetchByVehicleId(int idVehiculo) async{
     final database = await DatabaseService().database;
-    String query = ''' SELECT mecanico,lugar,costo,fecha,matricula,nombre,marca,modelo,color,ano from $tableName 
+    String query = ''' SELECT mecanico,lugar,costo,fecha,matricula,nombre,marca,modelo,color,ano,vehiculo,etiqueta from $tableName 
       INNER JOIN $tablaVehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 
       INNER JOIN $tablaEtiquetas ON $tablaEtiquetas.id_etiqueta = $tableName.etiqueta 
       WHERE vehiculo = $idVehiculo

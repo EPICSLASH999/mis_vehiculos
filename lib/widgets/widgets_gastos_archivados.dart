@@ -139,7 +139,7 @@ class TileGastoArchivado extends StatelessWidget {
   }
   Function restaurarGastoArchivado (BuildContext context, bool existeVehiculo) {
     return () {
-      context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: false));
+      context.read<VehiculoBloc>().add(RestaruradoGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: false));
     };
   }
   Future<bool> existeVehiculo(int idVehiculo) async {
@@ -158,7 +158,7 @@ class TileGastoArchivado extends StatelessWidget {
         actions: [
           TextButton( // Botón Restaurar Vehículo.
             onPressed: () {
-              context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: true));
+              context.read<VehiculoBloc>().add(RestaruradoGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: true));
               Navigator.of(context).pop();
             }, 
             child: const Text('Aceptar')
