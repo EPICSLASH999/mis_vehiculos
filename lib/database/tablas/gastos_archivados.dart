@@ -17,6 +17,10 @@ class GastosArchivados {
       "fecha" INTEGER NOT NULL DEFAULT (cast(strftime('%s','now') as int)),
       "id_vehiculo" INTEGER NOT NULL,
       "id_etiqueta" INTEGER NOT NULL,
+      "marca_vehiculo" TEXT NOT NULL,
+      "modelo_vehiculo" TEXT NOT NULL,
+      "color_vehiculo" TEXT NOT NULL,
+      "ano_vehiculo" INTEGER NOT NULL,
       PRIMARY KEY("id_gasto_archivado" AUTOINCREMENT)
     );""");
   }
@@ -24,7 +28,7 @@ class GastosArchivados {
   Future<int> create({required Map<String,dynamic> datos}) async {
     final database = await DatabaseService().database;
     return await database.rawInsert(
-      '''INSERT INTO $tableName (vehiculo,etiqueta,mecanico,lugar,costo,fecha,id_vehiculo,id_etiqueta) VALUES (?,?,?,?,?,?,?,?)''',
+      '''INSERT INTO $tableName (vehiculo,etiqueta,mecanico,lugar,costo,fecha,id_vehiculo,id_etiqueta,marca_vehiculo,modelo_vehiculo,color_vehiculo,ano_vehiculo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''',
       datos.values.toList()
     );
   }

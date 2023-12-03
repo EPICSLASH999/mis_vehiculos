@@ -47,6 +47,14 @@ class Etiquetas {
     return Etiqueta.fromSQfliteDatabase(etiqueta.first);
   }
 
+  Future<Etiqueta?> fetchByName(String nombreEtiqueta) async {
+    final database = await DatabaseService().database;
+    final etiqueta = await database
+        .rawQuery('''SELECT * from $tableName WHERE nombre = ?''', [nombreEtiqueta]);
+    if (etiqueta.isEmpty) return null;
+    return Etiqueta.fromSQfliteDatabase(etiqueta.first);
+  }
+
   Future<List<String>> fetchAllTagsExcept(String etiqueta) async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(

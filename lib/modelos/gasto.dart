@@ -10,6 +10,11 @@ class Gasto extends Equatable{
   final String fecha;
   final String? nombreVehiculo;
   final String? nombreEtiqueta;
+  final String? marcaVehiculo;
+  final String? modeloVehiculo;
+  final String? colorVehiculo;
+  final int? anoVehiculo;
+  
 
   const Gasto({
     required this.id, 
@@ -20,7 +25,11 @@ class Gasto extends Equatable{
     required this.costo, 
     required this.fecha,
     this.nombreVehiculo,
-    this.nombreEtiqueta
+    this.nombreEtiqueta, 
+    this.marcaVehiculo, 
+    this.modeloVehiculo, 
+    this.colorVehiculo, 
+    this.anoVehiculo, 
   });
 
   factory Gasto.fromSQfliteDatabase(Map<String, dynamic> datos) => Gasto(
@@ -34,6 +43,10 @@ class Gasto extends Equatable{
         .toIso8601String(),
     nombreVehiculo: datos['matricula']??'',
     nombreEtiqueta: datos['nombre']??'',
+    marcaVehiculo: datos['marca']??'',
+    modeloVehiculo: datos['modelo']??'',
+    colorVehiculo: datos['color']??'',
+    anoVehiculo: datos['ano']??2000,
   );
   
   

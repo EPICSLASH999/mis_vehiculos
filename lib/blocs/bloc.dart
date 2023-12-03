@@ -295,8 +295,9 @@ class FiltradoGastosArchivadosPorFecha extends VehiculoEvento {
 }
 class RestarurarGastoArchivado extends VehiculoEvento {
   final GastoArchivado gastoArchivado;
+  final bool debeRestaurarVehiculo;
 
-  RestarurarGastoArchivado({required this.gastoArchivado});
+  RestarurarGastoArchivado({required this.gastoArchivado,required this.debeRestaurarVehiculo, });
 }
 class EliminadoGastoArchivado extends VehiculoEvento {
   final int idGastoArchivado;
@@ -423,6 +424,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
         "id_vehiculo": gasto.etiqueta,
         "id_etiqueta": gasto.vehiculo,
+        "marca_vehiculo": gasto.marcaVehiculo,
+        "modelo_vehiculo": gasto.modeloVehiculo,
+        "color_vehiculo": gasto.colorVehiculo,
+        "ano_vehiculo": gasto.anoVehiculo,
       };
       await gastosArchivados.create(datos: datos);
     }
@@ -439,6 +444,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
       "id_vehiculo": gasto.vehiculo,
       "id_etiqueta": gasto.etiqueta,
+      "marca_vehiculo": gasto.marcaVehiculo,
+      "modelo_vehiculo": gasto.modeloVehiculo,
+      "color_vehiculo": gasto.colorVehiculo,
+      "ano_vehiculo": gasto.anoVehiculo,
     };
     await gastosArchivados.create(datos: datos);
   }
@@ -457,6 +466,33 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     //yyyy-MM-dd HH:mm:ss
     filtroGastosArchivadosFechaFinal = obtenerValorMaximoDelDiaDeFecha(DateTime.now());
     filtroGastosArchivadosFechaInicial = DateTime.parse('${filtroGastosArchivadosFechaFinal.year}-${normalizarNumeroA2DigitosFecha(filtroGastosArchivadosFechaFinal.month)}-01');
+  }
+  Future<int> obtenerIdEtiquetaGastoArchivado(GastoArchivado gastoArchivado) async {
+    int? idEtiquetaFinal;
+    Etiqueta? etiqueta = await etiquetas.fetchById(gastoArchivado.idEtiqueta);
+    if (etiqueta == null){
+      etiqueta = await etiquetas.fetchByName(gastoArchivado.etiqueta);
+      if (etiqueta != null) return etiqueta.id;
+      
+      idEtiquetaFinal = await etiquetas.create(nombre: gastoArchivado.etiqueta);
+    }
+    idEtiquetaFinal??= etiqueta!.id;
+    return idEtiquetaFinal;
+  }
+  Future<int?> obtenerIdVehiculoGastoArchivado(RestarurarGastoArchivado event) async {
+    int? idVehiculoFinal;
+    if (event.debeRestaurarVehiculo){
+      Map<String,dynamic> datos = {
+        "matricula": event.gastoArchivado.vehiculo,
+        "marca": event.gastoArchivado.marcaVehiculo,
+        "modelo": event.gastoArchivado.modeloVehiculo,
+        "color": event.gastoArchivado.colorVehiculo,
+        "ano": event.gastoArchivado.anoVehiculo,
+      };
+      idVehiculoFinal = await vehiculos.create(datos: datos);
+    }
+    idVehiculoFinal??= event.gastoArchivado.idVehiculo;
+    return idVehiculoFinal;
   }
 
   // Métodos para etiquetas
@@ -722,22 +758,15 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<RestarurarGastoArchivado>((event, emit) async {
       // Primero comprobar que existe etiqueta
-      Etiqueta? etiqueta = await etiquetas.fetchById(event.gastoArchivado.idEtiqueta);
-      int? idEtiquetaFinal;
-      if (etiqueta == null){
-        idEtiquetaFinal = await etiquetas.create(nombre: event.gastoArchivado.etiqueta);
-      }
-      idEtiquetaFinal??= etiqueta!.id;
-      //int idEtiquetaFinal = (etiqueta == null)? idSinEtiqueta:etiqueta.id;
+      int idEtiquetaFinal = await obtenerIdEtiquetaGastoArchivado(event.gastoArchivado);
 
-      // Segundo, comprobar que el vehiculo exista
-      //TODO: Restaurar gasto Archivado.
-      // Si no existe vehiculo, crear nuevo vehiculo.
+      // Segundo, comprobar que el vehiculo exista. Si no, lo crea.
+      int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivado(event);
 
       DateTime fechaRecibida = DateTime.parse(event.gastoArchivado.fecha);
       int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;
       Map<String,dynamic> datos = {
-        "vehiculo": event.gastoArchivado.idVehiculo,
+        "vehiculo": idVehiculoFinal,
         "etiqueta": idEtiquetaFinal,
         "mecanico": event.gastoArchivado.mecanico,
         "lugar": event.gastoArchivado.lugar,

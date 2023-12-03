@@ -138,13 +138,13 @@ class TileGastoArchivado extends StatelessWidget {
     };
   }
   Function restaurarGastoArchivado (BuildContext context, bool existeVehiculo) {
-    if(!existeVehiculo){
-      return (){
-        mostrarToast(context, 'No existe Vehiculo');
+    /*if(!existeVehiculo){
+      return () async {
+        //mostrarToast(context, 'No existe Vehiculo');
       };
-    }
+    }*/
     return () {
-      context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado));
+      context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: false));
     };
   }
   Future<bool> existeVehiculo(int idVehiculo) async {
@@ -159,20 +159,27 @@ class TileGastoArchivado extends StatelessWidget {
       context: context, 
       builder: (context) => AlertDialog(
         title: const Text('Vehiculo ya no existe'),
-        content: const Text('No existe'),
+        content: const Text('¿Desea restaurar el vehículo?'),
         /*Form(
           key: _formKey,
           child: SizedBox(height: alturaDelCuadroDeDialogo, child: CuadroDeTextoEtiqueta(controlador: controladorNuevaEtiqueta, campoRequerido: true, focusTecaldo: true, icono: iconoEtiqueta,)),
         ),*/
         actions: [
-          TextButton( // Botón Agregar Nueva Etiqueta.
+          TextButton( // Botón Restaurar Vehículo.
             onPressed: () {
               /*if (_formKey.currentState!.validate()) {
                 Navigator.of(context).pop(controladorNuevaEtiqueta.text.trim());
               }*/
+              context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: true));
               Navigator.of(context).pop();
             }, 
             child: const Text('Aceptar')
+          ),
+          TextButton( // Botón Cancelar.
+            onPressed: () {
+              Navigator.of(context).pop();
+            }, 
+            child: const Text('Cancelar')
           ),
         ],
       ),
