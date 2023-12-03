@@ -23,6 +23,7 @@ const String valorSinMecanico = 'Sin mecanico';
 const String valorSinLugar = 'Sin lugar';
 enum RepresentacionGastos {lista, grafica, reporte}
 enum TipoReporte {year, month, day}
+const String sinRelacion = 'Sin datos';
 
 // Tablas
 const tablaGastos = 'gastos';

@@ -1101,7 +1101,7 @@ class ListaGastos extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting){
           return const WidgetCargando();
         } else{
-          final gastos = snapshot.data?? [];
+          final gastos = snapshot.data?? []; // Recibe la lista ya filtrada desde SQL
           
           return gastos.isEmpty
             ? const Center(
@@ -1206,8 +1206,8 @@ class BotonesTileGasto extends StatelessWidget {
 class Graficas extends StatelessWidget {
   const Graficas({super.key, required this.misGastos, required this.misGastosGlobales});
 
-  final Future<List<Gasto>>? misGastos;
   final double radio = 235;
+  final Future<List<Gasto>>? misGastos;
   final Future<List<Gasto>>? misGastosGlobales;
   
 
@@ -1218,35 +1218,6 @@ class Graficas extends StatelessWidget {
       Colors.purple, Colors.grey, Colors.green, Colors.orange, Colors.brown, Colors.lightBlue,
     ];
     
-    int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
-    int? obtenerIDColor(int idVehiculo){
-      if (filtroIdVehiculo == valorOpcionTodas) return null;
-      if (idVehiculo == filtroIdVehiculo) return 1;
-      return 0;
-    }
-
-    void llenarListasEtiquetas(List<Gasto> misGastos, Map<String, double> gastoPorEtiqueta, Map<String, Color> colorPorEtiqueta, List<Color> colores) {
-      int idColor = 0;
-      for (var gasto in misGastos) {
-        gastoPorEtiqueta[gasto.nombreEtiqueta!] = (gastoPorEtiqueta[gasto.nombreEtiqueta!]??0) + gasto.costo;
-        if (!colorPorEtiqueta.containsKey(gasto.nombreEtiqueta)) {
-          colorPorEtiqueta[gasto.nombreEtiqueta!] = colores[idColor];
-          idColor++; if (idColor > colores.length-1) idColor = 0;
-        }
-      }
-    }
-    void llenarListasVehiculos(List<Gasto> misGastos, Map<String, double> gastoPorVehiculo, Map<String, Color> colorPorVehiculo, List<Color> colores) {    
-      int idColor = 0;
-      for (var gasto in misGastos) {
-        gastoPorVehiculo[gasto.nombreVehiculo!] = (gastoPorVehiculo[gasto.nombreVehiculo!]??0) + gasto.costo;
-        if (!colorPorVehiculo.containsKey(gasto.nombreVehiculo)) {
-          colorPorVehiculo[gasto.nombreVehiculo!] = colores[obtenerIDColor(gasto.vehiculo)??idColor];
-          idColor++; if (idColor > colores.length-1) idColor = 0;
-        }
-      }
-    }
-  
-
     //Para tener solo la gráfica de etiquetas
     /*return GraficaCircular(
       totalGastos: totalGastos, 
@@ -1256,6 +1227,7 @@ class Graficas extends StatelessWidget {
       colorPorElemento: colorPorEtiqueta,
       titulo: 'Relación por etiqueta'
     );*/
+
     // Para tener multiples graficas
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -1263,125 +1235,183 @@ class Graficas extends StatelessWidget {
         scrollDirection: Axis.vertical,
         child: Column(
           children: [
-            FutureBuilder<List<Gasto>>( // Gráfica para Etiquetas
-                future: misGastos,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting){
-                    return const WidgetCargando();
-                  } else{
-                    final gastos = snapshot.data?? [];
-
-                    int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
-                    if (filtroIdVehiculo != valorOpcionTodas) gastos.removeWhere((element) => (element.vehiculo != filtroIdVehiculo));  // Filtrar por vehículo  
-    
-                    /* ------------------------------------------------------------------------------------------------------------------ */
-                    // Para Etiquetas
-                    Map<String, Color> colorPorEtiqueta = {};
-                    Map<String, double> gastoPorEtiqueta = {};
-                    llenarListasEtiquetas(gastos, gastoPorEtiqueta, colorPorEtiqueta, colores);
-    
-                    double totalGastosEtiquetas = 0;
-                    List<PieChartSectionData> pieCharts = [];
-                    gastoPorEtiqueta.forEach((key, value) {totalGastosEtiquetas += value;}); // Obtener total de gastos.
-                    gastoPorEtiqueta.forEach((key, value) {
-                      pieCharts.add(
-                        PieChartSectionData(
-                          value: value, 
-                          color: colorPorEtiqueta[key],
-                          showTitle: true,
-                          title: '${((value*100)/totalGastosEtiquetas).toStringAsFixed(1)}%',
-                        )
-                      );
-                      //totalGastosEtiquetas += value;
-                    });
-    
-                    // Reordenar mapa por cantidad de gasto
-                    gastoPorEtiqueta = Map.fromEntries(gastoPorEtiqueta.entries.toList()..sort((e1,e2) => e2.value.compareTo(e1.value)));
-                    /* ------------------------------------------------------------------------------------------------------------------ */
-                    const String sinRelacionPorEtiquetas = 'Sin datos';
-
-                    return /*gastos.isEmpty
-                      ? const Center(
-                        child: TituloGrande(titulo: 'Sin relación por etiqueta')
-                      )
-                    : */
-                    gastos.isEmpty? 
-                      GraficaCircular(
-                        totalGastos: totalGastosEtiquetas, 
-                        radio: radio, 
-                        pieCharts: [
-                          PieChartSectionData(
-                          value: 1, // Es un valor placebo, pero si pongo 0 no sale nada.
-                          color: colorReporteSinGastos,
-                          showTitle: true,
-                          title: '0%',
-                        )
-                        ], 
-                        gastoPorElemento:  const {sinRelacionPorEtiquetas:0}, 
-                        colorPorElemento: const {sinRelacionPorEtiquetas: colorReporteSinGastos},
-                        titulo: 'Relación por etiqueta'
-                      )
-                      :
-                    GraficaCircular(
-                      totalGastos: totalGastosEtiquetas, 
-                      radio: radio, 
-                      pieCharts: pieCharts, 
-                      gastoPorElemento: gastoPorEtiqueta, 
-                      colorPorElemento: colorPorEtiqueta,
-                      titulo: 'Relación por etiqueta'
-                    );
-                  }
-                },
-              ),
-            FutureBuilder( // Gráfica para vehículos
-              future: misGastosGlobales, 
-              builder: (context, snapshot) {
-                 if (snapshot.connectionState == ConnectionState.waiting){
-                    return const WidgetCargando();
-                  } else{
-                    final gastosGlobales = snapshot.data?? [];
-    
-                    /* ------------------------------------------------------------------------------------------------------------------ */
-                    // Para Vehiculos
-                    Map<String, Color> colorPorVehiculo = {};
-                    Map<String, double> gastoPorVehiculo = {};
-                    llenarListasVehiculos(gastosGlobales, gastoPorVehiculo, colorPorVehiculo, colores);
-    
-                    double totalGastosVehiculos = 0;
-                    List<PieChartSectionData> pieChartsVehiculos = [];
-                    gastoPorVehiculo.forEach((key, value) {totalGastosVehiculos += value;}); // Obtener total de gastos.
-                    gastoPorVehiculo.forEach((key, value) {
-                      pieChartsVehiculos.add(
-                        PieChartSectionData(
-                          value: value, 
-                          color: colorPorVehiculo[key],
-                          showTitle: true,
-                          title: '${((value*100)/totalGastosVehiculos).toStringAsFixed(1)}%',
-                        )
-                      );
-                      //totalGastosVehiculos += value;
-                    });
-    
-                    // Reordenar mapa por cantidad de gasto
-                    gastoPorVehiculo = Map.fromEntries(gastoPorVehiculo.entries.toList()..sort((e1,e2) => e2.value.compareTo(e1.value)));
-                    /* ------------------------------------------------------------------------------------------------------------------ */
-    
-                     return GraficaCircular(
-                      totalGastos: totalGastosVehiculos, 
-                      radio: radio, 
-                      pieCharts: pieChartsVehiculos, 
-                      gastoPorElemento: gastoPorVehiculo, 
-                      colorPorElemento: colorPorVehiculo,
-                      titulo: 'Relación por vehículo');
-                    }
-                 
-              },
-            ),
-            
-            //GraficaCircular(totalGastos: totalGastos2, radio: radio, pieCharts: pieChartsVehiculos, gastoPorElemento: gastoPorVehiculo, colorPorElemento: colorPorVehiculo,titulo: 'Relación por vehículo'),
+            GraficaRelacionEtiquetas(misGastos: misGastos, colores: colores, radio: radio),
+            GraficaRelacionVehiculos(misGastosGlobales: misGastosGlobales, colores: colores, radio: radio),
           ],
         ),
       ),
+    );
+  }
+
+  
+}
+
+class GraficaRelacionEtiquetas extends StatelessWidget {
+  const GraficaRelacionEtiquetas({
+    super.key,
+    required this.misGastos,
+    required this.colores,
+    required this.radio,
+  });
+
+  final Future<List<Gasto>>? misGastos;
+  final List<Color> colores;
+  final double radio;
+
+  @override
+  Widget build(BuildContext context) {
+    void llenarListasEtiquetas(List<Gasto> misGastos, Map<String, double> gastoPorEtiqueta, Map<String, Color> colorPorEtiqueta, List<Color> colores) {
+      int idColor = 0;
+      for (var gasto in misGastos) {
+        gastoPorEtiqueta[gasto.nombreEtiqueta!] = (gastoPorEtiqueta[gasto.nombreEtiqueta!]??0) + gasto.costo;
+        if (!colorPorEtiqueta.containsKey(gasto.nombreEtiqueta)) {
+          colorPorEtiqueta[gasto.nombreEtiqueta!] = colores[idColor];
+          idColor++; if (idColor > colores.length-1) idColor = 0;
+        }
+      }
+    }    
+    void llenarPieCharts(Map<String, double> gastoPorEtiqueta, List<PieChartSectionData> pieCharts, Map<String, Color> colorPorEtiqueta, double totalGastosEtiquetas) {
+      gastoPorEtiqueta.forEach((key, value) {
+        pieCharts.add(
+          PieChartSectionData(
+            value: value, 
+            color: colorPorEtiqueta[key],
+            showTitle: true,
+            title: '${((value*100)/totalGastosEtiquetas).toStringAsFixed(1)}%',
+          )
+        );
+        //totalGastosEtiquetas += value;
+      });
+  }
+    
+    return FutureBuilder<List<Gasto>>( // Gráfica para Etiquetas
+        future: misGastos,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting){
+            return const WidgetCargando();
+          } else{
+            final gastos = snapshot.data?? [];
+
+            int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
+            if (filtroIdVehiculo != valorOpcionTodas) gastos.removeWhere((element) => (element.vehiculo != filtroIdVehiculo));  // Filtrar por vehículo  
+    
+            /* ------------------------------------------------------------------------------------------------------------------ */
+            // Para Etiquetas
+            Map<String, Color> colorPorEtiqueta = {};
+            Map<String, double> gastoPorEtiqueta = {};
+            llenarListasEtiquetas(gastos, gastoPorEtiqueta, colorPorEtiqueta, colores);
+    
+            double totalGastosEtiquetas = 0;
+            List<PieChartSectionData> pieCharts = [];
+            gastoPorEtiqueta.forEach((key, value) {totalGastosEtiquetas += value;}); // Obtener total de gastos.
+            llenarPieCharts(gastoPorEtiqueta, pieCharts, colorPorEtiqueta, totalGastosEtiquetas);
+    
+            // Reordenar mapa por cantidad de gasto
+            gastoPorEtiqueta = Map.fromEntries(gastoPorEtiqueta.entries.toList()..sort((e1,e2) => e2.value.compareTo(e1.value)));
+            /* ------------------------------------------------------------------------------------------------------------------ */
+            const String titulo = 'Relación por etiqueta';
+
+            return gastos.isEmpty
+              ? 
+              GraficaCircularVacia(totalGastos: totalGastosEtiquetas, radio: radio, titulo: titulo,)
+              :
+              GraficaCircular(
+                totalGastos: totalGastosEtiquetas, 
+                radio: radio, 
+                pieCharts: pieCharts, 
+                gastoPorElemento: gastoPorEtiqueta, 
+                colorPorElemento: colorPorEtiqueta,
+                titulo: titulo
+              );
+          }
+        },
+      );
+  }
+}
+
+class GraficaRelacionVehiculos extends StatelessWidget {
+  const GraficaRelacionVehiculos({
+    super.key,
+    required this.misGastosGlobales,
+    required this.colores,
+    required this.radio,
+  });
+
+  final Future<List<Gasto>>? misGastosGlobales;
+  final List<Color> colores;
+  final double radio;
+
+  @override
+  Widget build(BuildContext context) {
+    int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
+    int idColor = 0;
+    
+    int obtenerIDColor(int idVehiculo){
+      if (filtroIdVehiculo == valorOpcionTodas) return idColor;
+      if (idVehiculo == filtroIdVehiculo) return 1;
+      return 0;
+    }
+    void llenarListasVehiculos(List<Gasto> misGastos, Map<String, double> gastoPorVehiculo, Map<String, Color> colorPorVehiculo, List<Color> colores) {        
+      for (var gasto in misGastos) {
+        gastoPorVehiculo[gasto.nombreVehiculo!] = (gastoPorVehiculo[gasto.nombreVehiculo!]??0) + gasto.costo;
+        if (!colorPorVehiculo.containsKey(gasto.nombreVehiculo)) {
+          colorPorVehiculo[gasto.nombreVehiculo!] = colores[obtenerIDColor(gasto.vehiculo)];
+          idColor++; if (idColor > colores.length-1) idColor = 0;
+        }
+      }
+    }
+    void llenarPieCharts(Map<String, double> gastoPorVehiculo, List<PieChartSectionData> pieChartsVehiculos, Map<String, Color> colorPorVehiculo, double totalGastosVehiculos) {
+      gastoPorVehiculo.forEach((key, value) {
+        pieChartsVehiculos.add(
+          PieChartSectionData(
+            value: value, 
+            color: colorPorVehiculo[key],
+            showTitle: true,
+            title: '${((value*100)/totalGastosVehiculos).toStringAsFixed(1)}%',
+          )
+        );
+        //totalGastosVehiculos += value;
+      });
+    }
+
+    return FutureBuilder( // Gráfica para vehículos
+      future: misGastosGlobales, 
+      builder: (context, snapshot) {
+         if (snapshot.connectionState == ConnectionState.waiting){
+            return const WidgetCargando();
+          } else{
+            final gastosGlobales = snapshot.data?? [];
+    
+            /* ------------------------------------------------------------------------------------------------------------------ */
+            // Para Vehiculos
+            Map<String, Color> colorPorVehiculo = {};
+            Map<String, double> gastoPorVehiculo = {};
+            llenarListasVehiculos(gastosGlobales, gastoPorVehiculo, colorPorVehiculo, colores);
+    
+            double totalGastosVehiculos = 0;
+            List<PieChartSectionData> pieChartsVehiculos = [];
+            gastoPorVehiculo.forEach((key, value) {totalGastosVehiculos += value;}); // Obtener total de gastos.
+            llenarPieCharts(gastoPorVehiculo, pieChartsVehiculos, colorPorVehiculo, totalGastosVehiculos);
+    
+            // Reordenar mapa por cantidad de gasto
+            gastoPorVehiculo = Map.fromEntries(gastoPorVehiculo.entries.toList()..sort((e1,e2) => e2.value.compareTo(e1.value)));
+            /* ------------------------------------------------------------------------------------------------------------------ */
+            const String titulo = 'Relación por vehículo';
+
+             return gastosGlobales.isEmpty
+              ? 
+              GraficaCircularVacia(totalGastos: totalGastosVehiculos, radio: radio, titulo: titulo)
+              :
+              GraficaCircular(
+              totalGastos: totalGastosVehiculos, 
+              radio: radio, 
+              pieCharts: pieChartsVehiculos, 
+              gastoPorElemento: gastoPorVehiculo, 
+              colorPorElemento: colorPorVehiculo,
+              titulo: titulo);
+            }
+         
+      },
     );
   }
 
@@ -1442,11 +1472,11 @@ class GraficaCircular extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    for(var etiqueta in gastoPorElemento.keys) Padding(
+                    for(var elemento in gastoPorElemento.keys) Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Indicator(
-                        color: colorPorElemento[etiqueta]!,
-                        text: '$etiqueta \n \$${(gastoPorElemento[etiqueta]??0.0).toStringAsFixed(2)}',
+                        color: colorPorElemento[elemento]!,
+                        text: '$elemento \n \$${(gastoPorElemento[elemento]??0.0).toStringAsFixed(2)}',
                         isSquare: true,
                       ),
                     ),
@@ -1457,6 +1487,38 @@ class GraficaCircular extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class GraficaCircularVacia extends StatelessWidget {
+  const GraficaCircularVacia({
+    super.key,
+    required this.totalGastos,
+    required this.radio, 
+    required this.titulo,
+  });
+
+  final double totalGastos;
+  final double radio;
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    return GraficaCircular(
+      totalGastos: totalGastos, 
+      radio: radio, 
+      pieCharts: [
+        PieChartSectionData(
+        value: 1, // Es un valor placebo, pero si pongo 0 no sale nada.
+        color: colorReporteSinGastos,
+        showTitle: true,
+        title: '0%',
+      )
+      ], 
+      gastoPorElemento:  const {sinRelacion:0}, 
+      colorPorElemento: const {sinRelacion: colorReporteSinGastos},
+      titulo: titulo
     );
   }
 }
@@ -1641,6 +1703,18 @@ class _ReporteState extends State<Reporte> {
             return const WidgetCargando();
           } else{
             final gastosRecibidos = snapshot.data?? [];
+
+             if (gastosRecibidos.isEmpty) {
+               return const Center(
+                child: Text(
+                  'Sin gastos...',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                  ),
+                ),
+              );
+             }
             
             List<Gasto> misGastos = gastosRecibidos.toList().copiar();
             
