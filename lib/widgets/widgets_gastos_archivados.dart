@@ -62,7 +62,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
               } else{
                 final gastosArchivados = snapshot.data?? [];
 
-                return IconButton(
+                return IconButton( // Botón Borrar GastosArchivados.
                   onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerVehiculoSeleccionado()}?', funcionAlProceder: eliminarGastosArchivados(context), titulo: 'Eliminar'), 
                   icon: const Icon(Icons.delete_forever)
                 );
@@ -138,11 +138,6 @@ class TileGastoArchivado extends StatelessWidget {
     };
   }
   Function restaurarGastoArchivado (BuildContext context, bool existeVehiculo) {
-    /*if(!existeVehiculo){
-      return () async {
-        //mostrarToast(context, 'No existe Vehiculo');
-      };
-    }*/
     return () {
       context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: false));
     };
@@ -160,16 +155,9 @@ class TileGastoArchivado extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Vehiculo ya no existe'),
         content: const Text('¿Desea restaurar el vehículo?'),
-        /*Form(
-          key: _formKey,
-          child: SizedBox(height: alturaDelCuadroDeDialogo, child: CuadroDeTextoEtiqueta(controlador: controladorNuevaEtiqueta, campoRequerido: true, focusTecaldo: true, icono: iconoEtiqueta,)),
-        ),*/
         actions: [
           TextButton( // Botón Restaurar Vehículo.
             onPressed: () {
-              /*if (_formKey.currentState!.validate()) {
-                Navigator.of(context).pop(controladorNuevaEtiqueta.text.trim());
-              }*/
               context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: true));
               Navigator.of(context).pop();
             }, 

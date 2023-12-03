@@ -1316,15 +1316,19 @@ class GraficaRelacionVehiculos extends StatelessWidget {
   Widget build(BuildContext context) {
     int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroGastosIdVehiculo;
     int idColor = 0;
+    String? nombreVehiculo;
+    const int idColorPrincipal = 1;
+    const int idColorSecundario = 0;
     
     int obtenerIDColor(int idVehiculo){
       if (filtroIdVehiculo == valorOpcionTodas) return idColor;
-      if (idVehiculo == filtroIdVehiculo) return 1;
-      return 0;
+      if (idVehiculo == filtroIdVehiculo) return idColorPrincipal;
+      return idColorSecundario;
     }
     void llenarListasVehiculos(List<Gasto> misGastos, Map<String, double> gastoPorVehiculo, Map<String, Color> colorPorVehiculo, List<Color> colores) {        
       for (var gasto in misGastos) {
         gastoPorVehiculo[gasto.nombreVehiculo!] = (gastoPorVehiculo[gasto.nombreVehiculo!]??0) + gasto.costo;
+        if (nombreVehiculo == null && gasto.vehiculo == filtroIdVehiculo) nombreVehiculo = gasto.nombreVehiculo; // Establecer nombreVehiculo
         if (!colorPorVehiculo.containsKey(gasto.nombreVehiculo)) {
           colorPorVehiculo[gasto.nombreVehiculo!] = colores[obtenerIDColor(gasto.vehiculo)];
           idColor++; if (idColor > colores.length-1) idColor = 0;
@@ -1373,20 +1377,31 @@ class GraficaRelacionVehiculos extends StatelessWidget {
     
             // Reordenar mapa por cantidad de gasto
             gastoPorVehiculo = Map.fromEntries(gastoPorVehiculo.entries.toList()..sort((e1,e2) => e2.value.compareTo(e1.value)));
+            Map<String, double>? gastosVehiculoSeleccionado;
+            if (gastoPorVehiculo.entries.isNotEmpty && filtroIdVehiculo != valorOpcionTodas && nombreVehiculo != null) {
+              gastosVehiculoSeleccionado = {nombreVehiculo!: gastoPorVehiculo[nombreVehiculo]!};
+            }
+            if (gastosVehiculoSeleccionado == null && filtroIdVehiculo != valorOpcionTodas) {
+              gastosVehiculoSeleccionado = {mensajeSinRelacion: 0.0};
+              colorPorVehiculo[mensajeSinRelacion] = colores[idColorPrincipal];
+            }
+            
             /* ------------------------------------------------------------------------------------------------------------------ */
             const String titulo = 'Relación por vehículo';
 
-             return misGastosGlobales.isEmpty
+            return misGastosGlobales.isEmpty
               ? 
               GraficaCircularVacia(totalGastos: totalGastosVehiculos, radio: radio, titulo: titulo)
               :
               GraficaCircular(
-              totalGastos: totalGastosVehiculos, 
-              radio: radio, 
-              pieCharts: pieChartsVehiculos, 
-              gastoPorElemento: gastoPorVehiculo, 
-              colorPorElemento: colorPorVehiculo,
-              titulo: titulo);
+                totalGastos: totalGastosVehiculos, 
+                radio: radio, 
+                pieCharts: pieChartsVehiculos, 
+                gastoPorElemento: gastoPorVehiculo, 
+                colorPorElemento: colorPorVehiculo,
+                titulo: titulo,
+                simbologia: gastosVehiculoSeleccionado,
+              );
             }
          
       },
@@ -1404,7 +1419,8 @@ class GraficaCircular extends StatelessWidget {
     required this.pieCharts,
     required this.gastoPorElemento,
     required this.colorPorElemento, 
-    required this.titulo,
+    required this.titulo, 
+    this.simbologia,
   });
 
   final double totalGastos;
@@ -1413,6 +1429,12 @@ class GraficaCircular extends StatelessWidget {
   final Map<String, double> gastoPorElemento;
   final Map<String, Color> colorPorElemento;
   final String titulo;
+  final Map<String, double>? simbologia;
+
+  Map<String, double> obtenerSimbologia(){
+    if (simbologia != null) return simbologia!;
+    return gastoPorElemento;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1444,13 +1466,14 @@ class GraficaCircular extends StatelessWidget {
                 ),
               ),
             ),
-            Container( // Simbología de elementos por colores
+            // Simbología de elementos por colores
+            Container( 
               margin: const EdgeInsets.fromLTRB(0, 340, 0, 0),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    for(var elemento in gastoPorElemento.keys) Padding(
+                    for(var elemento in obtenerSimbologia().keys) Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Indicator(
                         color: colorPorElemento[elemento]!,
@@ -1682,6 +1705,7 @@ class _ReporteState extends State<Reporte> {
           } else{
             final gastosRecibidos = snapshot.data?? [];
 
+            // Clono la lista recibida porque al operar con ella, los cambios se reflejarian en las demas graficas que hagan referencia a la misma lista, por algun razón...
             List<Gasto> misGastos = gastosRecibidos.toList().copiar();
             
             int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroGastosIdVehiculo;
@@ -1702,6 +1726,8 @@ class _ReporteState extends State<Reporte> {
 
             reporteHistorico = Map.from(generarReporte(misGastos));
             reporteHistorico = Map.from(llenarFechasFaltantes(reporteHistorico));
+
+            animacionDeSubida(); // Hace que el scroll se suba en caso de que haya quedado abajo en el estado anterior.
 
             return Padding(
               padding: const EdgeInsets.all(8.0),
@@ -1737,7 +1763,6 @@ class _ReporteState extends State<Reporte> {
                                     setState(() {
                                       tipoReporte = TipoReporte.month;
                                       anoAMostrarReporte = year;
-                                        animacionDeSubida();
                                     });
                                     context.read<VehiculoBloc>().add(CambiadoTipoReporte(tipoReporte: tipoReporte));
                                     context.read<VehiculoBloc>().add(CambiadoAnoAMostrarReporte(anoAMostrarReporte: anoAMostrarReporte));
@@ -1767,7 +1792,6 @@ class _ReporteState extends State<Reporte> {
                                       tipoReporte = TipoReporte.day;
                                       mesAMostrarReporte = month;
                                     });
-                                    animacionDeSubida();
                                     context.read<VehiculoBloc>().add(CambiadoTipoReporte(tipoReporte: tipoReporte));
                                     context.read<VehiculoBloc>().add(CambiadoMesAMostrarReporte(mesAMostrarReporte: mesAMostrarReporte));
                                   },
@@ -1778,25 +1802,16 @@ class _ReporteState extends State<Reporte> {
                               ],
                             ),
                             // Reporte Diario
-                              Wrap(
+                            Wrap(
                             direction: Axis.horizontal,
                             children: 
                             [
-
-                            if (tipoReporte == TipoReporte.day) for (var day in reporteHistorico[anoAMostrarReporte]![mesAMostrarReporte]!.keys) /*ListTile( // Mostrar gastos por meses
-                              title: Text(day.toString()),
-                              subtitle: Text('\$ ${obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrar, mesAMostrar, day).toStringAsFixed(2)}'),
-                              onTap: () {
-                                setState(() {
-                                  mostrarReporte = MostrarReporte.day;
-                                });
-                              },
-                            ),*/
-                            SizedBox(
-                              width: 80,
-                              height: 80,
-                              child: Card(
-                                color: (obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrarReporte, mesAMostrarReporte, day) <= 0)? colorReporteSinGastos:null,
+                              if (tipoReporte == TipoReporte.day) for (var day in reporteHistorico[anoAMostrarReporte]![mesAMostrarReporte]!.keys) 
+                              SizedBox(
+                                width: 80,
+                                height: 80,
+                                child: Card(
+                                  color: (obtenerGastosPorDiaMesYAno(reporteHistorico, anoAMostrarReporte, mesAMostrarReporte, day) <= 0)? colorReporteSinGastos:null,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -1808,7 +1823,7 @@ class _ReporteState extends State<Reporte> {
                                     ],
                                   ),
                                 ),
-                            ),
+                              ),
                             ]
                           ),
                         ],
