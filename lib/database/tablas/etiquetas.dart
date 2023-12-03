@@ -39,10 +39,11 @@ class Etiquetas {
     return registros.map((etiqueta) => Etiqueta.fromSQfliteDatabase(etiqueta)).toList();
   }
 
-  Future<Etiqueta> fetchById(int id) async {
+  Future<Etiqueta?> fetchById(int id) async {
     final database = await DatabaseService().database;
     final etiqueta = await database
         .rawQuery('''SELECT * from $tableName WHERE id_etiqueta = ?''', [id]);
+    if (etiqueta.isEmpty) return null;
     return Etiqueta.fromSQfliteDatabase(etiqueta.first);
   }
 

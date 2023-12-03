@@ -721,26 +721,34 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
     on<RestarurarGastoArchivado>((event, emit) async {
-      //TODO: Restaurar gasto Archivado
-      // Obtener de alguna manera el id del vehiculo
-      // y el id de etiqueta
-      // Si no existe id de etiqueta hacerla 'Sin etiqueta'.
-      // Y si no existe vehiculo, crear nuevo vehiculo.
+      // Primero comprobar que existe etiqueta
+      Etiqueta? etiqueta = await etiquetas.fetchById(event.gastoArchivado.idEtiqueta);
+      int? idEtiquetaFinal;
+      if (etiqueta == null){
+        idEtiquetaFinal = await etiquetas.create(nombre: event.gastoArchivado.etiqueta);
+      }
+      idEtiquetaFinal??= etiqueta!.id;
+      //int idEtiquetaFinal = (etiqueta == null)? idSinEtiqueta:etiqueta.id;
+
+      // Segundo, comprobar que el vehiculo exista
+      //TODO: Restaurar gasto Archivado.
+      // Si no existe vehiculo, crear nuevo vehiculo.
 
       DateTime fechaRecibida = DateTime.parse(event.gastoArchivado.fecha);
       int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;
       Map<String,dynamic> datos = {
         "vehiculo": event.gastoArchivado.idVehiculo,
-        "etiqueta": event.gastoArchivado.idEtiqueta,
+        "etiqueta": idEtiquetaFinal,
         "mecanico": event.gastoArchivado.mecanico,
         "lugar": event.gastoArchivado.lugar,
         "costo": event.gastoArchivado.costo,
         "fecha": fechaEnMilisegundos,
       };
+
+
       await gastos.create(datos: datos);
       await gastosArchivados.delete(event.gastoArchivado.id); 
       _misGastosArchivados = obtenerGastosArchivados();
-      _misGastos = obtenerGastosFiltrados();
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
     on<EliminadoGastoArchivado>((event, emit) async {

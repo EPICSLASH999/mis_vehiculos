@@ -649,7 +649,7 @@ class _BotonRepresentacionGastosState extends State<BotonRepresentacionGastos> {
   Widget build(BuildContext context) {
     representacionGasto??= widget.representacionGasto;
     return Padding(
-      padding: const EdgeInsets.all(6.0),
+      padding: const EdgeInsets.all(10.0),
       child: SizedBox(
         height: 40,
         width: 300,
