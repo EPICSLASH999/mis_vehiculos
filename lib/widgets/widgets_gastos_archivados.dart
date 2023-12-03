@@ -152,6 +152,33 @@ class TileGastoArchivado extends StatelessWidget {
     return (vehiculo != null);
   }
   
+  Future<String?> cuadroDeDialogoAgregarEtiqueta(BuildContext context) {
+    //double alturaDelCuadroDeDialogo = 70;
+
+    return showDialog<String>(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: const Text('Vehiculo ya no existe'),
+        content: const Text('No existe'),
+        /*Form(
+          key: _formKey,
+          child: SizedBox(height: alturaDelCuadroDeDialogo, child: CuadroDeTextoEtiqueta(controlador: controladorNuevaEtiqueta, campoRequerido: true, focusTecaldo: true, icono: iconoEtiqueta,)),
+        ),*/
+        actions: [
+          TextButton( // Botón Agregar Nueva Etiqueta.
+            onPressed: () {
+              /*if (_formKey.currentState!.validate()) {
+                Navigator.of(context).pop(controladorNuevaEtiqueta.text.trim());
+              }*/
+              Navigator.of(context).pop();
+            }, 
+            child: const Text('Aceptar')
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     
@@ -189,7 +216,14 @@ class TileGastoArchivado extends StatelessWidget {
                     icon: const Icon(Icons.delete_forever, color: colorIcono,)
                   ),
                   IconButton( // Botón restaurar gasto archivado
-                    onPressed: dialogoAlerta(context: context, texto: '¿Desea restaurar el gasto archivado?', funcionAlProceder: restaurarGastoArchivado(context, siExisteVehiculo), titulo: 'Restaurar', colorTextoSi: Colors.blue),
+                    onPressed: () async {
+                      if (!siExisteVehiculo){
+                        await cuadroDeDialogoAgregarEtiqueta(context);
+                        return;
+                      }
+                      // ignore: use_build_context_synchronously
+                      dialogoAlerta(context: context, texto: '¿Desea restaurar el gasto archivado?', funcionAlProceder: restaurarGastoArchivado(context, siExisteVehiculo), titulo: 'Restaurar', colorTextoSi: Colors.blue)();
+                    },
                     icon: const Icon(Icons.restore, color: colorIcono,)
                   ),
                 ],
