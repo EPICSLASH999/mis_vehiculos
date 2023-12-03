@@ -490,6 +490,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "ano": event.gastoArchivado.anoVehiculo,
       };
       idVehiculoFinal = await vehiculos.create(datos: datos);
+
+      
+      // Tercero, actualizar todos los gastosArchviados de ese vehiculo para referenciar la Id del Vehiculo restaurado.
+      await gastosArchivados.updateAllWhereVehiculeId(idVehiculoVieja: event.gastoArchivado.idVehiculo, idVehiculoNueva: idVehiculoFinal);
     }
     idVehiculoFinal??= event.gastoArchivado.idVehiculo;
     return idVehiculoFinal;
@@ -762,6 +766,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
       // Segundo, comprobar que el vehiculo exista. Si no, lo crea.
       int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivado(event);
+
 
       DateTime fechaRecibida = DateTime.parse(event.gastoArchivado.fecha);
       int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;

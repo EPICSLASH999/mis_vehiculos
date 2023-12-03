@@ -74,4 +74,17 @@ class GastosArchivados {
     final database = await DatabaseService().database;
     await database.rawDelete('''DELETE FROM $tableName''');
   }
+
+  Future<int> updateAllWhereVehiculeId({required int idVehiculoVieja, required int idVehiculoNueva}) async {
+    final database = await DatabaseService().database;
+    return await database.update(
+      tableName, 
+      {
+        'id_vehiculo': idVehiculoNueva,
+      },
+      where: 'id_vehiculo = ?',
+      conflictAlgorithm: ConflictAlgorithm.rollback,
+      whereArgs: [idVehiculoVieja],
+    );
+  }
 }
