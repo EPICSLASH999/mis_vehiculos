@@ -752,8 +752,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     
     // Gastos Archivados
     on<ClickeadoConsultarGastosArchivados>((event, emit) {
-      _misGastosArchivados = obtenerGastosArchivados();
       reiniciarFiltrosGastosArchivados();
+      _misGastosArchivados = obtenerGastosArchivados();
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
@@ -799,9 +799,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await gastos.create(datos: datos);
       await gastosArchivados.delete(event.gastoArchivado.id); 
 
+      // Checa si ese vehiculo ya no tiene gastos Archivados, para limpiar el filtro.
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      var listaTemp = await misVehiculosArchivados;
-      if (listaTemp != null &&  listaTemp.isNotEmpty && !listaTemp.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
+      var vehiculosArchivados = await misVehiculosArchivados;
+      if (vehiculosArchivados != null &&  vehiculosArchivados.isNotEmpty && !vehiculosArchivados.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
       //reiniciarFiltroVehiculoGastosArchivados();
 
       _misGastosArchivados = obtenerGastosArchivados();
@@ -813,9 +814,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<EliminadoGastoArchivado>((event, emit) async {
       await gastosArchivados.delete(event.idGastoArchivado); 
 
+      // Checa si ese vehiculo ya no tiene gastos Archivados, para limpiar el filtro.
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      var listaTemp = await misVehiculosArchivados;
-      if (listaTemp != null &&  listaTemp.isNotEmpty && !listaTemp.contains(filtroVehiculoGastosArchivados))reiniciarFiltroVehiculoGastosArchivados();
+      var vehiculosArchivados = await misVehiculosArchivados;
+      if (vehiculosArchivados != null &&  vehiculosArchivados.isNotEmpty && !vehiculosArchivados.contains(filtroVehiculoGastosArchivados))reiniciarFiltroVehiculoGastosArchivados();
       //reiniciarFiltroVehiculoGastosArchivados();
 
       _misGastosArchivados = obtenerGastosArchivados();
