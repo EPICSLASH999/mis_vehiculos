@@ -1380,13 +1380,19 @@ class GraficaRelacionVehiculos extends StatelessWidget {
          if (snapshot.connectionState == ConnectionState.waiting){
             return const WidgetCargando();
           } else{
-            final gastosGlobales = snapshot.data?? [];
+            final gastosRecibidos = snapshot.data?? [];
+
+            List<Gasto> misGastosGlobales = gastosRecibidos.toList().copiar();
+
+            DateTime fechaInicial = context.watch<VehiculoBloc>().filtroFechaInicial;
+            DateTime fechaFinal = context.watch<VehiculoBloc>().filtroFechaFinal;
+            misGastosGlobales.removeWhere((element) => (DateTime.parse(element.fecha).isBefore(fechaInicial) ||   DateTime.parse(element.fecha).isAfter(fechaFinal)));  // Filtrar por Fecha  
     
             /* ------------------------------------------------------------------------------------------------------------------ */
             // Para Vehiculos
             Map<String, Color> colorPorVehiculo = {};
             Map<String, double> gastoPorVehiculo = {};
-            llenarListasVehiculos(gastosGlobales, gastoPorVehiculo, colorPorVehiculo, colores);
+            llenarListasVehiculos(misGastosGlobales, gastoPorVehiculo, colorPorVehiculo, colores);
     
             double totalGastosVehiculos = 0;
             List<PieChartSectionData> pieChartsVehiculos = [];
@@ -1398,7 +1404,7 @@ class GraficaRelacionVehiculos extends StatelessWidget {
             /* ------------------------------------------------------------------------------------------------------------------ */
             const String titulo = 'Relación por vehículo';
 
-             return gastosGlobales.isEmpty
+             return misGastosGlobales.isEmpty
               ? 
               GraficaCircularVacia(totalGastos: totalGastosVehiculos, radio: radio, titulo: titulo)
               :

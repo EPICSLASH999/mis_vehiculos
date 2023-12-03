@@ -722,6 +722,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         emit(MisEtiquetas(misEtiquetas: _misEtiquetas, estaModoSeleccionActivo: estaModoSeleccionEtiquetasActivo));
         return;
       }
+      reiniciarTipoReporte();
       //reiniciarFiltrosGastos();
       _misGastos = obtenerGastosFiltrados();
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroFechaInicial, fechaFinal: filtroFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroIdEtiqueta, filtroIdVehiculo: filtroIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroMecanico, representacionGasto: representacionGasto, tipoReporte: tipoReporte));    
