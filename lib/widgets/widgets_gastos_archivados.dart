@@ -119,7 +119,10 @@ class TileGastoArchivado extends StatelessWidget {
     required this.gastoArchivado, 
   });
 
+  // Variables
   final GastoArchivado gastoArchivado;
+  
+  // Getters y métodos
   String get mecanico => (gastoArchivado.mecanico.isNotEmpty)? gastoArchivado.mecanico:valorSinMecanico;
   String get lugar => (gastoArchivado.lugar.isNotEmpty)? gastoArchivado.lugar:valorSinLugar;
   String get fechaNormalizada {
@@ -145,6 +148,12 @@ class TileGastoArchivado extends StatelessWidget {
           Text(lugar),
           Text('\$${gastoArchivado.costo}'),
         ],
+      ),
+      trailing: IconButton(
+        onPressed: () {
+          context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado));
+        }, 
+        icon: const Icon(Icons.restore, color: colorIcono,)
       ),
       onTap: null,
     );

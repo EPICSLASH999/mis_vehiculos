@@ -20,7 +20,7 @@ class GastoArchivado extends Equatable{
   });
 
   factory GastoArchivado.fromSQfliteDatabase(Map<String, dynamic> datos) => GastoArchivado(
-    id: datos['id_gasto']?.toInt() ?? 0,
+    id: datos['id_gasto_archivado']?.toInt() ?? 0,
     vehiculo: datos['vehiculo'] ?? '',
     etiqueta: datos['etiqueta'] ?? '',
     mecanico: datos['mecanico'] ?? '',
