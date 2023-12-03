@@ -381,7 +381,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   Future<List<Gasto>> obtenerGastosFiltrados(){
     int? idVehiculo = (filtroIdVehiculo == valorOpcionTodas)?null:filtroIdVehiculo;
 
-    misGastosGlobales = gastos.fetchAllInnerJoined(idVehiculo); // Obtiene los gastos de toda la lista de un vehiculo proporcionado. Esto es para el Reporte.
+    misGastosGlobales = gastos.fetchAllInnerJoined(); // Obtiene los gastos de toda la lista de un vehiculo proporcionado. Esto es para el Reporte.
 
     return gastos.fetchAllWithFilters(filtroFechaInicial, filtroFechaFinal, idVehiculo);
   }
