@@ -75,7 +75,7 @@ class _WidgetMisEtiquetasState extends State<WidgetMisEtiquetas> {
           icon: const Icon(Icons.arrow_back_ios_new_outlined)
         ),
         actions: [
-          IconButton( // Botón de Borrar.
+          if (estaModoSeleccionActivo) IconButton( // Botón de Borrar.
             onPressed: !(estaModoSeleccionActivo && idsEtiquetasSeleccionadas.isNotEmpty)?null:
               dialogoAlerta(context: context, texto: '¿Seguro de eliminar las etiquetas seleccionadas?', funcionAlProceder: eliminarEtiquetasSeleccionadas(context), titulo: 'Eliminar'),
             icon: const Icon(Icons.delete_forever)

@@ -474,9 +474,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       etiqueta = await etiquetas.fetchByName(gastoArchivado.etiqueta);
       if (etiqueta != null) return etiqueta.id;
       
-      idEtiquetaFinal = await etiquetas.create(nombre: gastoArchivado.etiqueta);
+      idEtiquetaFinal = await crearEtiqueta(idEtiquetaFinal, gastoArchivado);
     }
     idEtiquetaFinal??= etiqueta!.id;
+    return idEtiquetaFinal;
+  }
+  Future<int?> crearEtiqueta(int? idEtiquetaFinal, GastoArchivado gastoArchivado) async {
+    idEtiquetaFinal = await etiquetas.create(nombre: gastoArchivado.etiqueta);
     return idEtiquetaFinal;
   }
   Future<int?> obtenerIdVehiculoGastoArchivado(RestarurarGastoArchivado event) async {
@@ -489,13 +493,16 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "color": event.gastoArchivado.colorVehiculo,
         "ano": event.gastoArchivado.anoVehiculo,
       };
-      idVehiculoFinal = await vehiculos.create(datos: datos);
-
+      idVehiculoFinal = await crearVehiculo(idVehiculoFinal, datos);
       
       // Tercero, actualizar todos los gastosArchviados de ese vehiculo para referenciar la Id del Vehiculo restaurado.
       await gastosArchivados.updateAllWhereVehiculeId(idVehiculoVieja: event.gastoArchivado.idVehiculo, idVehiculoNueva: idVehiculoFinal);
     }
     idVehiculoFinal??= event.gastoArchivado.idVehiculo;
+    return idVehiculoFinal;
+  }
+  Future<int> crearVehiculo(int? idVehiculoFinal, Map<String, dynamic> datos) async {
+    idVehiculoFinal = await vehiculos.create(datos: datos);
     return idVehiculoFinal;
   }
 
@@ -779,10 +786,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "fecha": fechaEnMilisegundos,
       };
 
-
       await gastos.create(datos: datos);
       await gastosArchivados.delete(event.gastoArchivado.id); 
+
       _misGastosArchivados = obtenerGastosArchivados();
+      _misEtiquetas = etiquetas.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
     on<EliminadoGastoArchivado>((event, emit) async {

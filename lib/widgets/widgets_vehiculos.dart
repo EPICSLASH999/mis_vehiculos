@@ -119,7 +119,7 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
           appBar: AppBar(
             title: const Text('Mis Vehículos'),
             actions: [
-              IconButton( // Botón de Borrar.
+              if (estaModoSeleccionActivo) IconButton( // Botón de Borrar.
                 onPressed: !(estaModoSeleccionActivo && idsVehiculosSeleccionados.isNotEmpty)?null:
                   dialogoAlerta(context: context, texto: '¿Seguro de eliminar los vehiculos seleccionados?', funcionAlProceder: eliminarVehiculosSeleccionados(context), titulo: 'Eliminar'),
                 icon: const Icon(Icons.delete_forever)
