@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_vehiculos/blocs/bloc.dart';
 import 'package:mis_vehiculos/extensiones/extensiones.dart';
+import 'package:mis_vehiculos/funciones/funciones.dart';
 import 'package:mis_vehiculos/main.dart';
 import 'package:mis_vehiculos/modelos/gasto_archivado.dart';
 import 'package:mis_vehiculos/variables/variables.dart';
@@ -11,11 +12,21 @@ import 'package:mis_vehiculos/widgets/widgets_misc.dart';
 
 /* ------------------------------ GASTOS ARCHIVADOS------------------------------ */
 class WidgetMisGastosArchivados extends StatelessWidget {
-  const WidgetMisGastosArchivados({super.key, required this.misGastosArchivados, required this.vehiculoSeleccionado, required this.misVehiculosArchivados});
+  const WidgetMisGastosArchivados({
+    super.key, 
+    required this.misGastosArchivados, 
+    required this.vehiculoSeleccionado, 
+    required this.misVehiculosArchivados, 
+    required this.fechaSeleccionadaFinal, 
+    required this.fechaSeleccionadaInicial
+  });
 
   final Future<List<GastoArchivado>>? misGastosArchivados;
   final String vehiculoSeleccionado;
   final Future<List<String>>? misVehiculosArchivados;
+
+  final DateTime fechaSeleccionadaFinal;
+  final DateTime fechaSeleccionadaInicial;
   
   Function eliminarGastosArchivados(BuildContext context){
     return () {
@@ -29,6 +40,8 @@ class WidgetMisGastosArchivados extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Gastos Archivados'),
@@ -59,7 +72,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisGastos),
       body: Column(
         children: [
-          //FiltroSeleccionadorVehiculo(vehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo', misVehiculos: misVehiculosArchivados),
+          FiltroParaRangoFechas(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal),
           FiltroVehiculo(misVehiculos: misVehiculosArchivados, matriculaVehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo'),
           Expanded(
             child: 
@@ -138,57 +151,89 @@ class TileGastoArchivado extends StatelessWidget {
   }
 }
 
-/*class FiltroSeleccionadorVehiculo extends StatelessWidget{
-  const FiltroSeleccionadorVehiculo({
-    super.key,
-    required this.vehiculoSeleccionado,
-    required this.titulo, 
-    required this.misVehiculos
+// Filtros
+// ignore: must_be_immutable
+class FiltroParaRangoFechas extends StatelessWidget {
+  FiltroParaRangoFechas({
+    super.key, 
+    required this.fechaSeleccionadaInicial,
+    required this.fechaSeleccionadaFinal, 
   });
 
-  final String vehiculoSeleccionado;
-  final String titulo;
-  final Future <List<String>>? misVehiculos;
+  final TextEditingController controladorFechaInicial = TextEditingController();
+  final TextEditingController controladorFechaFinal = TextEditingController();
+  
+  DateTime fechaSeleccionadaInicial;
+  DateTime fechaSeleccionadaFinal;
+
+  VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
+    return () async {
+      DateTime? nuevaFecha = await showDatePicker(
+        context: context, 
+        initialDate: fechaSeleccionadaInicial,
+        firstDate: DateTime(1970), 
+        lastDate: DateTime.now(),
+        initialEntryMode: DatePickerEntryMode.calendarOnly
+      );
+      if (nuevaFecha == null) return;
+      if (!((nuevaFecha.isBefore(fechaSeleccionadaFinal) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaFinal)))) {
+        // ignore: use_build_context_synchronously
+        mostrarToast(context, 'Fecha Inicial debe ser menor a la Fecha Final');
+        return;
+      }
+        fechaSeleccionadaInicial = nuevaFecha;
+        // ignore: use_build_context_synchronously
+        context.read<VehiculoBloc>().add(FiltradoGastosArchivadosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
+      
+    };
+  }
+  VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
+    return () async {
+      DateTime? nuevaFecha = await showDatePicker(
+        context: context, 
+        initialDate: fechaSeleccionadaFinal,
+        firstDate: DateTime(1970), 
+        lastDate: DateTime.now(),
+        initialEntryMode: DatePickerEntryMode.calendarOnly
+      );
+      if (nuevaFecha == null) return;
+      if (!((nuevaFecha.isAfter(fechaSeleccionadaInicial) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaInicial)))) {
+        // ignore: use_build_context_synchronously
+        mostrarToast(context, 'Fecha Final debe ser mayor a la Fecha inicial');
+        return;
+      }
+        //Formato: 2023-01-01 00:00:00.000
+        DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
+        fechaSeleccionadaFinal = fechaNormalizada;
+        // ignore: use_build_context_synchronously
+        context.read<VehiculoBloc>().add(FiltradoGastosArchivadosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
+      
+    };
+  }
+
+  void inicializarTextBoxesConFechas() {
+    controladorFechaInicial.text = DateFormat.yMMMd().format(fechaSeleccionadaInicial);
+    controladorFechaFinal.text = DateFormat.yMMMd().format(fechaSeleccionadaFinal);
+  }
 
   @override
-  Widget build(BuildContext context)  {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TituloComponente(titulo: titulo),
-          SizedBox(
-            width: 160,
-            child: FutureBuilder<List<String>>(
-              future: misVehiculos,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const WidgetCargando();
-                } else{
-                  final vehiculos = snapshot.data?? [];
-                  
-                  return DropdownButtonFormField(
-                    validator: (value) {
-                      return null;
-                    },
-                    value: vehiculoSeleccionado,
-                    items: [
-                      DropdownMenuItem(value: valorOpcionTodas.toString(), child: const Text('Todos')),
-                      for(var vehiculo in vehiculos) DropdownMenuItem(value: vehiculo, child: Text(vehiculo),)
-                    ],
-                    onChanged: (value) {
-                      context.read<VehiculoBloc>().add(FiltradoGastoArchivadoPorVehiculo(matricula: value as String));
-                    },
-                  );
-                }
-              },
-            ),
-          ),
-        ],
-      ),
+  Widget build(BuildContext context) {
+    inicializarTextBoxesConFechas();
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            SeleccionadorDeFecha(controlador: controladorFechaInicial, titulo: 'Fecha Inicial', funcionAlPresionar: funcionAlPresionarFechaInicial(context),),
+            SeleccionadorDeFecha(controlador: controladorFechaFinal, titulo: 'Fecha Final', funcionAlPresionar: funcionAlPresionarFechaFinal(context),),            
+          ],
+        ),
+        
+      ],
     );
   }
-}*/
+}
 
 class FiltroVehiculo extends StatefulWidget {
   const FiltroVehiculo({super.key, required this.misVehiculos, required this.matriculaVehiculoSeleccionado, required this.titulo});

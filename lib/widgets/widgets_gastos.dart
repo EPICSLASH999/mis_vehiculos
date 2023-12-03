@@ -575,7 +575,7 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
   @override
   Widget build(BuildContext context) {
     controladorMecanico.addListener(escuchador);
-    filtrosVisibles = context.watch<VehiculoBloc>().filtrosVisibles;
+    filtrosVisibles = context.watch<VehiculoBloc>().filtrosGastosVisibles;
     controladorMecanico.text = widget.filtroMecanico;
 
     Future<List<Gasto>>? misGastosGlobales = context.watch<VehiculoBloc>().misGastosGlobales; // Lista con los gastos hitoricos de un vehiculo.
@@ -614,46 +614,16 @@ class _WidgetMisGastosState extends State<WidgetMisGastos> {
         children: [
           if (filtrosVisibles) Filtros(widget: widget, controladorMecanico: controladorMecanico, representacionGasto: representacionGasto), // Filtros de MisGastos.
           Expanded(
-              child: switch (representacionGasto) {
-                RepresentacionGastos.lista => ListaGastos(misGastos: obtenerListaGastos()),
-                RepresentacionGastos.grafica => Graficas(misGastos: obtenerListaGastos(), misGastosGlobales: misGastosGlobales,),
-                RepresentacionGastos.reporte => Reporte(misGastosGlobales: misGastosGlobales),
-              }
-            
-            
-            /*FutureBuilder<List<Gasto>>(
-              future: obtenerListaGastos(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const WidgetCargando();
-                } else{
-                  final gastos = snapshot.data?? [];
-                  
-                  return gastos.isEmpty
-                    ? const Center(
-                      child: Text(
-                        'Sin gastos...',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 28,
-                        ),
-                      ),
-                    )
-                  : switch (representacionGasto) {
-                    RepresentacionGastos.lista => ListaGastos(gastos: gastos),
-                    RepresentacionGastos.grafica => Graficas(misgastos: gastos, misGastosGlobales: misGastosGlobales,),
-                    RepresentacionGastos.reporte => Reporte(misGastosGlobales: misGastosGlobales),
-                  };
-                  //(representacionGasto == RepresentacionGastos.lista)? ListaGastos(gastos: gastos): Graficas(misgastos: gastos,);
-                }
-              },
-            ),*/
+            child: switch (representacionGasto) {
+              RepresentacionGastos.lista => ListaGastos(misGastos: obtenerListaGastos()),
+              RepresentacionGastos.grafica => Graficas(misGastos: obtenerListaGastos(), misGastosGlobales: misGastosGlobales,),
+              RepresentacionGastos.reporte => Reporte(misGastosGlobales: misGastosGlobales),
+            }
           ),
           if (representacionGasto == RepresentacionGastos.lista) TotalGastos(listaGastos: obtenerListaGastos()), // Muestra el total de gastos '$'
           BotonRepresentacionGastos(representacionGasto: representacionGasto, cambiarRepresentacionDeGastos: cambiarRepresentacionDeGastos,)
         ],
       ),
-      
     );
   }
 }
@@ -736,6 +706,7 @@ class TotalGastos extends StatelessWidget {
   }
 }
 
+// Filtros
 class Filtros extends StatelessWidget {
   const Filtros({
     super.key,
@@ -1292,7 +1263,7 @@ class GraficaRelacionEtiquetas extends StatelessWidget {
           } else{
             final gastos = snapshot.data?? [];
 
-            int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
+            int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroGastosIdVehiculo;
             if (filtroIdVehiculo != valorOpcionTodas) gastos.removeWhere((element) => (element.vehiculo != filtroIdVehiculo));  // Filtrar por vehículo  
     
             /* ------------------------------------------------------------------------------------------------------------------ */
@@ -1343,7 +1314,7 @@ class GraficaRelacionVehiculos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
+    int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroGastosIdVehiculo;
     int idColor = 0;
     
     int obtenerIDColor(int idVehiculo){
@@ -1384,8 +1355,8 @@ class GraficaRelacionVehiculos extends StatelessWidget {
 
             List<Gasto> misGastosGlobales = gastosRecibidos.toList().copiar();
 
-            DateTime fechaInicial = context.watch<VehiculoBloc>().filtroFechaInicial;
-            DateTime fechaFinal = context.watch<VehiculoBloc>().filtroFechaFinal;
+            DateTime fechaInicial = context.watch<VehiculoBloc>().filtroGastosFechaInicial;
+            DateTime fechaFinal = context.watch<VehiculoBloc>().filtroGastosFechaFinal;
             misGastosGlobales.removeWhere((element) => (DateTime.parse(element.fecha).isBefore(fechaInicial) 
               ||   DateTime.parse(element.fecha).isAfter(fechaFinal)));  // Filtrar por Fecha  
     
@@ -1713,7 +1684,7 @@ class _ReporteState extends State<Reporte> {
 
             List<Gasto> misGastos = gastosRecibidos.toList().copiar();
             
-            int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
+            int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroGastosIdVehiculo;
             if (filtroIdVehiculo != valorOpcionTodas) misGastos.removeWhere((element) => (element.vehiculo != filtroIdVehiculo));  // Filtrar por vehículo  
 
             // Si no tiene gastos...

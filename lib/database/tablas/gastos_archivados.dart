@@ -35,11 +35,13 @@ class GastosArchivados {
     return registros.map((gastoArchivado) => GastoArchivado.fromSQfliteDatabase(gastoArchivado)).toList();
   }
 
-  Future<List<GastoArchivado>> fetchByVehicule(String vehiculo) async{
+  Future<List<GastoArchivado>> fetchByFilters(DateTime fechaInicial, DateTime fechaFinal, String? vehiculo) async{
     final database = await DatabaseService().database;
+    String filtroVehiculo = (vehiculo == null)?'':'AND vehiculo = \'$vehiculo\' ';
     final registros = await database.rawQuery(
       ''' SELECT * from $tableName 
-      WHERE vehiculo = '$vehiculo'
+      WHERE fecha BETWEEN ${fechaInicial.millisecondsSinceEpoch} AND ${fechaFinal.millisecondsSinceEpoch} 
+      $filtroVehiculo
       ORDER BY fecha DESC'''
     );
     return registros.map((gastoArchivado) => GastoArchivado.fromSQfliteDatabase(gastoArchivado)).toList();
