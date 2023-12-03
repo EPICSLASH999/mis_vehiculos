@@ -111,10 +111,16 @@ class MisGastosArchivados extends VehiculoEstado {
   final DateTime fechaInicial;
   final DateTime fechaFinal;
 
-  MisGastosArchivados({required this.misGastosArchivados, required this.vehiculoSeleccionado, required this.misVehiculosArchivados, required this.fechaInicial, required this.fechaFinal, });
+  MisGastosArchivados({
+    required this.misGastosArchivados, 
+    required this.vehiculoSeleccionado, 
+    required this.misVehiculosArchivados, 
+    required this.fechaInicial, 
+    required this.fechaFinal, 
+  });
 
   @override
-  List<Object?> get props => [misGastosArchivados, vehiculoSeleccionado, misVehiculosArchivados];
+  List<Object?> get props => [misGastosArchivados, vehiculoSeleccionado, misVehiculosArchivados, fechaInicial, fechaFinal];
 }
 /* --------------------------------------------------------------------------- */
 
@@ -413,9 +419,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   // Métodos para gastos archivados.
   Future<void> archivarGastosDeIdVehiculo(int idVehiculo) async {
     List<Gasto> misGastosPorVehiculo = await Gastos().fetchByVehicleId(idVehiculo);
-    
     for (var gasto in misGastosPorVehiculo) {
-      print('Vehiculo: ${gasto.vehiculo}, Etiqueta: ${gasto.etiqueta}');
       DateTime fechaNormalizada = DateTime.fromMillisecondsSinceEpoch(DateTime.parse(gasto.fecha).millisecondsSinceEpoch);
       Map<String,dynamic> datos = {
         "vehiculo": gasto.nombreVehiculo,
@@ -795,28 +799,28 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await gastos.create(datos: datos);
       await gastosArchivados.delete(event.gastoArchivado.id); 
 
+      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      var listaTemp = await misVehiculosArchivados;
+      if (listaTemp != null &&  listaTemp.isNotEmpty && !listaTemp.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
+      //reiniciarFiltroVehiculoGastosArchivados();
+
       _misGastosArchivados = obtenerGastosArchivados();
       _misEtiquetas = etiquetas.fetchAll();
       _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
       
-      //var listaTemp = await misVehiculosArchivados;
-      //if (listaTemp != null &&  listaTemp.isNotEmpty && !listaTemp.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
-      reiniciarFiltroVehiculoGastosArchivados();
-
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
     on<EliminadoGastoArchivado>((event, emit) async {
       await gastosArchivados.delete(event.idGastoArchivado); 
-      _misGastosArchivados = obtenerGastosArchivados();
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      
-      //var listaTemp = await misVehiculosArchivados;
-      //if (listaTemp != null &&  listaTemp.isNotEmpty && !listaTemp.contains(filtroVehiculoGastosArchivados))reiniciarFiltroVehiculoGastosArchivados();
-      reiniciarFiltroVehiculoGastosArchivados();
 
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
+      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      var listaTemp = await misVehiculosArchivados;
+      if (listaTemp != null &&  listaTemp.isNotEmpty && !listaTemp.contains(filtroVehiculoGastosArchivados))reiniciarFiltroVehiculoGastosArchivados();
+      //reiniciarFiltroVehiculoGastosArchivados();
+
+      _misGastosArchivados = obtenerGastosArchivados();
       
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
 
     // MISC
