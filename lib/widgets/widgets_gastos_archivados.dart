@@ -130,6 +130,17 @@ class TileGastoArchivado extends StatelessWidget {
     return DateFormat.yMMMd().format(fechaRecibida);
   }
 
+  Function eliminarGastoArchivado(BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(EliminadoGastoArchivado(idGastoArchivado: gastoArchivado.id));
+    };
+  }
+  Function restaurarGastoArchivado (BuildContext context){
+    return () {
+      context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado));
+    };
+  }
+  
   @override
   Widget build(BuildContext context) {
 
@@ -149,11 +160,21 @@ class TileGastoArchivado extends StatelessWidget {
           Text('\$${gastoArchivado.costo}'),
         ],
       ),
-      trailing: IconButton(
-        onPressed: () {
-          context.read<VehiculoBloc>().add(RestarurarGastoArchivado(gastoArchivado: gastoArchivado));
-        }, 
-        icon: const Icon(Icons.restore, color: colorIcono,)
+      trailing: SizedBox(
+        width: 110,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton( // Botón borar gasto arhivado
+              onPressed: dialogoAlerta(context: context, texto: '¿Seguro de eliminar permanentemente el gasto archivado?', funcionAlProceder: eliminarGastoArchivado(context), titulo: 'Eliminar'), 
+              icon: const Icon(Icons.delete_forever, color: colorIcono,)
+            ),
+            IconButton( // Botón restaurar gasto archivado
+              onPressed: dialogoAlerta(context: context, texto: '¿Desea restaurar el gasto archivado?', funcionAlProceder: restaurarGastoArchivado(context), titulo: 'Restaurar'),
+              icon: const Icon(Icons.restore, color: colorIcono,)
+            ),
+          ],
+        ),
       ),
       onTap: null,
     );

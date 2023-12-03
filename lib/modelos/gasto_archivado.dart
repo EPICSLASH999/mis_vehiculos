@@ -8,6 +8,8 @@ class GastoArchivado extends Equatable{
   final String lugar;
   final double costo;
   final String fecha;
+  final int idVehiculo;
+  final int idEtiqueta;
 
   const GastoArchivado({
     required this.id, 
@@ -17,6 +19,8 @@ class GastoArchivado extends Equatable{
     required this.lugar, 
     required this.costo, 
     required this.fecha,
+    required this.idVehiculo, 
+    required this.idEtiqueta, 
   });
 
   factory GastoArchivado.fromSQfliteDatabase(Map<String, dynamic> datos) => GastoArchivado(
@@ -28,8 +32,10 @@ class GastoArchivado extends Equatable{
     costo: datos['costo']?.toDouble() ?? 0,
     fecha: DateTime.fromMillisecondsSinceEpoch(datos['fecha'])
         .toIso8601String(),
+    idVehiculo: datos['id_vehiculo'] ?? 0,
+    idEtiqueta: datos['id_etiqueta'] ?? 0,
   );
   
   @override
-  List<Object?> get props => [id, vehiculo, etiqueta, mecanico, lugar, costo, fecha];
+  List<Object?> get props => [id, vehiculo, etiqueta, mecanico, lugar, costo, fecha, idVehiculo, idEtiqueta];
 }

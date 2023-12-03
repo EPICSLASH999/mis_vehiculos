@@ -298,6 +298,11 @@ class RestarurarGastoArchivado extends VehiculoEvento {
 
   RestarurarGastoArchivado({required this.gastoArchivado});
 }
+class EliminadoGastoArchivado extends VehiculoEvento {
+  final int idGastoArchivado;
+
+  EliminadoGastoArchivado({required this.idGastoArchivado});
+}
 
 // MISC
 class Inicializado extends VehiculoEvento {}
@@ -416,6 +421,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
         "lugar": gasto.lugar,
         "costo": gasto.costo,
         "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
+        "id_vehiculo": gasto.etiqueta,
+        "id_etiqueta": gasto.vehiculo,
       };
       await gastosArchivados.create(datos: datos);
     }
@@ -430,6 +437,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       "lugar": gasto.lugar,
       "costo": gasto.costo,
       "fecha": fechaNormalizada.millisecondsSinceEpoch.toString(),
+      "id_vehiculo": gasto.vehiculo,
+      "id_etiqueta": gasto.etiqueta,
     };
     await gastosArchivados.create(datos: datos);
   }
@@ -717,19 +726,28 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       // y el id de etiqueta
       // Si no existe id de etiqueta hacerla 'Sin etiqueta'.
       // Y si no existe vehiculo, crear nuevo vehiculo.
-      /*Map<String,dynamic> datos = {
-        "vehiculo": event.gastoArchivado .vehiculo,
-        "etiqueta": event.gastoArchivado.etiqueta,
+
+      DateTime fechaRecibida = DateTime.parse(event.gastoArchivado.fecha);
+      int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;
+      Map<String,dynamic> datos = {
+        "vehiculo": event.gastoArchivado.idVehiculo,
+        "etiqueta": event.gastoArchivado.idEtiqueta,
         "mecanico": event.gastoArchivado.mecanico,
         "lugar": event.gastoArchivado.lugar,
         "costo": event.gastoArchivado.costo,
-        "fecha": event.gastoArchivado.fecha,
+        "fecha": fechaEnMilisegundos,
       };
       await gastos.create(datos: datos);
       await gastosArchivados.delete(event.gastoArchivado.id); 
       _misGastosArchivados = obtenerGastosArchivados();
+      _misGastos = obtenerGastosFiltrados();
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
+    });
+    on<EliminadoGastoArchivado>((event, emit) async {
+      await gastosArchivados.delete(event.idGastoArchivado); 
+      _misGastosArchivados = obtenerGastosArchivados();
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
-      */
+      
     });
 
     // MISC
