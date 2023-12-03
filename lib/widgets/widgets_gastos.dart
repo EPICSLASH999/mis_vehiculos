@@ -1029,7 +1029,7 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
                     ),
                   ),
                   dropdownStyleData: const DropdownStyleData(
-                    maxHeight: 200,
+                    maxHeight: alturaMaximaSearchbar,
                   ),
                   menuItemStyleData: const MenuItemStyleData(
                     height: 40,
@@ -1386,7 +1386,8 @@ class GraficaRelacionVehiculos extends StatelessWidget {
 
             DateTime fechaInicial = context.watch<VehiculoBloc>().filtroFechaInicial;
             DateTime fechaFinal = context.watch<VehiculoBloc>().filtroFechaFinal;
-            misGastosGlobales.removeWhere((element) => (DateTime.parse(element.fecha).isBefore(fechaInicial) ||   DateTime.parse(element.fecha).isAfter(fechaFinal)));  // Filtrar por Fecha  
+            misGastosGlobales.removeWhere((element) => (DateTime.parse(element.fecha).isBefore(fechaInicial) 
+              ||   DateTime.parse(element.fecha).isAfter(fechaFinal)));  // Filtrar por Fecha  
     
             /* ------------------------------------------------------------------------------------------------------------------ */
             // Para Vehiculos
@@ -1460,7 +1461,7 @@ class GraficaCircular extends StatelessWidget {
                 Text('\$ ${totalGastos.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),),
               ],
             ),
-            // Pie chart
+            // Pie chart / Gráfica
             SizedBox(
               width: radio,
               height: radio,
@@ -1522,8 +1523,8 @@ class GraficaCircularVacia extends StatelessWidget {
         title: '0%',
       )
       ], 
-      gastoPorElemento:  const {sinRelacion:0}, 
-      colorPorElemento: const {sinRelacion: colorReporteSinGastos},
+      gastoPorElemento:  const {mensajeSinRelacion:0}, 
+      colorPorElemento: const {mensajeSinRelacion: colorReporteSinGastos},
       titulo: titulo
     );
   }
@@ -1710,8 +1711,14 @@ class _ReporteState extends State<Reporte> {
           } else{
             final gastosRecibidos = snapshot.data?? [];
 
-             if (gastosRecibidos.isEmpty) {
-               return const Center(
+            List<Gasto> misGastos = gastosRecibidos.toList().copiar();
+            
+            int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
+            if (filtroIdVehiculo != valorOpcionTodas) misGastos.removeWhere((element) => (element.vehiculo != filtroIdVehiculo));  // Filtrar por vehículo  
+
+            // Si no tiene gastos...
+            if (misGastos.isEmpty) {
+              return const Center(
                 child: Text(
                   'Sin gastos...',
                   style: TextStyle(
@@ -1721,11 +1728,6 @@ class _ReporteState extends State<Reporte> {
                 ),
               );
              }
-            
-            List<Gasto> misGastos = gastosRecibidos.toList().copiar();
-            
-            int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroIdVehiculo;
-            if (filtroIdVehiculo != valorOpcionTodas) misGastos.removeWhere((element) => (element.vehiculo != filtroIdVehiculo));  // Filtrar por vehículo  
 
             reporteHistorico = Map.from(generarReporte(misGastos));
             reporteHistorico = Map.from(llenarFechasFaltantes(reporteHistorico));

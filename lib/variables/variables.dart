@@ -23,7 +23,7 @@ const String valorSinMecanico = 'Sin mecanico';
 const String valorSinLugar = 'Sin lugar';
 enum RepresentacionGastos {lista, grafica, reporte}
 enum TipoReporte {year, month, day}
-const String sinRelacion = 'Sin datos';
+const String mensajeSinRelacion = 'Sin datos';
 
 // Tablas
 const tablaGastos = 'gastos';
@@ -69,3 +69,4 @@ const Icon iconoEtiqueta = Icon(Icons.card_travel);
 
 // Tamaños
 const double widthDeComponente = 160;
+const double alturaMaximaSearchbar = 350;

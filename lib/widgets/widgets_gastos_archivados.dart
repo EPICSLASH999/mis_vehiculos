@@ -274,7 +274,7 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
                       ),
                     ),
                     dropdownStyleData: const DropdownStyleData(
-                      maxHeight: 200,
+                      maxHeight: alturaMaximaSearchbar,
                     ),
                     menuItemStyleData: const MenuItemStyleData(
                       height: 40,
