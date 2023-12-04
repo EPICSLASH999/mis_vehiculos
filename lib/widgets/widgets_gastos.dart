@@ -1316,7 +1316,7 @@ class GraficaRelacionVehiculos extends StatelessWidget {
   Widget build(BuildContext context) {
     int filtroIdVehiculo = context.watch<VehiculoBloc>().filtroGastosIdVehiculo;
     int idColor = 0;
-    String? nombreVehiculo;
+    String? vehiculoSeleccionado;
     const int idColorPrincipal = 1;
     const int idColorSecundario = 0;
     
@@ -1326,14 +1326,35 @@ class GraficaRelacionVehiculos extends StatelessWidget {
       return idColorSecundario;
     }
     void llenarListasVehiculos(List<Gasto> misGastos, Map<String, double> gastoPorVehiculo, Map<String, Color> colorPorVehiculo, List<Color> colores) {        
-      for (var gasto in misGastos) {
-        gastoPorVehiculo[gasto.nombreVehiculo!] = (gastoPorVehiculo[gasto.nombreVehiculo!]??0) + gasto.costo;
-        if (nombreVehiculo == null && gasto.vehiculo == filtroIdVehiculo) nombreVehiculo = gasto.nombreVehiculo; // Establecer nombreVehiculo
-        if (!colorPorVehiculo.containsKey(gasto.nombreVehiculo)) {
-          colorPorVehiculo[gasto.nombreVehiculo!] = colores[obtenerIDColor(gasto.vehiculo)];
-          idColor++; if (idColor > colores.length-1) idColor = 0;
+      if (filtroIdVehiculo == valorOpcionTodas){
+        for (var gasto in misGastos) {
+          gastoPorVehiculo[gasto.nombreVehiculo!] = (gastoPorVehiculo[gasto.nombreVehiculo!]??0) + gasto.costo;
+          if (vehiculoSeleccionado == null && gasto.vehiculo == filtroIdVehiculo) vehiculoSeleccionado = gasto.nombreVehiculo; // Establecer nombreVehiculo seleccionado en filtro
+          if (!colorPorVehiculo.containsKey(gasto.nombreVehiculo)) {
+            colorPorVehiculo[gasto.nombreVehiculo!] = colores[obtenerIDColor(gasto.vehiculo)];
+            idColor++; if (idColor > colores.length-1) idColor = 0;
+          }
         }
+        return;
       }
+      
+      const String otrosVehiculos = 'Otros';
+      for (var gasto in misGastos) {
+        if (vehiculoSeleccionado == null && gasto.vehiculo == filtroIdVehiculo) { // Establecer nombreVehiculo seleccionado en filtro
+          vehiculoSeleccionado = gasto.nombreVehiculo;
+        } 
+        if (gasto.nombreVehiculo != vehiculoSeleccionado) {
+           gastoPorVehiculo[otrosVehiculos] = (gastoPorVehiculo[otrosVehiculos]??0) + gasto.costo;
+           continue;
+        }
+        if (vehiculoSeleccionado != null) gastoPorVehiculo[vehiculoSeleccionado!] = (gastoPorVehiculo[vehiculoSeleccionado]??0) +gasto.costo;
+      }
+      if (vehiculoSeleccionado == null) {
+        vehiculoSeleccionado = mensajeSinRelacion;
+        gastoPorVehiculo[vehiculoSeleccionado!] = 0.0;
+      }
+      colorPorVehiculo[vehiculoSeleccionado!] = colores[idColorPrincipal];
+      colorPorVehiculo[otrosVehiculos] = colores[idColorSecundario];
     }
     void llenarPieCharts(Map<String, double> gastoPorVehiculo, List<PieChartSectionData> pieChartsVehiculos, Map<String, Color> colorPorVehiculo, double totalGastosVehiculos) {
       gastoPorVehiculo.forEach((key, value) {
@@ -1377,9 +1398,11 @@ class GraficaRelacionVehiculos extends StatelessWidget {
     
             // Reordenar mapa por cantidad de gasto
             gastoPorVehiculo = Map.fromEntries(gastoPorVehiculo.entries.toList()..sort((e1,e2) => e2.value.compareTo(e1.value)));
+
+            // En caso de que no tenga relación en la gráfica (que no tenga gastos) crear una relación de 'Sin datos'.
             Map<String, double>? gastosVehiculoSeleccionado;
-            if (gastoPorVehiculo.entries.isNotEmpty && filtroIdVehiculo != valorOpcionTodas && nombreVehiculo != null) {
-              gastosVehiculoSeleccionado = {nombreVehiculo!: gastoPorVehiculo[nombreVehiculo]!};
+            if (gastoPorVehiculo.entries.isNotEmpty && filtroIdVehiculo != valorOpcionTodas && vehiculoSeleccionado != null) {
+              gastosVehiculoSeleccionado = {vehiculoSeleccionado!: gastoPorVehiculo[vehiculoSeleccionado]!};
             }
             if (gastosVehiculoSeleccionado == null && filtroIdVehiculo != valorOpcionTodas) {
               gastosVehiculoSeleccionado = {mensajeSinRelacion: 0.0};
