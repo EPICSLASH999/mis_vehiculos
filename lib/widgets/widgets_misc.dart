@@ -51,7 +51,7 @@ class CuadroDeTexto extends StatelessWidget {
     this.valorDebeSermayorA, 
     this.puedeTenerEspacios = true, 
     this.valorDebeSerMenorOIgualA, 
-    this.validarCampo = true,
+    this.validarCampo = true, 
   });
 
   final TextEditingController controlador;
@@ -92,7 +92,7 @@ class CuadroDeTexto extends StatelessWidget {
       r'[\^$*\[\]{}()?\"!@%&/\><:,;_~`+=' 
       "'" 
       ']'
-    );
+    );    
     bool esPrimerClic = true;
 
     return Padding(
