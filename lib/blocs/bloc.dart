@@ -802,7 +802,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       // Checa si ese vehiculo ya no tiene gastos Archivados, para limpiar el filtro.
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
       var vehiculosArchivados = await misVehiculosArchivados;
-      if (vehiculosArchivados != null &&  vehiculosArchivados.isNotEmpty && !vehiculosArchivados.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
+      if (vehiculosArchivados == null ||  vehiculosArchivados.isEmpty || !vehiculosArchivados.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
       //reiniciarFiltroVehiculoGastosArchivados();
 
       _misGastosArchivados = obtenerGastosArchivados();
@@ -817,7 +817,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       // Checa si ese vehiculo ya no tiene gastos Archivados, para limpiar el filtro.
       misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
       var vehiculosArchivados = await misVehiculosArchivados;
-      if (vehiculosArchivados != null &&  vehiculosArchivados.isNotEmpty && !vehiculosArchivados.contains(filtroVehiculoGastosArchivados))reiniciarFiltroVehiculoGastosArchivados();
+      if (vehiculosArchivados == null ||  vehiculosArchivados.isEmpty || !vehiculosArchivados.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
       //reiniciarFiltroVehiculoGastosArchivados();
 
       _misGastosArchivados = obtenerGastosArchivados();
