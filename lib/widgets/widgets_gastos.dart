@@ -1326,7 +1326,7 @@ class GraficaRelacionVehiculos extends StatelessWidget {
       return idColorSecundario;
     }
     void llenarListasVehiculos(List<Gasto> misGastos, Map<String, double> gastoPorVehiculo, Map<String, Color> colorPorVehiculo, List<Color> colores) {        
-      if (filtroIdVehiculo == valorOpcionTodas){
+      if (filtroIdVehiculo == valorOpcionTodas){ // Específico para Opcion 'Todos'.
         for (var gasto in misGastos) {
           gastoPorVehiculo[gasto.nombreVehiculo!] = (gastoPorVehiculo[gasto.nombreVehiculo!]??0) + gasto.costo;
           if (vehiculoSeleccionado == null && gasto.vehiculo == filtroIdVehiculo) vehiculoSeleccionado = gasto.nombreVehiculo; // Establecer nombreVehiculo seleccionado en filtro
@@ -1338,6 +1338,7 @@ class GraficaRelacionVehiculos extends StatelessWidget {
         return;
       }
       
+      // Generar relación para vehículo específico.
       const String otrosVehiculos = 'Otros';
       for (var gasto in misGastos) {
         if (vehiculoSeleccionado == null && gasto.vehiculo == filtroIdVehiculo) { // Establecer nombreVehiculo seleccionado en filtro

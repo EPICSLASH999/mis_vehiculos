@@ -67,6 +67,10 @@ class MainApp extends StatelessWidget {
             context.read<VehiculoBloc>().add(ClickeadoRegresarDesdeGastos());
             return Future(() => false);
           }
+          if (state is MisGastos && state.representacionGasto != RepresentacionGastos.lista){
+            context.read<VehiculoBloc>().add(CambiadaRepresentacionGastos(representacionGastos: RepresentacionGastos.lista));
+            return Future(() => false);
+          }
           if (state is MisVehiculos){
             if (state.estaModoSeleccionActivo){
               context.read<VehiculoBloc>().add(CambiadaModalidadSeleccionVehiculo(estaModoSeleccionActivo: false));
