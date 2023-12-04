@@ -1713,11 +1713,13 @@ class _ReporteState extends State<Reporte> {
     }
 
      void animacionDeSubida() {
-      _scrollController.animateTo(
-        0.0,
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 400),
-      );
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0.0,
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 400),
+        );
+      }
     }
     /* ------------------------------------------------------------------------------------ */
 
