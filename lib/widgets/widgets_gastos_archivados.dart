@@ -40,6 +40,11 @@ class WidgetMisGastosArchivados extends StatelessWidget {
     GastoArchivado gastoArchivado = gastosArchivados.where((element) => element.idVehiculo == idVehiculoSeleccionado).first;
     return '${gastoArchivado.modeloVehiculo} - ${gastoArchivado.vehiculo}';
   }
+  Function restaurarGastosArchivados (BuildContext context) {
+    return () {
+      context.read<VehiculoBloc>().add(RestauradosGastosArchivados(idVehiculo: idVehiculoSeleccionado));
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +66,32 @@ class WidgetMisGastosArchivados extends StatelessWidget {
               } else{
                 final gastosArchivados = snapshot.data?? [];
 
-                return IconButton( // Botón Borrar GastosArchivados.
-                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerNombreVehiculoSeleccionado(gastosArchivados)}?', funcionAlProceder: eliminarGastosArchivados(context), titulo: 'Eliminar'), 
-                  icon: const Icon(Icons.delete_forever)
+                return Row(
+                  children: [
+                    IconButton( // Botón Borrar GastosArchivados.
+                      onPressed: gastosArchivados.isEmpty
+                          ?null:
+                          dialogoAlerta(
+                            context: context, 
+                            texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerNombreVehiculoSeleccionado(gastosArchivados)}?', 
+                            funcionAlProceder: eliminarGastosArchivados(context), 
+                            titulo: 'Eliminar'
+                          ), 
+                      icon: const Icon(Icons.delete_forever)
+                    ),
+                     IconButton( // Botón Restaurar GastosArchivados.
+                      onPressed: (gastosArchivados.isEmpty || idVehiculoSeleccionado == valorOpcionTodas)
+                          ? null:
+                          dialogoAlerta(
+                            context: context, 
+                            texto: '¿Seguro de restaurar todos los gastos archivados de: ${obtenerNombreVehiculoSeleccionado(gastosArchivados)}?', 
+                            funcionAlProceder: restaurarGastosArchivados(context), 
+                            titulo: 'Restaurar', 
+                            colorTextoSi: Colors.blue
+                          ), 
+                      icon: const Icon(Icons.restore)
+                    ),
+                  ],
                 );
               }
             },
@@ -138,7 +166,7 @@ class TileGastoArchivado extends StatelessWidget {
   }
   Function restaurarGastoArchivado (BuildContext context, bool existeVehiculo) {
     return () {
-      context.read<VehiculoBloc>().add(RestaruradoGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: false));
+      context.read<VehiculoBloc>().add(RestauradoGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: false));
     };
   }
   Future<bool> existeVehiculo(int idVehiculo) async {
@@ -157,7 +185,7 @@ class TileGastoArchivado extends StatelessWidget {
         actions: [
           TextButton( // Botón Restaurar Vehículo.
             onPressed: () {
-              context.read<VehiculoBloc>().add(RestaruradoGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: true));
+              context.read<VehiculoBloc>().add(RestauradoGastoArchivado(gastoArchivado: gastoArchivado, debeRestaurarVehiculo: true));
               Navigator.of(context).pop();
             }, 
             child: const Text('Aceptar')

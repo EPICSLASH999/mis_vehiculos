@@ -54,10 +54,12 @@ class GastosArchivados {
     return registros.map((gastoArchivado) => GastoArchivado.fromSQfliteDatabase(gastoArchivado)).toList();
   }
 
-  Future<List<GastoArchivado>> fetchByVehicleID(int idVehiculo) async{
+  Future<List<GastoArchivado>> fetchAllWhereVehicleID(int idVehiculo) async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
-      ''' SELECT DISTINCT id_vehiculo from $tableName ORDER BY fecha DESC'''
+      ''' SELECT * from $tableName 
+        WHERE id_vehiculo = $idVehiculo 
+        ORDER BY fecha DESC'''
     );
     return registros.map((gastoArchivado) => GastoArchivado.fromSQfliteDatabase(gastoArchivado)).toList();
   }

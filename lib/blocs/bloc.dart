@@ -299,16 +299,21 @@ class FiltradoGastosArchivadosPorFecha extends VehiculoEvento {
 
   FiltradoGastosArchivadosPorFecha({required this.fechaInicial, required this.fechaFinal});
 }
-class RestaruradoGastoArchivado extends VehiculoEvento {
+class RestauradoGastoArchivado extends VehiculoEvento {
   final GastoArchivado gastoArchivado;
   final bool debeRestaurarVehiculo;
 
-  RestaruradoGastoArchivado({required this.gastoArchivado,required this.debeRestaurarVehiculo, });
+  RestauradoGastoArchivado({required this.gastoArchivado,required this.debeRestaurarVehiculo, });
 }
 class EliminadoGastoArchivado extends VehiculoEvento {
   final int idGastoArchivado;
 
   EliminadoGastoArchivado({required this.idGastoArchivado});
+}
+class RestauradosGastosArchivados extends VehiculoEvento {
+  final int idVehiculo;
+
+  RestauradosGastosArchivados({required this.idVehiculo});
 }
 
 // MISC
@@ -496,22 +501,27 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     idEtiquetaFinal = await etiquetas.create(nombre: gastoArchivado.etiqueta);
     return idEtiquetaFinal;
   }
-  Future<int?> obtenerIdVehiculoGastoArchivadoARestaurar(RestaruradoGastoArchivado event) async {
+  Future<int?> obtenerIdVehiculoGastoArchivadoARestaurar(GastoArchivado gastoArchivado) async {
+    int idVehiculoABuscar = (filtroGastosArchivadosIdVehiculo != valorOpcionTodas)? filtroGastosArchivadosIdVehiculo:gastoArchivado.idVehiculo;
+    Vehiculo? vehiculo = await vehiculos.fetchById(idVehiculoABuscar);
+    //Vehiculo? vehiculo = await vehiculos.fetchById(gastoArchivado.idVehiculo);
+
     int? idVehiculoFinal;
-    if (event.debeRestaurarVehiculo){
+    //if (event.debeRestaurarVehiculo){
+    if (vehiculo == null){
       Map<String,dynamic> datos = {
-        "matricula": event.gastoArchivado.vehiculo,
-        "marca": event.gastoArchivado.marcaVehiculo,
-        "modelo": event.gastoArchivado.modeloVehiculo,
-        "color": event.gastoArchivado.colorVehiculo,
-        "ano": event.gastoArchivado.anoVehiculo,
+        "matricula": gastoArchivado.vehiculo,
+        "marca": gastoArchivado.marcaVehiculo,
+        "modelo": gastoArchivado.modeloVehiculo,
+        "color": gastoArchivado.colorVehiculo,
+        "ano": gastoArchivado.anoVehiculo,
       };
       idVehiculoFinal = await crearVehiculo(idVehiculoFinal, datos);
       
       // Tercero, actualizar todos los gastosArchviados de ese vehiculo para referenciar la Id del Vehiculo restaurado.
-      await gastosArchivados.updateAllWhereVehicleId(idVehiculoVieja: event.gastoArchivado.idVehiculo, idVehiculoNueva: idVehiculoFinal);
+      await gastosArchivados.updateAllWhereVehicleId(idVehiculoVieja: idVehiculoABuscar, idVehiculoNueva: idVehiculoFinal);
     }
-    idVehiculoFinal??= event.gastoArchivado.idVehiculo;
+    idVehiculoFinal??= idVehiculoABuscar;
     if(filtroGastosArchivadosIdVehiculo != valorOpcionTodas) filtroGastosArchivadosIdVehiculo = idVehiculoFinal; // Establce el filtro actual del vehiculo, en caso de que se haya creado un vehiculo
     return idVehiculoFinal;
   }
@@ -781,27 +791,9 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       _misGastosArchivados = obtenerGastosArchivados();
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
-    on<RestaruradoGastoArchivado>((event, emit) async {
-      // Primero comprobar que existe etiqueta
-      int idEtiquetaFinal = await obtenerIdEtiquetaGastoArchivadoARestaurar(event.gastoArchivado);
-
-      // Segundo, comprobar que el vehiculo exista. Si no, lo crea.
-      int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivadoARestaurar(event);
-
-
-      DateTime fechaRecibida = DateTime.parse(event.gastoArchivado.fecha);
-      int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;
-      Map<String,dynamic> datos = {
-        "vehiculo": idVehiculoFinal,
-        "etiqueta": idEtiquetaFinal,
-        "mecanico": event.gastoArchivado.mecanico,
-        "lugar": event.gastoArchivado.lugar,
-        "costo": event.gastoArchivado.costo,
-        "fecha": fechaEnMilisegundos,
-      };
-
-      await gastos.create(datos: datos);
-      await gastosArchivados.delete(event.gastoArchivado.id); 
+    on<RestauradoGastoArchivado>((event, emit) async {
+      
+      await restaurarGastoArchivado(event.gastoArchivado); 
 
       // Checa si ese vehiculo ya no tiene gastos Archivados, para limpiar el filtro.
       misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
@@ -826,6 +818,19 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       //reiniciarFiltroVehiculoGastosArchivados();
 
       _misGastosArchivados = obtenerGastosArchivados();
+      
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
+    });
+    on<RestauradosGastosArchivados>((event, emit) async {
+      List<GastoArchivado> gastosArchivadosDeVehiculo = await gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, event.idVehiculo);
+      for (var gastoArchivado in gastosArchivadosDeVehiculo) {
+        await restaurarGastoArchivado(gastoArchivado);
+      }
+      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
+      reiniciarFiltroVehiculoGastosArchivados();
+      _misGastosArchivados = obtenerGastosArchivados();
+      _misEtiquetas = etiquetas.fetchAll();
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
@@ -871,6 +876,35 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroGastosFechaInicial, fechaFinal: filtroGastosFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroGastosIdEtiqueta, filtroIdVehiculo: filtroGastosIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroGastosMecanico, representacionGasto: representacionGasto, tipoReporte: tipoReporte));    
     });
 
+  }
+
+  Future<void> restaurarGastoArchivado(GastoArchivado gastoArchivado) async {
+    // Primero comprobar que existe etiqueta
+    int idEtiquetaFinal = await obtenerIdEtiquetaGastoArchivadoARestaurar(gastoArchivado);
+    
+    // Segundo, comprobar que el vehiculo exista. Si no, lo crea.
+    int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivadoARestaurar(gastoArchivado);
+    
+    // Siguiente, restaurar el gasto a la tabla de "Gastos"
+    await restaurarGasto(gastoArchivado, idVehiculoFinal, idEtiquetaFinal);
+    
+    // Eliminar el gasto de la tabla de "gastosArchivados"
+    await gastosArchivados.delete(gastoArchivado.id); 
+  }
+
+  Future<void> restaurarGasto(GastoArchivado gastoArchivado, int? idVehiculoFinal, int idEtiquetaFinal) async {
+    DateTime fechaRecibida = DateTime.parse(gastoArchivado.fecha);
+    int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;
+    Map<String,dynamic> datos = {
+      "vehiculo": idVehiculoFinal,
+      "etiqueta": idEtiquetaFinal,
+      "mecanico": gastoArchivado.mecanico,
+      "lugar": gastoArchivado.lugar,
+      "costo": gastoArchivado.costo,
+      "fecha": fechaEnMilisegundos,
+    };
+    
+    await gastos.create(datos: datos);
   }
 }
 
