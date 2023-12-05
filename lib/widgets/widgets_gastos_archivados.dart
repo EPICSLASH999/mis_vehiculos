@@ -35,13 +35,10 @@ class WidgetMisGastosArchivados extends StatelessWidget {
       context.read<VehiculoBloc>().add(EliminadosGastosArchivados(idVehiculo: idVehiculoSeleccionado));
     };
   }
-  String obtenerNombreVehiculoSeleccionado(){
+  String obtenerNombreVehiculoSeleccionado(List<GastoArchivado> gastosArchivados){
     if(idVehiculoSeleccionado == valorOpcionTodas) return 'Todos';
-    return 'vehiculo seleccionado';
-    /*for (var vehiculoArchivado in misVehiculosArchivados) {
-      
-    }*/
-    //return idVehiculoSeleccionado;
+    GastoArchivado gastoArchivado = gastosArchivados.where((element) => element.idVehiculo == idVehiculoSeleccionado).first;
+    return '${gastoArchivado.modeloVehiculo} - ${gastoArchivado.vehiculo}';
   }
 
   @override
@@ -65,7 +62,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                 final gastosArchivados = snapshot.data?? [];
 
                 return IconButton( // Botón Borrar GastosArchivados.
-                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerNombreVehiculoSeleccionado()}?', funcionAlProceder: eliminarGastosArchivados(context), titulo: 'Eliminar'), 
+                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerNombreVehiculoSeleccionado(gastosArchivados)}?', funcionAlProceder: eliminarGastosArchivados(context), titulo: 'Eliminar'), 
                   icon: const Icon(Icons.delete_forever)
                 );
               }

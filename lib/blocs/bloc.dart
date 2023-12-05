@@ -462,11 +462,14 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     return gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, vehiculo);
   }
   Future<void> eliminarGastosArchivadosPorIdVehiculo(int idVehiculo) async {
-    if(idVehiculo == valorOpcionTodas) {
+    /*if(idVehiculo == valorOpcionTodas) {
       await gastosArchivados.deleteAll();
       return;
-    }
-    await gastosArchivados.deleteWhereVehicleId(idVehiculo);
+    }*/
+    //await gastosArchivados.deleteWhereVehicleId(idVehiculo);
+    int? idVehiculoAEliminar = idVehiculo;
+    if (idVehiculoAEliminar == valorOpcionTodas) idVehiculoAEliminar = null;
+    await gastosArchivados.deleteByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, idVehiculoAEliminar);
   }
   void reiniciarFiltrosGastosArchivados() {
     //yyyy-MM-dd HH:mm:ss

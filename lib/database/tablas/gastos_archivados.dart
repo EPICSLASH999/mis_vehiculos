@@ -91,6 +91,14 @@ class GastosArchivados {
     await database.rawDelete('''DELETE FROM $tableName WHERE id_vehiculo = ?''', [idVehiculo]);
   }
 
+  Future<void> deleteByFilters(DateTime fechaInicial, DateTime fechaFinal, int? idVehiculo) async {
+    final database = await DatabaseService().database;
+    String filtroVehiculo = (idVehiculo == null)?'':'AND id_vehiculo = $idVehiculo ';
+    await database.rawDelete('''DELETE FROM $tableName 
+      WHERE fecha BETWEEN ${fechaInicial.millisecondsSinceEpoch} AND ${fechaFinal.millisecondsSinceEpoch} 
+      $filtroVehiculo''');
+  }
+
   Future<void> deleteAll() async {
     final database = await DatabaseService().database;
     await database.rawDelete('''DELETE FROM $tableName''');
