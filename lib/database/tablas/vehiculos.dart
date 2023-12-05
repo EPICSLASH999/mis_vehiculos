@@ -201,7 +201,8 @@ class Vehiculos implements RepositorioVehiculos{
     final registros = await database.rawQuery(
       ''' SELECT matricula from $tableName 
       WHERE matricula NOT IN ('$plate') 
-      ORDER BY id_vehiculo'''
+      UNION
+      SELECT DISTINCT vehiculo as matricula from $tablaGastosArchivados'''
     );
     return registros.map((vehiculo) => vehiculo["matricula"] as String).toList();
   }
