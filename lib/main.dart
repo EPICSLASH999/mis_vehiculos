@@ -90,7 +90,7 @@ class MainApp extends StatelessWidget {
             if (state is MisEtiquetas) return WidgetMisEtiquetas(misEtiquetas: state.misEtiquetas,);
             if (state is PlantillaEtiqueta) return WidgetPlantillaEtiqueta(etiqueta: state.etiqueta,);
             if (state is MisGastos) return WidgetMisGastos(misGastos: state.misGastos, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal, misEtiquetas: state.misEtiquetas, idEtiquetaSeleccionada: state.filtroIdEtiqueta, idVehiculoSeleccionado: state.filtroIdVehiculo, misVehiculos: state.misVehiculos, filtroMecanico: state.filtroMecanico,);
-            if (state is MisGastosArchivados) return WidgetMisGastosArchivados(misGastosArchivados: state.misGastosArchivados, vehiculoSeleccionado: state.vehiculoSeleccionado, misVehiculosArchivados: state.misVehiculosArchivados, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal,);
+            if (state is MisGastosArchivados) return WidgetMisGastosArchivados(misGastosArchivados: state.misGastosArchivados, idVehiculoSeleccionado: state.idVehiculoSeleccionado, misVehiculosArchivados: state.misVehiculosArchivados, fechaSeleccionadaInicial: state.fechaInicial, fechaSeleccionadaFinal: state.fechaFinal,);
             return const WidgetCargando();
           },
         )

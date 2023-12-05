@@ -106,21 +106,21 @@ class PlantillaEtiqueta extends VehiculoEstado {
 // GASTOS ARCHIVADOS
 class MisGastosArchivados extends VehiculoEstado {
   final Future <List<GastoArchivado>>? misGastosArchivados;
-  final String vehiculoSeleccionado;
-  final Future <List<String>>? misVehiculosArchivados;
+  final int idVehiculoSeleccionado;
+  final Future <List<Vehiculo>>? misVehiculosArchivados;
   final DateTime fechaInicial;
   final DateTime fechaFinal;
 
   MisGastosArchivados({
     required this.misGastosArchivados, 
-    required this.vehiculoSeleccionado, 
+    required this.idVehiculoSeleccionado, 
     required this.misVehiculosArchivados, 
     required this.fechaInicial, 
     required this.fechaFinal, 
   });
 
   @override
-  List<Object?> get props => [misGastosArchivados, vehiculoSeleccionado, misVehiculosArchivados, fechaInicial, fechaFinal];
+  List<Object?> get props => [misGastosArchivados, idVehiculoSeleccionado, misVehiculosArchivados, fechaInicial, fechaFinal];
 }
 /* --------------------------------------------------------------------------- */
 
@@ -284,14 +284,14 @@ class CambiadoTipoReporte extends VehiculoEvento {
 // GASTOS ARCHIVADOS
 class ClickeadoConsultarGastosArchivados extends VehiculoEvento {}
 class FiltradoGastoArchivadoPorVehiculo extends VehiculoEvento {
-  final String matricula;
+  final int idVehiculo;
 
-  FiltradoGastoArchivadoPorVehiculo({required this.matricula});
+  FiltradoGastoArchivadoPorVehiculo({required this.idVehiculo});
 }
 class EliminadosGastosArchivados extends VehiculoEvento {
-  final String matricula;
+  final int idVehiculo;
 
-  EliminadosGastosArchivados({required this.matricula});
+  EliminadosGastosArchivados({required this.idVehiculo});
 }
 class FiltradoGastosArchivadosPorFecha extends VehiculoEvento {
   final DateTime fechaInicial;
@@ -375,8 +375,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   TipoReporte tipoReporte = TipoReporte.year;
 
   // Gastos Archivados
-  String filtroVehiculoGastosArchivados = valorOpcionTodas.toString();
-  Future<List<String>>? misVehiculosArchivados;
+  int filtroGastosArchivadosIdVehiculo = valorOpcionTodas;
+  Future<List<Vehiculo>>? misVehiculosArchivados;
   DateTime filtroGastosArchivadosFechaInicial = DateTime.now();
   DateTime filtroGastosArchivadosFechaFinal = DateTime.now();
 
@@ -458,24 +458,24 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     await gastosArchivados.create(datos: datos);
   }
   Future<List<GastoArchivado>> obtenerGastosArchivados() {
-    String? vehiculo = (filtroVehiculoGastosArchivados == valorOpcionTodas.toString())?null:filtroVehiculoGastosArchivados.toString();
+    String? vehiculo = (filtroGastosArchivadosIdVehiculo == valorOpcionTodas)?null:filtroGastosArchivadosIdVehiculo.toString();
     return gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, vehiculo);
   }
-  Future<void> eliminarGastosArchivadosPorMatricula(String matricula) async {
-    if(matricula == valorOpcionTodas.toString()) {
+  Future<void> eliminarGastosArchivadosPorIdVehiculo(int idVehiculo) async {
+    if(idVehiculo == valorOpcionTodas) {
       await gastosArchivados.deleteAll();
       return;
     }
-    await gastosArchivados.deleteWhereVehicle(matricula);
+    await gastosArchivados.deleteWhereVehicleId(idVehiculo);
   }
   void reiniciarFiltrosGastosArchivados() {
     //yyyy-MM-dd HH:mm:ss
     filtroGastosArchivadosFechaFinal = obtenerValorMaximoDelDiaDeFecha(DateTime.now());
     filtroGastosArchivadosFechaInicial = DateTime.parse('${filtroGastosArchivadosFechaFinal.year}-${normalizarNumeroA2DigitosFecha(filtroGastosArchivadosFechaFinal.month)}-01');
-    filtroVehiculoGastosArchivados = valorOpcionTodas.toString();
+    filtroGastosArchivadosIdVehiculo = valorOpcionTodas;
   } 
   void reiniciarFiltroVehiculoGastosArchivados() {
-    filtroVehiculoGastosArchivados = valorOpcionTodas.toString();
+    filtroGastosArchivadosIdVehiculo = valorOpcionTodas;
   }
   Future<int> obtenerIdEtiquetaGastoArchivado(GastoArchivado gastoArchivado) async {
     int? idEtiquetaFinal;
@@ -509,6 +509,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await gastosArchivados.updateAllWhereVehicleId(idVehiculoVieja: event.gastoArchivado.idVehiculo, idVehiculoNueva: idVehiculoFinal);
     }
     idVehiculoFinal??= event.gastoArchivado.idVehiculo;
+    if(filtroGastosArchivadosIdVehiculo != valorOpcionTodas) filtroGastosArchivadosIdVehiculo = idVehiculoFinal; // Establce el filtro actual del vehiculo, en caso de que se haya creado un vehiculo
     return idVehiculoFinal;
   }
   Future<int> crearVehiculo(int? idVehiculoFinal, Map<String, dynamic> datos) async {
@@ -754,28 +755,28 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<ClickeadoConsultarGastosArchivados>((event, emit) {
       reiniciarFiltrosGastosArchivados();
       _misGastosArchivados = obtenerGastosArchivados();
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
+      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
     on<FiltradoGastoArchivadoPorVehiculo>((event, emit) {
-      filtroVehiculoGastosArchivados = event.matricula;
+      filtroGastosArchivadosIdVehiculo = event.idVehiculo;
       _misGastosArchivados = obtenerGastosArchivados();
 
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
+      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
     on<EliminadosGastosArchivados>((event, emit) async {
-      await eliminarGastosArchivadosPorMatricula(event.matricula);
+      await eliminarGastosArchivadosPorIdVehiculo(event.idVehiculo);
       _misGastosArchivados = gastosArchivados.fetchAll();
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
       reiniciarFiltroVehiculoGastosArchivados();
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
     on<FiltradoGastosArchivadosPorFecha>((event, emit) {
       filtroGastosArchivadosFechaInicial = event.fechaInicial;
       filtroGastosArchivadosFechaFinal = event.fechaFinal;
       _misGastosArchivados = obtenerGastosArchivados();
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
     on<RestaruradoGastoArchivado>((event, emit) async {
       // Primero comprobar que existe etiqueta
@@ -800,29 +801,30 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       await gastosArchivados.delete(event.gastoArchivado.id); 
 
       // Checa si ese vehiculo ya no tiene gastos Archivados, para limpiar el filtro.
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
       var vehiculosArchivados = await misVehiculosArchivados;
-      if (vehiculosArchivados == null ||  vehiculosArchivados.isEmpty || !vehiculosArchivados.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
+      if (vehiculosArchivados == null || vehiculosArchivados.isEmpty || !vehiculosArchivados.any((element) => element.id == filtroGastosArchivadosIdVehiculo)) reiniciarFiltroVehiculoGastosArchivados();
+      
       //reiniciarFiltroVehiculoGastosArchivados();
 
       _misGastosArchivados = obtenerGastosArchivados();
       _misEtiquetas = etiquetas.fetchAll();
       _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
       
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
     on<EliminadoGastoArchivado>((event, emit) async {
       await gastosArchivados.delete(event.idGastoArchivado); 
 
       // Checa si ese vehiculo ya no tiene gastos Archivados, para limpiar el filtro.
-      misVehiculosArchivados = gastosArchivados.fetchAllVehicles();
+      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
       var vehiculosArchivados = await misVehiculosArchivados;
-      if (vehiculosArchivados == null ||  vehiculosArchivados.isEmpty || !vehiculosArchivados.contains(filtroVehiculoGastosArchivados)) reiniciarFiltroVehiculoGastosArchivados();
+      if (vehiculosArchivados == null ||  vehiculosArchivados.isEmpty || !vehiculosArchivados.any((element) => element.id == filtroGastosArchivadosIdVehiculo)) reiniciarFiltroVehiculoGastosArchivados();
       //reiniciarFiltroVehiculoGastosArchivados();
 
       _misGastosArchivados = obtenerGastosArchivados();
       
-      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, vehiculoSeleccionado: filtroVehiculoGastosArchivados, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
+      emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
 
     // MISC

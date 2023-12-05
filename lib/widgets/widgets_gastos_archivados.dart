@@ -17,33 +17,35 @@ class WidgetMisGastosArchivados extends StatelessWidget {
   const WidgetMisGastosArchivados({
     super.key, 
     required this.misGastosArchivados, 
-    required this.vehiculoSeleccionado, 
+    required this.idVehiculoSeleccionado, 
     required this.misVehiculosArchivados, 
     required this.fechaSeleccionadaFinal, 
     required this.fechaSeleccionadaInicial
   });
 
   final Future<List<GastoArchivado>>? misGastosArchivados;
-  final String vehiculoSeleccionado;
-  final Future<List<String>>? misVehiculosArchivados;
+  final int idVehiculoSeleccionado;
+  final Future<List<Vehiculo>>? misVehiculosArchivados;
 
   final DateTime fechaSeleccionadaFinal;
   final DateTime fechaSeleccionadaInicial;
   
   Function eliminarGastosArchivados(BuildContext context){
     return () {
-      context.read<VehiculoBloc>().add(EliminadosGastosArchivados(matricula: vehiculoSeleccionado));
+      context.read<VehiculoBloc>().add(EliminadosGastosArchivados(idVehiculo: idVehiculoSeleccionado));
     };
   }
-  String obtenerVehiculoSeleccionado(){
-    if(vehiculoSeleccionado == valorOpcionTodas.toString()) return 'Todos';
-    return vehiculoSeleccionado;
+  String obtenerNombreVehiculoSeleccionado(){
+    if(idVehiculoSeleccionado == valorOpcionTodas) return 'Todos';
+    return 'vehiculo seleccionado';
+    /*for (var vehiculoArchivado in misVehiculosArchivados) {
+      
+    }*/
+    //return idVehiculoSeleccionado;
   }
 
   @override
   Widget build(BuildContext context) {
-    
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Gastos Archivados'),
@@ -63,7 +65,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                 final gastosArchivados = snapshot.data?? [];
 
                 return IconButton( // Botón Borrar GastosArchivados.
-                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerVehiculoSeleccionado()}?', funcionAlProceder: eliminarGastosArchivados(context), titulo: 'Eliminar'), 
+                  onPressed: gastosArchivados.isEmpty?null:dialogoAlerta(context: context, texto: '¿Seguro de eliminar todos los gastos archivados de: ${obtenerNombreVehiculoSeleccionado()}?', funcionAlProceder: eliminarGastosArchivados(context), titulo: 'Eliminar'), 
                   icon: const Icon(Icons.delete_forever)
                 );
               }
@@ -75,7 +77,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
       body: Column(
         children: [
           FiltroParaRangoFechas(fechaSeleccionadaInicial: fechaSeleccionadaInicial, fechaSeleccionadaFinal: fechaSeleccionadaFinal),
-          FiltroVehiculo(misVehiculos: misVehiculosArchivados, matriculaVehiculoSeleccionado: vehiculoSeleccionado, titulo: 'Vehiculo'),
+          FiltroVehiculo(misVehiculosArchivados: misVehiculosArchivados, idVehiculoSeleccionado: idVehiculoSeleccionado, titulo: 'Vehiculo'),
           Expanded(
             child: 
             FutureBuilder<List<GastoArchivado>>(
@@ -317,10 +319,10 @@ class FiltroParaRangoFechas extends StatelessWidget {
 }
 
 class FiltroVehiculo extends StatefulWidget {
-  const FiltroVehiculo({super.key, required this.misVehiculos, required this.matriculaVehiculoSeleccionado, required this.titulo});
+  const FiltroVehiculo({super.key, required this.misVehiculosArchivados, required this.idVehiculoSeleccionado, required this.titulo});
 
-  final Future<List<String>>? misVehiculos;
-  final String matriculaVehiculoSeleccionado;
+  final Future<List<Vehiculo>>? misVehiculosArchivados;
+  final int idVehiculoSeleccionado;
   final String titulo;
 
   @override
@@ -329,7 +331,8 @@ class FiltroVehiculo extends StatefulWidget {
 
 class _FiltroVehiculoState extends State<FiltroVehiculo> {
   final TextEditingController textEditingController = TextEditingController(); // Controlador propio de este widget. NO ALTERAR.
-  String? matriculaVehiculoSeleccionado;
+  Vehiculo? vehiculoSeleccionado;
+  final Vehiculo opcionTodosLosVehiculos = const Vehiculo(id: valorOpcionTodas, matricula: "Todos", marca: "", modelo: "", color: "", ano: 2000); // Opción por omisión 'Todos'
 
   @override
   void dispose() {
@@ -339,7 +342,7 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
 
   @override
   Widget build(BuildContext context) {
-    matriculaVehiculoSeleccionado = widget.matriculaVehiculoSeleccionado;
+    //vehiculoSeleccionado = widget.idVehiculoSeleccionado;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -349,18 +352,21 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
             padding: const EdgeInsets.all(8.0),
             child: TituloComponente(titulo: widget.titulo),
           ),
-          FutureBuilder<List<String>>(
-            future: widget.misVehiculos,
+          FutureBuilder<List<Vehiculo>>(
+            future: widget.misVehiculosArchivados,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting){
                 return const WidgetCargando();
               } else{
                 final vehiculos = snapshot.data?? [];
-                List<String> listaVehiculosMatriculas = vehiculos.copiar();
-                listaVehiculosMatriculas.insert(0,valorOpcionTodas.toString()); // Agrega la opción de 'Todos' al filtro.
+                List<Vehiculo> listaVehiculosArchivados = vehiculos.copiar();
+                listaVehiculosArchivados.insert(0,opcionTodosLosVehiculos); // Agrega la opción de 'Todos' al filtro.
+
+                // Obtener vehiculo seleccionado
+                vehiculoSeleccionado = listaVehiculosArchivados.where((element) => element.id == widget.idVehiculoSeleccionado).toList().first;
     
                 return DropdownButtonHideUnderline(
-                  child: DropdownButton2<String>(
+                  child: DropdownButton2<Vehiculo>(
                     isExpanded: true,
                     hint: Text(
                       'Vehiculo...',
@@ -369,7 +375,7 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
                         color: Theme.of(context).hintColor,
                       ),
                     ),
-                    items: listaVehiculosMatriculas
+                    items: /*listaVehiculosArchivados
                         .map((item) => DropdownMenuItem(
                               value: item,
                               child: Text(
@@ -379,14 +385,39 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
                                 ),
                               ),
                             ))
-                        .toList(),
-                    value: matriculaVehiculoSeleccionado,
+                        .toList(),*/
+                        listaVehiculosArchivados.map((item) => DropdownMenuItem(
+                            value: item,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (item.id != valorOpcionTodas) Text(
+                                  item.modelo,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    overflow: TextOverflow.ellipsis
+                                  ),
+                                ),
+                                Text(
+                                  item.matricula,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                    value: vehiculoSeleccionado,
                     onChanged: (value) {
                       setState(() {
-                        matriculaVehiculoSeleccionado = value;
+                        vehiculoSeleccionado = value;
                         
                       });
-                      context.read<VehiculoBloc>().add(FiltradoGastoArchivadoPorVehiculo(matricula: matriculaVehiculoSeleccionado!));
+                      context.read<VehiculoBloc>().add(FiltradoGastoArchivadoPorVehiculo(idVehiculo: vehiculoSeleccionado!.id));
                     },
                     buttonStyleData: ButtonStyleData(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -426,7 +457,7 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
                               horizontal: 10,
                               vertical: 8,
                             ),
-                            hintText: 'Matricula...',
+                            hintText: 'Vehiculo...',
                             hintStyle: const TextStyle(fontSize: 12),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -436,7 +467,7 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
                       ),
                       searchMatchFn: (item, searchValue) {
                         return (item.value.toString().containsIgnoreCase(searchValue) 
-                         || item.value.toString().containsIgnoreCase(valorOpcionTodas.toString())); // Filtrar por matrícula.
+                         || item.value.toString().containsIgnoreCase(valorOpcionTodas.toString())); // Filtrar por vehículo.
                       },
                     ),
                     //This to clear the search value when you close the menu

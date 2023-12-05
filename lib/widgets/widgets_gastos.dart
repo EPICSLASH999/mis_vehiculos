@@ -941,7 +941,7 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
                List<Vehiculo> listaSinDuplicados = listaVehiculos.toSet().toList().copiar();
               /* -------------------------------------------------------------.------------------------------ */
 
-              // Reemplazar listaSinDuplicados por listaVehiculos
+              // Obtener vehiculo seleccionado
               vehiculoSeleccionado = listaSinDuplicados.where((element) => element.id == widget.idVehiculoSeleccionado).toList().first;
 
               return DropdownButtonHideUnderline(
@@ -1035,8 +1035,12 @@ class _FiltroParaVehiculoState extends State<FiltroParaVehiculo> {
                       ),
                     ),
                     searchMatchFn: (item, searchValue) {
-                      return ((item.value as Vehiculo).matricula.toString().containsIgnoreCase(searchValue) // Filtrar por matrícula.
-                        || (item.value as Vehiculo).modelo.toString().containsIgnoreCase(searchValue)); // o por modelo.
+                      /*return ((item.value as Vehiculo).matricula.toString().containsIgnoreCase(searchValue) // Filtrar por matrícula.
+                        || (item.value as Vehiculo).modelo.toString().containsIgnoreCase(searchValue)); // o por modelo.*/
+                      
+                      // Esto filtra por cualquier palabra que contenga el objeto vehiculo, desde color hasta matricula
+                      return (item.value.toString().containsIgnoreCase(searchValue) 
+                         || item.value.toString().containsIgnoreCase(valorOpcionTodas.toString())); // Filtrar por vehículo.
                     },
                   ),
                   //This to clear the search value when you close the menu
