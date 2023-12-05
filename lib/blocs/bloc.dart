@@ -529,6 +529,33 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     idVehiculoFinal = await vehiculos.create(datos: datos);
     return idVehiculoFinal;
   }
+  Future<void> restaurarGastoArchivado(GastoArchivado gastoArchivado) async {
+    // Primero comprobar que existe etiqueta
+    int idEtiquetaFinal = await obtenerIdEtiquetaGastoArchivadoARestaurar(gastoArchivado);
+    
+    // Segundo, comprobar que el vehiculo exista. Si no, lo crea.
+    int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivadoARestaurar(gastoArchivado);
+    
+    // Siguiente, restaurar el gasto a la tabla de "Gastos"
+    await restaurarGasto(gastoArchivado, idVehiculoFinal, idEtiquetaFinal);
+    
+    // Eliminar el gasto de la tabla de "gastosArchivados"
+    await gastosArchivados.delete(gastoArchivado.id); 
+  }
+  Future<void> restaurarGasto(GastoArchivado gastoArchivado, int? idVehiculoFinal, int idEtiquetaFinal) async {
+    DateTime fechaRecibida = DateTime.parse(gastoArchivado.fecha);
+    int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;
+    Map<String,dynamic> datos = {
+      "vehiculo": idVehiculoFinal,
+      "etiqueta": idEtiquetaFinal,
+      "mecanico": gastoArchivado.mecanico,
+      "lugar": gastoArchivado.lugar,
+      "costo": gastoArchivado.costo,
+      "fecha": fechaEnMilisegundos,
+    };
+    
+    await gastos.create(datos: datos);
+  }
 
   // Métodos para etiquetas
   Future<void> eliminarEtiquetasSeleccionadas(List<int> idsEtiquetasSeleccionadas) async {
@@ -876,35 +903,6 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisGastos(misGastos: _misGastos, fechaInicial: filtroGastosFechaInicial, fechaFinal: filtroGastosFechaFinal, misEtiquetas: _misEtiquetas, filtroIdEtiqueta: filtroGastosIdEtiqueta, filtroIdVehiculo: filtroGastosIdVehiculo, misVehiculos: _misVehiculos, filtroMecanico: filtroGastosMecanico, representacionGasto: representacionGasto, tipoReporte: tipoReporte));    
     });
 
-  }
-
-  Future<void> restaurarGastoArchivado(GastoArchivado gastoArchivado) async {
-    // Primero comprobar que existe etiqueta
-    int idEtiquetaFinal = await obtenerIdEtiquetaGastoArchivadoARestaurar(gastoArchivado);
-    
-    // Segundo, comprobar que el vehiculo exista. Si no, lo crea.
-    int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivadoARestaurar(gastoArchivado);
-    
-    // Siguiente, restaurar el gasto a la tabla de "Gastos"
-    await restaurarGasto(gastoArchivado, idVehiculoFinal, idEtiquetaFinal);
-    
-    // Eliminar el gasto de la tabla de "gastosArchivados"
-    await gastosArchivados.delete(gastoArchivado.id); 
-  }
-
-  Future<void> restaurarGasto(GastoArchivado gastoArchivado, int? idVehiculoFinal, int idEtiquetaFinal) async {
-    DateTime fechaRecibida = DateTime.parse(gastoArchivado.fecha);
-    int fechaEnMilisegundos = fechaRecibida.millisecondsSinceEpoch;
-    Map<String,dynamic> datos = {
-      "vehiculo": idVehiculoFinal,
-      "etiqueta": idEtiquetaFinal,
-      "mecanico": gastoArchivado.mecanico,
-      "lugar": gastoArchivado.lugar,
-      "costo": gastoArchivado.costo,
-      "fecha": fechaEnMilisegundos,
-    };
-    
-    await gastos.create(datos: datos);
   }
 }
 
