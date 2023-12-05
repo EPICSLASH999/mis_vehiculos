@@ -75,8 +75,6 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
 
   int? idEtiquetaSeleccionadaOriginal;
 
-  bool escribioSuPropioMecanico = true;
-
   void inicializarValoresDeControladores(){
     idVehiculoString = (widget.gasto?.vehiculo??widget.idVehiculo.toString()).toString();
     controladorVehiculo.text = idVehiculoString;
@@ -138,6 +136,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     if ((idEtiquetaSeleccionadaOriginal != null) && idEtiquetaSeleccionadaOriginal == idSinEtiqueta) return idSinEtiqueta;
     return int.parse(controladorEtiqueta.text);
   }
+
 
   @override
   void dispose() {
@@ -318,7 +317,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
 
                       // IA para rellenar el TextField con el mecánico con más coincidencias dependiendo de la etiqueta seleccionada en el DropDownButton.
                       // Si se encuentra editando el gasto, no cambia al Mecánico.
-                      //if(!widget.esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(widget.listaMecanicoPorEtiqueta, value!);
+                      if(!widget.esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(widget.listaMecanicoPorEtiqueta, value!);
                     });
                   },
                 );

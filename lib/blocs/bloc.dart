@@ -474,13 +474,13 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   void reiniciarFiltrosGastosArchivados() {
     //yyyy-MM-dd HH:mm:ss
     filtroGastosArchivadosFechaFinal = obtenerValorMaximoDelDiaDeFecha(DateTime.now());
-    filtroGastosArchivadosFechaInicial = DateTime.parse('${filtroGastosArchivadosFechaFinal.year}-${normalizarNumeroA2DigitosFecha(filtroGastosArchivadosFechaFinal.month)}-01');
+    filtroGastosArchivadosFechaInicial = DateTime.parse('${filtroGastosArchivadosFechaFinal.year}-01-01');
     filtroGastosArchivadosIdVehiculo = valorOpcionTodas;
   } 
   void reiniciarFiltroVehiculoGastosArchivados() {
     filtroGastosArchivadosIdVehiculo = valorOpcionTodas;
   }
-  Future<int> obtenerIdEtiquetaGastoArchivado(GastoArchivado gastoArchivado) async {
+  Future<int> obtenerIdEtiquetaGastoArchivadoARestaurar(GastoArchivado gastoArchivado) async {
     int? idEtiquetaFinal;
     Etiqueta? etiqueta = await etiquetas.fetchById(gastoArchivado.idEtiqueta);
     if (etiqueta == null){
@@ -496,7 +496,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     idEtiquetaFinal = await etiquetas.create(nombre: gastoArchivado.etiqueta);
     return idEtiquetaFinal;
   }
-  Future<int?> obtenerIdVehiculoGastoArchivado(RestaruradoGastoArchivado event) async {
+  Future<int?> obtenerIdVehiculoGastoArchivadoARestaurar(RestaruradoGastoArchivado event) async {
     int? idVehiculoFinal;
     if (event.debeRestaurarVehiculo){
       Map<String,dynamic> datos = {
@@ -756,7 +756,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     
     // Gastos Archivados
     on<ClickeadoConsultarGastosArchivados>((event, emit) {
-      reiniciarFiltrosGastosArchivados();
+      //reiniciarFiltrosGastosArchivados();
       _misGastosArchivados = obtenerGastosArchivados();
       misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
@@ -783,10 +783,10 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<RestaruradoGastoArchivado>((event, emit) async {
       // Primero comprobar que existe etiqueta
-      int idEtiquetaFinal = await obtenerIdEtiquetaGastoArchivado(event.gastoArchivado);
+      int idEtiquetaFinal = await obtenerIdEtiquetaGastoArchivadoARestaurar(event.gastoArchivado);
 
       // Segundo, comprobar que el vehiculo exista. Si no, lo crea.
-      int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivado(event);
+      int? idVehiculoFinal = await obtenerIdVehiculoGastoArchivadoARestaurar(event);
 
 
       DateTime fechaRecibida = DateTime.parse(event.gastoArchivado.fecha);
