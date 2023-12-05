@@ -458,8 +458,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     await gastosArchivados.create(datos: datos);
   }
   Future<List<GastoArchivado>> obtenerGastosArchivados() {
-    String? vehiculo = (filtroGastosArchivadosIdVehiculo == valorOpcionTodas)?null:filtroGastosArchivadosIdVehiculo.toString();
-    return gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, vehiculo);
+    int? idVehiculo = (filtroGastosArchivadosIdVehiculo == valorOpcionTodas)?null:filtroGastosArchivadosIdVehiculo;
+    return gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, idVehiculo);
   }
   Future<void> eliminarGastosArchivadosPorIdVehiculo(int idVehiculo) async {
     /*if(idVehiculo == valorOpcionTodas) {
