@@ -371,7 +371,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   int filtroGastosIdEtiqueta = valorOpcionTodas;
   int filtroGastosIdVehiculo = valorOpcionTodas;
   Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta; // IA para rellenar automáticamente campo mecánico.
-  bool filtrosGastosVisibles = false;
+  bool filtrosGastosVisibles = true;
   String filtroGastosMecanico = "";
   Future <List<Gasto>>? misGastosGlobales;
   RepresentacionGastos representacionGasto = RepresentacionGastos.lista;
