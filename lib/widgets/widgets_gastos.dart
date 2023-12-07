@@ -374,12 +374,12 @@ class BotonCrearEtiqueta extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton( // Botón Agregar Etiqueta.
       onPressed: () async {
+        final vehiculoBloc = context.read<VehiculoBloc>();
         controladorNuevaEtiqueta.clear(); // Limpiar el texto del controlador.
         final nuevaEtiqueta = await cuadroDeDialogoAgregarEtiqueta(context);
         if (nuevaEtiqueta == null || nuevaEtiqueta.isEmpty) return;
         Gasto gastoSinGuardar = funcionObtenerGasto();
-        // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculo, gasto: gastoSinGuardar, esEditarGasto: esEditarGasto));
+        vehiculoBloc.add(AgregadoEtiquetaDesdeGasto(nombreEtiqueta: nuevaEtiqueta, idVehiculo: idVehiculo, gasto: gastoSinGuardar, esEditarGasto: esEditarGasto));
       }, 
       child: const Text('Agregar Etiqueta'));
   }
@@ -738,7 +738,6 @@ class Filtros extends StatelessWidget {
   }
 }
 
-// ignore: must_be_immutable
 class FiltroParaRangoFechas extends StatelessWidget {
   FiltroParaRangoFechas({
     super.key, 
@@ -749,53 +748,9 @@ class FiltroParaRangoFechas extends StatelessWidget {
   final TextEditingController controladorFechaInicial = TextEditingController();
   final TextEditingController controladorFechaFinal = TextEditingController();
   
-  DateTime fechaSeleccionadaInicial;
-  DateTime fechaSeleccionadaFinal;
+  final DateTime fechaSeleccionadaInicial;
+  final DateTime fechaSeleccionadaFinal;
 
-  VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
-    return () async {
-      DateTime? nuevaFecha = await showDatePicker(
-        context: context, 
-        initialDate: fechaSeleccionadaInicial,
-        firstDate: DateTime(1970), 
-        lastDate: DateTime.now(),
-        initialEntryMode: DatePickerEntryMode.calendarOnly
-      );
-      if (nuevaFecha == null) return;
-      if (!((nuevaFecha.isBefore(fechaSeleccionadaFinal) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaFinal)))) {
-        // ignore: use_build_context_synchronously
-        mostrarToast(context, 'Fecha Inicial debe ser menor a la Fecha Final');
-        return;
-      }
-        fechaSeleccionadaInicial = nuevaFecha;
-        // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
-      
-    };
-  }
-  VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
-    return () async {
-      DateTime? nuevaFecha = await showDatePicker(
-        context: context, 
-        initialDate: fechaSeleccionadaFinal,
-        firstDate: DateTime(1970), 
-        lastDate: DateTime.now(),
-        initialEntryMode: DatePickerEntryMode.calendarOnly
-      );
-      if (nuevaFecha == null) return;
-      if (!((nuevaFecha.isAfter(fechaSeleccionadaInicial) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaInicial)))) {
-        // ignore: use_build_context_synchronously
-        mostrarToast(context, 'Fecha Final debe ser mayor a la Fecha inicial');
-        return;
-      }
-        //Formato: 2023-01-01 00:00:00.000
-        DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
-        fechaSeleccionadaFinal = fechaNormalizada;
-        // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
-      
-    };
-  }
   
   String normalizarNumeroA2DigitosFecha(int numero){
     String numeroRecibido = '';
@@ -811,6 +766,52 @@ class FiltroParaRangoFechas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     inicializarTextBoxesConFechas();
+    DateTime fechaInicial = fechaSeleccionadaInicial;
+    DateTime fechaFinal = fechaSeleccionadaFinal;
+
+    VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
+    return () async {
+      final vehiculoBloc = context.read<VehiculoBloc>();
+      ScaffoldMessengerState scaffoldMessengerState = ScaffoldMessenger.of(context); 
+      DateTime? nuevaFecha = await showDatePicker(
+        context: context, 
+        initialDate: fechaInicial,
+        firstDate: DateTime(1970), 
+        lastDate: DateTime.now(),
+        initialEntryMode: DatePickerEntryMode.calendarOnly
+      );
+      if (nuevaFecha == null) return;
+      if (!((nuevaFecha.isBefore(fechaFinal) || nuevaFecha.isAtSameMomentAs(fechaFinal)))) {
+        mostrarToast(scaffoldMessengerState, 'Fecha Inicial debe ser menor a la Fecha Final');
+        return;
+      }
+      fechaInicial = nuevaFecha;
+      vehiculoBloc.add(FiltradoGastosPorFecha(fechaInicial: fechaInicial, fechaFinal: fechaFinal));      
+    };
+  }
+    VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
+      return () async {
+        final vehiculoBloc = context.read<VehiculoBloc>();
+        ScaffoldMessengerState scaffoldMessengerState = ScaffoldMessenger.of(context); 
+        DateTime? nuevaFecha = await showDatePicker(
+          context: context, 
+          initialDate: fechaFinal,
+          firstDate: DateTime(1970), 
+          lastDate: DateTime.now(),
+          initialEntryMode: DatePickerEntryMode.calendarOnly
+        );
+        if (nuevaFecha == null) return;
+        if (!((nuevaFecha.isAfter(fechaInicial) || nuevaFecha.isAtSameMomentAs(fechaInicial)))) {
+          mostrarToast(scaffoldMessengerState, 'Fecha Final debe ser mayor a la Fecha inicial');
+          return;
+        }
+          //Formato: 2023-01-01 00:00:00.000
+          DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
+          fechaFinal = fechaNormalizada;
+          vehiculoBloc.add(FiltradoGastosPorFecha(fechaInicial: fechaInicial, fechaFinal: fechaFinal));            
+      };
+    }
+  
 
     return Column(
       children: [

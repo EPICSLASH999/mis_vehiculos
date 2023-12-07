@@ -174,9 +174,7 @@ class TileGastoArchivado extends StatelessWidget {
     return (vehiculo != null);
   }
   
-  Future<String?> cuadroDeDialogoAgregarEtiqueta(BuildContext context) {
-    //double alturaDelCuadroDeDialogo = 70;
-
+  Future<String?> cuadroDeDialogoRestaurarVehiculo(BuildContext context) {
     return showDialog<String>(
       context: context, 
       builder: (context) => AlertDialog(
@@ -239,12 +237,12 @@ class TileGastoArchivado extends StatelessWidget {
                     icon: const Icon(Icons.delete_forever, color: colorIcono,)
                   ),
                   IconButton( // Botón restaurar gasto archivado
-                    onPressed: () async {
+                    onPressed: () {
                       if (!siExisteVehiculo){
-                        await cuadroDeDialogoAgregarEtiqueta(context);
+                        // removido await del cuadroDeDialogo
+                        cuadroDeDialogoRestaurarVehiculo(context);
                         return;
                       }
-                      // ignore: use_build_context_synchronously
                       dialogoAlerta(context: context, texto: '¿Desea restaurar el gasto archivado?', funcionAlProceder: restaurarGastoArchivado(context, siExisteVehiculo), titulo: 'Restaurar', colorTextoSi: Colors.blue)();
                     },
                     icon: const Icon(Icons.restore, color: colorIcono,)
@@ -261,7 +259,6 @@ class TileGastoArchivado extends StatelessWidget {
 }
 
 // Filtros
-// ignore: must_be_immutable
 class FiltroParaRangoFechas extends StatelessWidget {
   FiltroParaRangoFechas({
     super.key, 
@@ -272,54 +269,10 @@ class FiltroParaRangoFechas extends StatelessWidget {
   final TextEditingController controladorFechaInicial = TextEditingController();
   final TextEditingController controladorFechaFinal = TextEditingController();
   
-  DateTime fechaSeleccionadaInicial;
-  DateTime fechaSeleccionadaFinal;
+   final DateTime fechaSeleccionadaInicial;
+   final DateTime fechaSeleccionadaFinal;
 
-  VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
-    return () async {
-      DateTime? nuevaFecha = await showDatePicker(
-        context: context, 
-        initialDate: fechaSeleccionadaInicial,
-        firstDate: DateTime(1970), 
-        lastDate: DateTime.now(),
-        initialEntryMode: DatePickerEntryMode.calendarOnly
-      );
-      if (nuevaFecha == null) return;
-      if (!((nuevaFecha.isBefore(fechaSeleccionadaFinal) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaFinal)))) {
-        // ignore: use_build_context_synchronously
-        mostrarToast(context, 'Fecha Inicial debe ser menor a la Fecha Final');
-        return;
-      }
-        fechaSeleccionadaInicial = nuevaFecha;
-        // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosArchivadosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));
-      
-    };
-  }
-  VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
-    return () async {
-      DateTime? nuevaFecha = await showDatePicker(
-        context: context, 
-        initialDate: fechaSeleccionadaFinal,
-        firstDate: DateTime(1970), 
-        lastDate: DateTime.now(),
-        initialEntryMode: DatePickerEntryMode.calendarOnly
-      );
-      if (nuevaFecha == null) return;
-      if (!((nuevaFecha.isAfter(fechaSeleccionadaInicial) || nuevaFecha.isAtSameMomentAs(fechaSeleccionadaInicial)))) {
-        // ignore: use_build_context_synchronously
-        mostrarToast(context, 'Fecha Final debe ser mayor a la Fecha inicial');
-        return;
-      }
-        //Formato: 2023-01-01 00:00:00.000
-        DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
-        fechaSeleccionadaFinal = fechaNormalizada;
-        // ignore: use_build_context_synchronously
-        context.read<VehiculoBloc>().add(FiltradoGastosArchivadosPorFecha(fechaInicial: fechaSeleccionadaInicial, fechaFinal: fechaSeleccionadaFinal));    
-      
-    };
-  }
-
+ 
   void inicializarTextBoxesConFechas() {
     controladorFechaInicial.text = DateFormat.yMMMd().format(fechaSeleccionadaInicial);
     controladorFechaFinal.text = DateFormat.yMMMd().format(fechaSeleccionadaFinal);
@@ -328,6 +281,52 @@ class FiltroParaRangoFechas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     inicializarTextBoxesConFechas();
+    DateTime fechaInicial = fechaSeleccionadaInicial;
+    DateTime fechaFinal = fechaSeleccionadaFinal;
+
+    VoidCallback funcionAlPresionarFechaInicial(BuildContext context){
+      return () async {
+        final vehiculoBloc = context.read<VehiculoBloc>();
+        ScaffoldMessengerState scaffoldMessengerState = ScaffoldMessenger.of(context); 
+        DateTime? nuevaFecha = await showDatePicker(
+          context: context, 
+          initialDate: fechaInicial,
+          firstDate: DateTime(1970), 
+          lastDate: DateTime.now(),
+          initialEntryMode: DatePickerEntryMode.calendarOnly
+        );
+        if (nuevaFecha == null) return;
+        if (!((nuevaFecha.isBefore(fechaFinal) || nuevaFecha.isAtSameMomentAs(fechaFinal)))) {
+          mostrarToast(scaffoldMessengerState, 'Fecha Inicial debe ser menor a la Fecha Final');
+          return;
+        }
+        fechaInicial = nuevaFecha;
+        vehiculoBloc.add(FiltradoGastosArchivadosPorFecha(fechaInicial: fechaInicial, fechaFinal: fechaFinal));      
+      };
+    }
+    VoidCallback funcionAlPresionarFechaFinal(BuildContext context){
+      return () async {
+        final vehiculoBloc = context.read<VehiculoBloc>();
+        ScaffoldMessengerState scaffoldMessengerState = ScaffoldMessenger.of(context); // Util para usar el conexto en una funcion async. Pero debe ir ANTES del await.
+        DateTime? nuevaFecha = await showDatePicker(
+          context: context, 
+          initialDate: fechaFinal,
+          firstDate: DateTime(1970), 
+          lastDate: DateTime.now(),
+          initialEntryMode: DatePickerEntryMode.calendarOnly
+        );
+        if (nuevaFecha == null) return;
+        if (!((nuevaFecha.isAfter(fechaInicial) || nuevaFecha.isAtSameMomentAs(fechaInicial)))) {
+          mostrarToast(scaffoldMessengerState, 'Fecha Final debe ser mayor a la Fecha inicial');
+          return;
+        }
+        //Formato: 2023-01-01 00:00:00.000
+        DateTime fechaNormalizada = DateTime.parse('${nuevaFecha.year}-${normalizarNumeroA2DigitosFecha(nuevaFecha.month)}-${normalizarNumeroA2DigitosFecha(nuevaFecha.day)} 23:59:59.999');        
+        fechaFinal = fechaNormalizada;
+        vehiculoBloc.add(FiltradoGastosArchivadosPorFecha(fechaInicial: fechaInicial, fechaFinal: fechaFinal));      
+      };
+    }
+
 
     return Column(
       children: [

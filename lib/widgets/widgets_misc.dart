@@ -301,9 +301,9 @@ VoidCallback dialogoAlerta ({required BuildContext context, required String text
   }
 
 // Toast!
- void mostrarToast(BuildContext context, String mensaje) {
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+ void mostrarToast(ScaffoldMessengerState scaffoldMessangerState, String mensaje) {
+  scaffoldMessangerState.hideCurrentSnackBar();
+  scaffoldMessangerState.showSnackBar(SnackBar(
     content: Text(mensaje),
     duration: const Duration(seconds: 1),
     //backgroundColor: Colors.blueGrey,

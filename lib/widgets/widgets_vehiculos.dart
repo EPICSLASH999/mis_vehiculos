@@ -33,7 +33,8 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
     return () {
       context.read<VehiculoBloc>().add(EliminadosVehiculosSeleccionados(idsVehiculosSeleccionados: idsVehiculosSeleccionados));
       abortarSeleccionVehiculos();
-      mostrarToast(context, 'Gastos archivados');
+      ScaffoldMessengerState scaffoldMessengerState = ScaffoldMessenger.of(context); 
+      mostrarToast(scaffoldMessengerState, 'Gastos archivados');
     };
   }
   void alSeleccionarVehiculo(int idVehiculo){
