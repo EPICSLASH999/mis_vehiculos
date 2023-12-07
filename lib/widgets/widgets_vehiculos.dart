@@ -82,7 +82,8 @@ class _WidgetMisVehiculosState extends State<WidgetMisVehiculos> {
 
       if (valorAFiltrar.isNotEmpty) { 
         vehiculosFiltrados.removeWhere((element) {
-          return (!element.matricula.containsIgnoreCase(valorAFiltrar) && !element.modelo.containsIgnoreCase(valorAFiltrar));
+          //return (!element.matricula.containsIgnoreCase(valorAFiltrar) && !element.modelo.containsIgnoreCase(valorAFiltrar));
+          return (!element.toString().containsIgnoreCase(valorAFiltrar));
         }); 
       }
       return vehiculosFiltrados;
