@@ -807,9 +807,12 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<EliminadosGastosArchivados>((event, emit) async {
       await eliminarGastosArchivadosPorIdVehiculo(event.idVehiculo);
-      _misGastosArchivados = gastosArchivados.fetchAll();
-      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
+      
       reiniciarFiltroVehiculoGastosArchivados();
+
+      _misGastosArchivados = obtenerGastosArchivados();
+      misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
+      
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));
     });
     on<FiltradoGastosArchivadosPorFecha>((event, emit) {
