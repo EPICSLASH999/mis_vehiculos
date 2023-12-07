@@ -222,19 +222,15 @@ class TileVehiculo extends StatelessWidget {
   VoidCallback funcionIrAPlantillaAgregarGasto(BuildContext context){
     //Future<bool> futureHayEtiquetas = context.watch<VehiculoBloc>().hayAlmenosUnaEtiqueta();
 
-    return () async {
-      // ignore: use_build_context_synchronously
+    return () {
         Navigator.of(context).pop(); // Primero desaparece el cuadro de diálogo de Mostrar vehículo.
 
         /*bool hayAlmenosUnaEtiqueta = await futureHayEtiquetas;
         if (!hayAlmenosUnaEtiqueta) { // Si no hay etiquetas, mostrar Toast / SnackBar.
-          // ignore: use_build_context_synchronously
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          // ignore: use_build_context_synchronously
           mostrarToast(context, "Primero cree una etiqueta!");
           return;
         }*/
-        // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id)); // Ir a PlantillaGasto para agregar un gasto.
       };
   }  
@@ -376,17 +372,14 @@ class BotonesTileVehiculo extends StatelessWidget {
     //Future<bool> futureHayEtiquetas = context.watch<VehiculoBloc>().hayAlmenosUnaEtiqueta();
 
     return IconButton(
-      onPressed: () async {
+      onPressed: () {
         /*bool hayAlmenosUnaEtiqueta = await futureHayEtiquetas;
 
         if (!hayAlmenosUnaEtiqueta) { // Si no hay etiquetas, mostrar Toast / SnackBar.
-          // ignore: use_build_context_synchronously
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          // ignore: use_build_context_synchronously
           mostrarToast(context, "Primero cree una etiqueta!");
           return;
         }*/
-        // ignore: use_build_context_synchronously
         context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id)); // Ir a PlantillaGasto para agregar un gasto.
       },
       icon: const Icon(Icons.monetization_on, color: colorGastoDorado,)
