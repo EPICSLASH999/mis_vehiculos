@@ -222,6 +222,7 @@ class TileGastoArchivado extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(fechaNormalizada),
+                Text(gastoArchivado.modeloVehiculo),
                 Text(gastoArchivado.vehiculo),
                 Text(mecanico),
                 Text(lugar),

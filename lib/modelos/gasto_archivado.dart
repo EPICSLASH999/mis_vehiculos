@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 
 class GastoArchivado extends Equatable{
   final int id;
-  final String vehiculo;
-  final String etiqueta;
+  final String vehiculo; // Matricula de vehiculo
+  final String etiqueta; // Nombre de etiqueta
   final String mecanico;
   final String lugar;
   final double costo;
