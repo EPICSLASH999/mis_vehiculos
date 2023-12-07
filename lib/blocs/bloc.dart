@@ -859,8 +859,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       misVehiculosArchivados = gastosArchivados.fetchAllArchivedVehicles();
       reiniciarFiltroVehiculoGastosArchivados();
       _misGastosArchivados = obtenerGastosArchivados();
-      _misEtiquetas = etiquetas.fetchAll();
-      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent();
+      _misEtiquetas = etiquetas.fetchAll(); // Por si se recrearon etiquetas
+      _misVehiculos = vehiculos.fetchAllFavoritesAndFrequent(); // Por si se restauraron vehiculos
       
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
