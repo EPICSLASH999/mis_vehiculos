@@ -60,7 +60,7 @@ class Gastos {
     final database = await DatabaseService().database;
     String filtroVehiculo = (idVehiculo == null)?'':'AND vehiculo = $idVehiculo ';
     //String query = ''' SELECT * from $tableName WHERE vehiculo IN ($values) ORDER BY fecha DESC''';
-    String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula, nombre from $tableName 
+    String query = ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula,nombre,modelo from $tableName 
       INNER JOIN $tablaVehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 
       INNER JOIN $tablaEtiquetas ON $tablaEtiquetas.id_etiqueta = $tableName.etiqueta 
       WHERE fecha BETWEEN ${fechaInicial.millisecondsSinceEpoch} AND ${fechaFinal.millisecondsSinceEpoch} 
