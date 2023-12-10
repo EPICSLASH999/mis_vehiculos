@@ -48,7 +48,7 @@ class Gastos {
   Future<List<Gasto>> fetchAllInnerJoined() async{
     final database = await DatabaseService().database;
     final registros = await database.rawQuery(
-      ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula, nombre from $tableName 
+      ''' SELECT id_gasto,vehiculo,etiqueta,mecanico,lugar,costo,fecha,matricula,nombre,modelo from $tableName 
       INNER JOIN $tablaVehiculos ON $tablaVehiculos.id_vehiculo = $tableName.vehiculo 
       INNER JOIN $tablaEtiquetas ON $tablaEtiquetas.id_etiqueta = $tableName.etiqueta 
       ORDER BY fecha DESC'''
