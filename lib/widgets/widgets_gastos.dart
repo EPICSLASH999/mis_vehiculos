@@ -317,7 +317,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
 
                       // IA para rellenar el TextField con el mecánico con más coincidencias dependiendo de la etiqueta seleccionada en el DropDownButton.
                       // Si se encuentra editando el gasto, no cambia al Mecánico.
-                      if(!widget.esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(widget.listaMecanicoPorEtiqueta, value!);
+                      //if(!widget.esEditarGasto) widget.controladorMecanico.text = obtenerMecanicoConMayorOcurrenciasDeEtiqueta(widget.listaMecanicoPorEtiqueta, value!);
                     });
                   },
                 );
