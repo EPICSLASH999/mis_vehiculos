@@ -79,7 +79,7 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                           ), 
                       icon: const Icon(Icons.delete_forever)
                     ),
-                     IconButton( // Botón Restaurar GastosArchivados.
+                    if (!(gastosArchivados.isEmpty || idVehiculoSeleccionado == valorOpcionTodas)) IconButton( // Botón Restaurar GastosArchivados.
                       onPressed: (gastosArchivados.isEmpty || idVehiculoSeleccionado == valorOpcionTodas)
                           ? null:
                           dialogoAlerta(
@@ -113,7 +113,11 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                 } else{
                   final gastosArchivados = snapshot.data?? [];
 
-                  return gastosArchivados.isEmpty
+                  var gastosArchivadosFiltrados = gastosArchivados.copiar();
+                  gastosArchivadosFiltrados.removeWhere((element) => 
+                  !((DateTime.parse(element.fecha).isAfter(fechaSeleccionadaInicial))  && ((DateTime.parse(element.fecha)).isBefore(fechaSeleccionadaFinal))));
+
+                  return gastosArchivadosFiltrados.isEmpty
                     ? const Center(
                       child: Text(
                         'Sin gastos archivados...',
@@ -126,9 +130,9 @@ class WidgetMisGastosArchivados extends StatelessWidget {
                   : ListView.separated(
                     separatorBuilder: (context, index) => 
                         const SizedBox(height: 12,), 
-                    itemCount: gastosArchivados.length,
+                    itemCount: gastosArchivadosFiltrados.length,
                     itemBuilder: (context, index) {
-                      final gastoArchivado = gastosArchivados[index];
+                      final gastoArchivado = gastosArchivadosFiltrados[index];
                       return TileGastoArchivado(gastoArchivado: gastoArchivado);
                     }, 
                   );
@@ -514,4 +518,3 @@ class _FiltroVehiculoState extends State<FiltroVehiculo> {
 
 /* ------------------------------------------------------------------------------ */
 
-// Rama Icono

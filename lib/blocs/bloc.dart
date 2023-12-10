@@ -464,17 +464,19 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
   }
   Future<List<GastoArchivado>> obtenerGastosArchivados() {
     int? idVehiculo = (filtroGastosArchivadosIdVehiculo == valorOpcionTodas)?null:filtroGastosArchivadosIdVehiculo;
-    return gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, idVehiculo);
+    //return gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, idVehiculo);
+    return gastosArchivados.fetchAllWhereVehicleID(idVehiculo);
   }
   Future<void> eliminarGastosArchivadosPorIdVehiculo(int idVehiculo) async {
-    /*if(idVehiculo == valorOpcionTodas) {
+    if(idVehiculo == valorOpcionTodas) {
       await gastosArchivados.deleteAll();
       return;
-    }*/
-    //await gastosArchivados.deleteWhereVehicleId(idVehiculo);
-    int? idVehiculoAEliminar = idVehiculo;
+    }
+    await gastosArchivados.deleteWhereVehicleId(idVehiculo);
+
+    /*int? idVehiculoAEliminar = idVehiculo;
     if (idVehiculoAEliminar == valorOpcionTodas) idVehiculoAEliminar = null;
-    await gastosArchivados.deleteByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, idVehiculoAEliminar);
+    await gastosArchivados.deleteByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, idVehiculoAEliminar);*/
   }
   void reiniciarFiltrosGastosArchivados() {
     //yyyy-MM-dd HH:mm:ss
@@ -852,7 +854,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
       emit(MisGastosArchivados(misGastosArchivados: _misGastosArchivados, idVehiculoSeleccionado: filtroGastosArchivadosIdVehiculo, misVehiculosArchivados: misVehiculosArchivados, fechaInicial: filtroGastosArchivadosFechaInicial, fechaFinal: filtroGastosArchivadosFechaFinal));      
     });
     on<RestauradosGastosArchivados>((event, emit) async {
-      List<GastoArchivado> gastosArchivadosDeVehiculo = await gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, event.idVehiculo);
+      //List<GastoArchivado> gastosArchivadosDeVehiculo = await gastosArchivados.fetchByFilters(filtroGastosArchivadosFechaInicial, filtroGastosArchivadosFechaFinal, event.idVehiculo);
+      List<GastoArchivado> gastosArchivadosDeVehiculo = await gastosArchivados.fetchAllWhereVehicleID(event.idVehiculo);
       for (var gastoArchivado in gastosArchivadosDeVehiculo) {
         await restaurarGastoArchivado(gastoArchivado);
       }
