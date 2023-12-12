@@ -71,7 +71,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   bool get esEditarGasto => widget.esEditarGasto;
   String obtenerTexto() => '${(!esEditarGasto)? 'Agregar':'Editar'} Gasto'; // Titulo de la plantilla y botón.
   bool get esFormValido => _formKey.currentState?.validate()??(esEditarGasto?true:false);
-
+  
   // Métodos
   void inicializarValoresDeControladores(){
     idVehiculoString = (widget.gasto?.vehiculo??widget.vehiculo.id.toString()).toString();
@@ -136,6 +136,14 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
     return int.parse(controladorEtiqueta.text);
   }
 
+  validarSeleccionadorEtiqueta(){
+    Future.delayed(Duration.zero,(){
+      setState(() {
+        
+      });
+    });
+  }
+
   @override
   void initState() {
     inicializarValoresDeControladores();
@@ -157,7 +165,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
   Widget build(BuildContext context) {
     var pressedFecha = funcionAlPresionarFecha();
     idEtiquetaSeleccionadaOriginal??= int.tryParse(controladorEtiqueta.text);
-
+   
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTexto()),
@@ -202,7 +210,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                 child: Column(
                   children: <Widget>[
                     CuadroDeTexto(controlador: controladorVehiculo, titulo: 'Vehiculo', esSoloLectura: true,),
-                    SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', esEditarGasto: esEditarGasto,controladorMecanico: controladorMecanico, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta),
+                    SeleccionadorEtiqueta(etiquetaSeleccionada: controladorEtiqueta, titulo: 'Etiqueta', esEditarGasto: esEditarGasto,controladorMecanico: controladorMecanico, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, funcionActualizarWidget: validarSeleccionadorEtiqueta),
                     BotonCrearEtiqueta(funcionObtenerGasto: recuperarGastoActual, esEditarGasto: esEditarGasto, idVehiculo: widget.vehiculo.id,),
                     CuadroDeTexto(controlador: controladorMecanico, titulo: 'Mecanico', campoRequerido: false, icono: const Icon(Icons.build),),
                     CuadroDeTexto(controlador: controladorLugar, titulo: 'Lugar', campoRequerido: false, maxCaracteres: 40, icono: const Icon(Icons.place),),
@@ -211,7 +219,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                   
                     ElevatedButton( // Botón Agregar/Editar Gasto.
                       onPressed: !esFormValido?null:() {
-                        if (!(_formKey.currentState!.validate())) return; // Comprueba si todos los campos son válidos.
+                        if (!esFormValido) return; // Comprueba si todos los campos son válidos.
                         if (!widget.esEditarGasto) {
                           context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto())); // Agrega Gasto.
                           return;
@@ -238,7 +246,8 @@ class SeleccionadorEtiqueta extends StatefulWidget {
     required this.titulo, 
     required this.esEditarGasto, 
     required this.controladorMecanico, 
-    required this.listaMecanicoPorEtiqueta,
+    required this.listaMecanicoPorEtiqueta, 
+    required this.funcionActualizarWidget, 
   });
 
   final TextEditingController etiquetaSeleccionada;
@@ -246,6 +255,7 @@ class SeleccionadorEtiqueta extends StatefulWidget {
   final bool esEditarGasto;
   final TextEditingController controladorMecanico;
   final List<Map<String, Object?>> listaMecanicoPorEtiqueta;
+  final Function funcionActualizarWidget;
 
   @override
   State<SeleccionadorEtiqueta> createState() => _SeleccionadorEtiquetaState();
@@ -259,6 +269,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
   
   int? etiquetaSeleccionadaOriginal;
 
+  bool esPrimeraVez = true;
   @override
   Widget build(BuildContext context)  {
     etiquetaSeleccionadaOriginal ??= int.tryParse(widget.etiquetaSeleccionada.text);
@@ -266,7 +277,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
     var state = context.watch<VehiculoBloc>().state;
     bool agregadaEtiquetaDesdeGasto = (state as PlantillaGasto).agregadaEtiquetaDesdeGasto;
     Future<List<Etiqueta>>? misEtiquetas = context.watch<VehiculoBloc>().misEtiquetas;
-
+    
     int valorIdEtiquetaInicial(List<Etiqueta> etiquetas) {
       if(agregadaEtiquetaDesdeGasto && etiquetas.isNotEmpty) {
         agregadaEtiquetaDesdeGasto = false;
@@ -297,9 +308,14 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 etiquetaSeleccionada = valorIdEtiquetaInicial(etiquetas);
                 
                 return DropdownButtonFormField(
+                  autovalidateMode: AutovalidateMode.always,
                   validator: (value) {
                     if (value != null && value == valorNoHayEtiquetasCreadas) return 'Agregue una etiqueta';
                     
+                    if (esPrimeraVez){ // Solo una vez se ejecuta la funcionActualziarWidget, de no ser asi se haria un bucle infinito de setState.
+                      esPrimeraVez = false;
+                      widget.funcionActualizarWidget();
+                    }
                     // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
                     widget.etiquetaSeleccionada.text = value.toString();
                     return null;
