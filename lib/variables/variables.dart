@@ -70,3 +70,6 @@ const Icon iconoEtiqueta = Icon(Icons.card_travel);
 // Tamaños
 const double widthDeComponente = 160;
 const double alturaMaximaSearchbar = 290;
+
+// Autovalidacion
+AutovalidateMode autovalidacion = AutovalidateMode.onUserInteraction;

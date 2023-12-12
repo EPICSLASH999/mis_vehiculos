@@ -543,7 +543,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
               children: [
                 TituloComponente(titulo: titulo),
                 TextFormField(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  autovalidateMode: autovalidacion,
                   validator: (value) {
                     String valorNormalizado = (value ?? '').trim();
                     if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';

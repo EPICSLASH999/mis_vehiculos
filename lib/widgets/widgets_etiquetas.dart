@@ -320,7 +320,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
               children: [
                 TituloComponente(titulo: titulo),
                 TextFormField(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  autovalidateMode: autovalidacion,
                   validator: (value) {
                     String valorNormalizado = (value??'').trim();
                     if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';

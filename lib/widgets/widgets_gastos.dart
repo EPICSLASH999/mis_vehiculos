@@ -308,7 +308,7 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                 etiquetaSeleccionada = valorIdEtiquetaInicial(etiquetas);
                 
                 return DropdownButtonFormField(
-                  autovalidateMode: AutovalidateMode.always,
+                  autovalidateMode: autovalidacion,
                   validator: (value) {
                     if (value != null && value == valorNoHayEtiquetasCreadas) return 'Agregue una etiqueta';
                     
@@ -472,7 +472,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
             children: [
               if(titulo != null) TituloComponente(titulo: titulo!),
               TextFormField(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: autovalidacion,
                 validator: (value) {
                   String valorNormalizado = (value??'').trim();
                   if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
