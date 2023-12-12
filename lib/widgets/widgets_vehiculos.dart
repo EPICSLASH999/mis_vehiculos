@@ -473,7 +473,7 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
               CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15, icono: const Icon(Icons.colorize),),
               CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month), valorDebeSermayorA: 1949, valorDebeSerMenorOIgualA: DateTime.now().year+1,),
               ElevatedButton(
-                onPressed: !esFormValido?null:() {
+                onPressed: () {
                   if (!esFormValido) return; // Si alguno de los campos no es válido, no procede.
                   if (!esEditarVehiculo) {
                     context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
@@ -543,7 +543,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
               children: [
                 TituloComponente(titulo: titulo),
                 TextFormField(
-                  autovalidateMode: AutovalidateMode.always,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     String valorNormalizado = (value ?? '').trim();
                     if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';

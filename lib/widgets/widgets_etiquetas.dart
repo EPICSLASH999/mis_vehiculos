@@ -241,7 +241,7 @@ class _WidgetPlantillaEtiquetaState extends State<WidgetPlantillaEtiqueta> {
             children: <Widget>[
               CuadroDeTextoEtiqueta(controlador: controladorNombre, titulo: 'Nombre', focusTecaldo: true, icono: iconoEtiqueta,),
               ElevatedButton(
-                onPressed: !esFormValido?null:() {
+                onPressed: () {
                   if (!esFormValido) return;
                   if (!esEditarEtiqueta) {
                     context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text.trim())); // Agrega nueva Etiqueta.
@@ -320,7 +320,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
               children: [
                 TituloComponente(titulo: titulo),
                 TextFormField(
-                  autovalidateMode: AutovalidateMode.always,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
                     String valorNormalizado = (value??'').trim();
                     if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';

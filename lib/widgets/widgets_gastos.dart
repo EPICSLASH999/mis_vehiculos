@@ -218,7 +218,7 @@ class _WidgetPlantillaGastoState extends State<WidgetPlantillaGasto> {
                     SeleccionadorDeFecha(controlador: controladorFecha, titulo: 'Fecha', funcionAlPresionar: pressedFecha),
                   
                     ElevatedButton( // Botón Agregar/Editar Gasto.
-                      onPressed: !esFormValido?null:() {
+                      onPressed: () {
                         if (!esFormValido) return; // Comprueba si todos los campos son válidos.
                         if (!widget.esEditarGasto) {
                           context.read<VehiculoBloc>().add(AgregadoGasto(gasto: obtenerGasto())); // Agrega Gasto.
@@ -384,10 +384,9 @@ class _BotonCrearEtiquetaState extends State<BotonCrearEtiqueta> {
               ),
               actions: [
                 TextButton( // Botón Agregar Nueva Etiqueta.
-                  onPressed: !(esFormValido)?null:() {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.of(context).pop(controladorNuevaEtiqueta.text.trim());
-                    }
+                  onPressed: () {
+                    if (!esFormValido) return;
+                    Navigator.of(context).pop(controladorNuevaEtiqueta.text.trim());
                   }, 
                   child: const Text('Agregar')
                 ),
@@ -473,7 +472,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
             children: [
               if(titulo != null) TituloComponente(titulo: titulo!),
               TextFormField(
-                autovalidateMode: AutovalidateMode.always,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
                   String valorNormalizado = (value??'').trim();
                   if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';
