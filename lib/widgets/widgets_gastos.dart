@@ -312,10 +312,10 @@ class _SeleccionadorEtiquetaState extends State<SeleccionadorEtiqueta>{
                   validator: (value) {
                     if (value != null && value == valorNoHayEtiquetasCreadas) return 'Agregue una etiqueta';
                     
-                    if (esPrimeraVez){ // Solo una vez se ejecuta la funcionActualziarWidget, de no ser asi se haria un bucle infinito de setState.
+                    /*if (esPrimeraVez){ // Solo una vez se ejecuta la funcionActualziarWidget, de no ser asi se haria un bucle infinito de setState.
                       esPrimeraVez = false;
                       widget.funcionActualizarWidget();
-                    }
+                    }*/
                     // En caso de no seleccionar una etiqueta y dejar la que ya esta seleccionada, se asigna el valor manualmente.
                     widget.etiquetaSeleccionada.text = value.toString();
                     return null;
