@@ -42,17 +42,24 @@ class PlantillaVehiculo extends VehiculoEstado {
 
 // GASTOS
 class PlantillaGasto extends VehiculoEstado {
-  final int idVehiculo;
+  final Vehiculo vehiculo;
   final Gasto? gasto;
   final Future <List<Etiqueta>>? misEtiquetas;
   final Future<List<Map<String, Object?>>>? listaMecanicoPorEtiqueta;
   final bool agregadaEtiquetaDesdeGasto;
   final bool esEditarGasto;
 
-  PlantillaGasto({required this.idVehiculo, this.gasto, required this.misEtiquetas, this.listaMecanicoPorEtiqueta, this.agregadaEtiquetaDesdeGasto = false, this.esEditarGasto = false, });
+  PlantillaGasto({
+    this.vehiculo = const Vehiculo(id: 0, matricula: 'matricula', marca: 'marca', modelo: 'modelo', color: 'color', ano: 2000), 
+    this.gasto, 
+    required this.misEtiquetas, 
+    this.listaMecanicoPorEtiqueta, 
+    this.agregadaEtiquetaDesdeGasto = false,
+     this.esEditarGasto = false, 
+  });
 
   @override
-  List<Object?> get props => [idVehiculo, gasto, misEtiquetas, listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto, esEditarGasto];
+  List<Object?> get props => [vehiculo, gasto, misEtiquetas, listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto, esEditarGasto];
 }
 class MisGastos extends VehiculoEstado {
   final Future <List<Gasto>>? misGastos;
@@ -209,9 +216,9 @@ class CambiadaModalidadSeleccionEtiqueta extends VehiculoEvento {
 
 // GASTOS
 class ClickeadoAgregarGasto extends VehiculoEvento {
-  final int idVehiculo;
+  final Vehiculo vehiculo;
 
-  ClickeadoAgregarGasto({required this.idVehiculo});
+  ClickeadoAgregarGasto({required this.vehiculo,});
 }
 class ClickeadoConsultarGastos extends VehiculoEvento {}
 class AgregadoGasto extends VehiculoEvento {
@@ -647,8 +654,8 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
 
     // Gastos
     on<ClickeadoAgregarGasto>((event, emit) {
-      listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.idVehiculo);
-      emit(PlantillaGasto(idVehiculo: event.idVehiculo, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta));
+      listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.vehiculo.id);
+      emit(PlantillaGasto(vehiculo: event.vehiculo, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta));
     });
     on<AgregadoGasto>((event, emit) async {
        Map<String,dynamic> datos = {
@@ -678,7 +685,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     });
     on<ClickeadoEditarGasto>((event, emit) {
       listaMecanicoPorEtiqueta = gastos.fetchMostOccurringMechanics(event.gasto.vehiculo);
-      emit(PlantillaGasto(idVehiculo: 0, gasto: event.gasto, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, esEditarGasto: true));
+      emit(PlantillaGasto(gasto: event.gasto, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, esEditarGasto: true));
     });
     on<EditadoGasto>((event, emit) async {
       Map<String,dynamic> datos = {
@@ -781,7 +788,7 @@ class VehiculoBloc extends Bloc<VehiculoEvento, VehiculoEstado> {
     on<AgregadoEtiquetaDesdeGasto>((event, emit) async {
       await etiquetas.create(nombre: event.nombreEtiqueta);
       _misEtiquetas = etiquetas.fetchAll();
-      emit(PlantillaGasto(idVehiculo: event.idVehiculo, gasto: event.gasto, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true, esEditarGasto: event.esEditarGasto));
+      emit(PlantillaGasto(gasto: event.gasto, misEtiquetas: _misEtiquetas, listaMecanicoPorEtiqueta: listaMecanicoPorEtiqueta, agregadaEtiquetaDesdeGasto: true, esEditarGasto: event.esEditarGasto));
     });
     on<CambiadaModalidadSeleccionEtiqueta>((event, emit) {
       estaModoSeleccionEtiquetasActivo = event.estaModoSeleccionActivo;

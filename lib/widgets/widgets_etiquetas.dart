@@ -182,28 +182,46 @@ class TileEtiqueta extends StatelessWidget {
 }
 
 // Plantilla Etiqueta - Sirve tanto para Agregar como para Editar.
-class WidgetPlantillaEtiqueta extends StatelessWidget {
+class WidgetPlantillaEtiqueta extends StatefulWidget {
   final Etiqueta? etiqueta; // En caso de editar no es nula. Al agregar si lo es.
-  WidgetPlantillaEtiqueta({super.key, this.etiqueta});
+  const WidgetPlantillaEtiqueta({super.key, this.etiqueta});
 
-  final _formKey = GlobalKey<FormState>(); // Llave necesaria para el Form. Sirve para validar los campos.
+  @override
+  State<WidgetPlantillaEtiqueta> createState() => _WidgetPlantillaEtiquetaState();
+}
+class _WidgetPlantillaEtiquetaState extends State<WidgetPlantillaEtiqueta> {
+  final _formKey = GlobalKey<FormState>(); 
+ // Llave necesaria para el Form. Sirve para validar los campos.
   final TextEditingController controladorNombre = TextEditingController();
+  
+  bool get esEditarEtiqueta => widget.etiqueta != null;
+  bool get esFormValido => _formKey.currentState?.validate()??(esEditarEtiqueta?true:false);
+  String obtenerTextoDePlantilla() => "${(widget.etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
 
   Etiqueta obtenerEtiqueta(){
     return Etiqueta(
-      id: (etiqueta?.id)??0, 
+      id: (widget.etiqueta?.id)??0, 
       nombre: controladorNombre.text.trim(), 
     );
   }
-  String obtenerTextoDePlantilla() => "${(etiqueta == null)? 'Agregar':'Editar'} Etiqueta";
   void inicializarValoresDeControladores(){
-    controladorNombre.text = etiqueta?.nombre??'';
+    controladorNombre.text = widget.etiqueta?.nombre??'';
+  }
+
+  @override
+  void initState() {
+    inicializarValoresDeControladores();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controladorNombre.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    inicializarValoresDeControladores();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTextoDePlantilla()),
@@ -218,18 +236,18 @@ class WidgetPlantillaEtiqueta extends StatelessWidget {
       body: SingleChildScrollView( // Esto evita algun tipo de overflow al aparecer el teclado en el celular.
         child: Form(
           key: _formKey,
+          onChanged: () => setState(() {}),
           child: Column(
             children: <Widget>[
               CuadroDeTextoEtiqueta(controlador: controladorNombre, titulo: 'Nombre', focusTecaldo: true, icono: iconoEtiqueta,),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    if (etiqueta == null) {
-                      context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text.trim())); // Agrega nueva Etiqueta.
-                      return;
-                    }
-                    context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta())); // Edita la etiqueta.
+                onPressed: !esFormValido?null:() {
+                  if (!esFormValido) return;
+                  if (!esEditarEtiqueta) {
+                    context.read<VehiculoBloc>().add(AgregadoEtiqueta(nombreEtiqueta: controladorNombre.text.trim())); // Agrega nueva Etiqueta.
+                    return;
                   }
+                  context.read<VehiculoBloc>().add(EditadoEtiqueta(etiqueta: obtenerEtiqueta())); // Edita la etiqueta.                  
                 },
                 child: Text(obtenerTextoDePlantilla()),
               ),
@@ -302,7 +320,7 @@ class CuadroDeTextoEtiqueta extends StatelessWidget {
               children: [
                 TituloComponente(titulo: titulo),
                 TextFormField(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  autovalidateMode: AutovalidateMode.always,
                   validator: (value) {
                     String valorNormalizado = (value??'').trim();
                     if (valorNormalizado.isEmpty && campoRequerido) return 'Campo requerido';

@@ -102,7 +102,7 @@ class CuadroDeTexto extends StatelessWidget {
         children: [
           TituloComponente(titulo: titulo),
           TextFormField(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+            autovalidateMode: AutovalidateMode.always,
             validator: (value) {
               if (esSoloLectura || !validarCampo) return null;
               String valorNormalizado = (value??'').trim();

@@ -232,7 +232,7 @@ class TileVehiculo extends StatelessWidget {
           mostrarToast(context, "Primero cree una etiqueta!");
           return;
         }*/
-        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id)); // Ir a PlantillaGasto para agregar un gasto.
+        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(vehiculo: vehiculo)); // Ir a PlantillaGasto para agregar un gasto.
       };
   }  
   Future mostrarCuadroDeDialogoDeVehiculo(BuildContext context) { // Cuadro de diálogo que aparece al hacer clic en un vehículo.
@@ -381,7 +381,7 @@ class BotonesTileVehiculo extends StatelessWidget {
           mostrarToast(context, "Primero cree una etiqueta!");
           return;
         }*/
-        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(idVehiculo: vehiculo.id)); // Ir a PlantillaGasto para agregar un gasto.
+        context.read<VehiculoBloc>().add(ClickeadoAgregarGasto(vehiculo: vehiculo)); // Ir a PlantillaGasto para agregar un gasto.
       },
       icon: const Icon(Icons.monetization_on, color: colorGastoDorado,)
     );
@@ -406,8 +406,10 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   final TextEditingController controladorColor = TextEditingController();
   final TextEditingController controladorAno = TextEditingController();
 
-  bool get esEditar => widget.vehiculo != null;
-  String obtenerTextoPlantilla() => (!esEditar) ? 'Agregar Vehiculo' : 'Editar Vehiculo';
+  bool get esEditarVehiculo => widget.vehiculo != null;
+  String obtenerTextoPlantilla() => (!esEditarVehiculo) ? 'Agregar Vehiculo' : 'Editar Vehiculo';
+  bool get esFormValido => _formKey.currentState?.validate()??(esEditarVehiculo?true:false);
+  
   Vehiculo obtenerVehiculo() {
     return Vehiculo(
         id: (widget.vehiculo?.id) ?? 0,
@@ -417,9 +419,8 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
         color: controladorColor.text.trim(),
         ano: int.tryParse(controladorAno.text)??2000);
   }
-
   void inicializarValoresDeControladores() {
-    if (!esEditar) return;
+    if (!esEditarVehiculo) return;
     controladorMatricula.text = widget.vehiculo?.matricula ?? '';
     controladorMarca.text = widget.vehiculo?.marca ?? '';
     controladorModelo.text = widget.vehiculo?.modelo ?? '';
@@ -430,6 +431,12 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
   // Global key that uniquely identifies the Form widget
   // and allows validation of the form.
   final _formKey = GlobalKey<FormState>(); // Llave necesaria para un Form. De esta manera se validan los valores de los campos.
+
+  @override
+  void initState() {
+    inicializarValoresDeControladores();
+    super.initState();
+  }
 
   @override
   void dispose() { // Elimina manualmente los controladores.
@@ -443,8 +450,6 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
 
   @override
   Widget build(BuildContext context) {
-    inicializarValoresDeControladores();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(obtenerTextoPlantilla()),
@@ -457,26 +462,26 @@ class _WidgetPlantillaVehiculoState extends State<WidgetPlantillaVehiculo> {
       ),
       bottomNavigationBar: const BarraInferior(indiceSeleccionado: indiceMisVehiculos),
       body: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: <Widget>[
-                CuadroDeTextoMatricula(controlador: controladorMatricula, titulo: 'Matricula', focusTecaldo: true, icono: const Icon(Icons.abc_outlined), maxCaracteres: 7, puedeTenerEspacios: false, minCaracteres: 5,),
-                CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca', icono: const Icon(Icons.factory)),
-                CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo', icono: const Icon(Icons.car_rental)),
-                CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15, icono: const Icon(Icons.colorize),),
-                CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month), valorDebeSermayorA: 999, valorDebeSerMenorOIgualA: DateTime.now().year+1,),
-                ElevatedButton(
-                  onPressed: () {
-                    if (!(_formKey.currentState!.validate())) return; // Si alguno de los campos no es válido, no procede.
-                    if (!esEditar) {
-                      context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
-                      return;
-                    }
-                    context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
-                  },
-                  child: Text(obtenerTextoPlantilla()
-                ),
+        child: Form(
+          key: _formKey,
+          onChanged: () => setState(() {}),
+          child: Column(
+            children: <Widget>[
+              CuadroDeTextoMatricula(controlador: controladorMatricula, titulo: 'Matricula', focusTecaldo: true, icono: const Icon(Icons.abc_outlined), maxCaracteres: 7, puedeTenerEspacios: false, minCaracteres: 5,),
+              CuadroDeTexto(controlador: controladorMarca, titulo: 'Marca', icono: const Icon(Icons.factory)),
+              CuadroDeTexto(controlador: controladorModelo, titulo: 'Modelo', icono: const Icon(Icons.car_rental)),
+              CuadroDeTexto(controlador: controladorColor, titulo: 'Color', maxCaracteres: 15, icono: const Icon(Icons.colorize),),
+              CuadroDeTexto(controlador: controladorAno, titulo: 'Año', esInt: true, maxCaracteres: 4, minCaracteres: 4, icono: const Icon(Icons.calendar_month), valorDebeSermayorA: 999, valorDebeSerMenorOIgualA: DateTime.now().year+1,),
+              ElevatedButton(
+                onPressed: !esFormValido?null:() {
+                  if (!esFormValido) return; // Si alguno de los campos no es válido, no procede.
+                  if (!esEditarVehiculo) {
+                    context.read<VehiculoBloc>().add(AgregadoVehiculo(vehiculo: obtenerVehiculo()));
+                    return;
+                  }
+                  context.read<VehiculoBloc>().add(EditadoVehiculo(vehiculo: obtenerVehiculo()));
+                },
+                child: Text(obtenerTextoPlantilla()),
               ),
             ],
           ),
@@ -521,6 +526,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future<List<String>>? matriculasVehiculos = context.watch<VehiculoBloc>().matriculasVehiculos;
+    bool esPrimerClic = true;
     
     return FutureBuilder(
       future: matriculasVehiculos,
@@ -537,7 +543,7 @@ class CuadroDeTextoMatricula extends StatelessWidget {
               children: [
                 TituloComponente(titulo: titulo),
                 TextFormField(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  autovalidateMode: AutovalidateMode.always,
                   validator: (value) {
                     String valorNormalizado = (value ?? '').trim();
                     if (!puedeTenerEspacios && value != null && value.contains(" ")) return 'No puede tener espacios';
@@ -575,6 +581,11 @@ class CuadroDeTextoMatricula extends StatelessWidget {
                   decoration: obtenerDecoracionCampoObligatorio(icono: icono),
                   keyboardType: TextInputType.text,
                   autofocus: focusTecaldo,
+                  onTap: () { 
+                    if(!esPrimerClic) return;
+                    controlador.selectAll(); // Seleccionar todo el texto.
+                    esPrimerClic = !esPrimerClic;
+                  },
                 ),
               ],
             ),
